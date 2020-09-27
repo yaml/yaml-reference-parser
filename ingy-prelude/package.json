@@ -1,0 +1,56 @@
+{
+  "_from": "ingy-prelude",
+  "_id": "ingy-prelude@0.0.4",
+  "_inBundle": false,
+  "_integrity": "sha512-csxJY1M6wozZ1UFSZSnOkeNn5ZWKx9p3koZQHr7Nzdj484ufA9/VHG9mf4OUcvyBAlGfU4etEhDdhk7worQl9A==",
+  "_location": "/ingy-prelude",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "ingy-prelude",
+    "name": "ingy-prelude",
+    "escapedName": "ingy-prelude",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/ingy-prelude/-/ingy-prelude-0.0.4.tgz",
+  "_shasum": "2307595e3c615133a479bf31c3d2dd66cb279307",
+  "_spec": "ingy-prelude",
+  "_where": "/home/ingy/src/yaml-grammar/parser/node_modules",
+  "author": {
+    "name": "Ingy döt Net",
+    "email": "ingy@ingy.net",
+    "url": "http://ingy.net"
+  },
+  "bugs": {
+    "url": "https://github.com/testml-lang/ingy-prelude-js/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "lodash": ">=2.2.2",
+    "sprintf-js": ">=1.1.2",
+    "yaml": ">=1.9.2"
+  },
+  "deprecated": false,
+  "description": "Ingy döt Net's Prelude For JavaScript",
+  "homepage": "http://ingy.net",
+  "keywords": [
+    "ingy",
+    "prelude",
+    "javascript"
+  ],
+  "license": "MIT",
+  "main": "./lib/ingy-prelude/index.js",
+  "name": "ingy-prelude",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/testml-lang/ingy-prelude-js.git"
+  },
+  "version": "0.0.4"
+}
