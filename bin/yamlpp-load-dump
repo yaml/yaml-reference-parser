@@ -1,0 +1,179 @@
+#!/home/ingy/perl5/perlbrew/perls/perl-5.28.0/bin/perl
+use strict;
+use warnings;
+
+use YAML::PP;
+use YAML::PP::Dumper;
+use YAML::PP::Common qw/ PRESERVE_ORDER PRESERVE_SCALAR_STYLE PRESERVE_FLOW_STYLE /;
+use Encode;
+use Getopt::Long;
+
+GetOptions(
+    'help|h' => \my $help,
+    'indent=i' => \my $indent,
+    'width=i' => \my $width,
+    'header!' => \my $header,
+    'footer!' => \my $footer,
+    'boolean=s' => \my $boolean,
+    'merge' => \my $merge,
+    'perl' => \my $perl,
+    'preserve=s' => \my $preserve,
+    'module|M=s' => \my $module,
+    'yaml-version=s' => \my $yaml_version,
+    'version-directive' => \my $version_directive,
+) or usage(1);
+
+usage(0) if $help;
+
+$module ||= 'YAML::PP';
+$boolean ||= 'JSON::PP';
+$footer ||= 0;
+$indent ||= 2;
+$yaml_version ||= 1.2;
+my @yaml_versions = split m/,/, $yaml_version;
+my @schema = ('+');
+if ($merge) {
+    push @schema, 'Merge';
+}
+if ($perl) {
+    push @schema, 'Perl';
+}
+
+if (defined $preserve) {
+    my @split = split m/,/, $preserve;
+    $preserve = 0;
+    for my $split (@split) {
+        $preserve |= PRESERVE_ORDER if $split eq 'order';
+        $preserve |= PRESERVE_SCALAR_STYLE if $split eq 'scalar';
+        $preserve |= PRESERVE_FLOW_STYLE if $split eq 'flow';
+    }
+}
+else {
+    $preserve = 1;
+}
+$header = 1 unless defined $header;
+
+my ($file) = @ARGV;
+my $yaml;
+
+my $decode = 1;
+if ($module eq 'YAML::XS') {
+    $decode = 0;
+}
+if ($file) {
+    open my $fh, '<', $file or die "Can not open '$file'";
+    $yaml = do { local $/; <$fh> };
+    close $fh;
+}
+else {
+    $yaml = do { local $/; <STDIN> };
+}
+$yaml = decode_utf8($yaml) if $decode;
+
+my %codes = (
+    'YAML::PP' => \&yamlpp,
+    'YAML::PP::LibYAML' => \&yamlpplibyaml,
+    'YAML::XS' => \&yamlxs,
+    'YAML::Tiny' => \&yamltiny,
+    'YAML::Syck' => \&yamlsyck,
+    'YAML' => \&yaml,
+);
+
+my $code = $codes{ $module } or die "Module '$module' not supported";
+
+my $out_yaml = $code->($yaml);
+
+sub _yamlpp {
+    my ($class, $yaml) = @_;
+    my $ypp = $class->new(
+        schema => \@schema,
+        boolean => $boolean,
+        preserve => $preserve,
+        indent => $indent,
+        width => $width,
+        header => $header ? 1 : 0,
+        footer => $footer ? 1 : 0,
+        yaml_version => \@yaml_versions,
+        version_directive => $version_directive || 0,
+    );
+    my @docs = $ypp->load_string($yaml);
+    return $ypp->dump_string(@docs);
+}
+sub yamlpp {
+    _yamlpp('YAML::PP' => $_[0]);
+}
+sub yamlpplibyaml {
+    eval { require YAML::PP::LibYAML };
+    _yamlpp('YAML::PP::LibYAML' => $_[0]);
+}
+
+sub yamlxs {
+    eval { require YAML::XS };
+    my ($yaml) = @_;
+    no warnings 'once';
+    local $YAML::XS::LoadBlessed = $perl;
+    local $YAML::XS::Indent = $indent;
+    my $data = YAML::XS::Load($yaml);
+    return YAML::XS::Dump($data);
+}
+sub yamlsyck {
+    eval { require YAML::Syck };
+    my ($yaml) = @_;
+    no warnings 'once';
+    local $YAML::Syck::Headless = 1 unless $header;
+    local $YAML::Syck::LoadBlessed = $perl;
+    local $YAML::Syck::ImplicitTyping = 1;
+    local $YAML::Syck::ImplicitUnicode = 1;
+    my $data = YAML::Syck::Load($yaml);
+    return YAML::Syck::Dump($data);
+}
+sub yaml {
+    eval { require YAML };
+    no warnings 'once';
+    local $YAML::LoadBlessed = $perl;
+    local $YAML::UseHeader = $header ? 1 : 0;
+    local $YAML::Indent = $indent;
+    my ($yaml) = @_;
+    my $data = YAML::Load($yaml);
+    return YAML::Dump($data);
+}
+sub yamltiny {
+    eval { require YAML::Tiny };
+    my ($yaml) = @_;
+    my $data = YAML::Tiny::Load($yaml);
+    return YAML::Tiny::Dump($data);
+}
+
+if ($decode) {
+    print encode_utf8 $out_yaml;
+}
+else {
+    print $out_yaml;
+}
+
+sub usage {
+    my ($rc) = @_;
+    print <<"EOM";
+Usage:
+
+    $0 [options] < file
+    $0 [options] file
+
+Options:
+    --boolean=            'perl', 'JSON::PP', 'boolean'
+    --indent=             Number of spaces for indentation
+    --width=              Maximum column width (only used in flow style for now)
+    --[no-]header         Print '---' (default)
+    --[no-]footer         Print '...'
+    --merge               Enable loading merge keys '<<'
+    --perl                Enable loading perl types and objects (use only
+                          on trusted input!)
+    --preserve            Comma separated: 'order', 'scalar', 'flow'. By
+                          default all things are preserved
+    --module -M           YAML::PP (default), YAML, YAML::PP::LibYAML,
+                          YAML::Syck, YAML::Tiny, YAML::XS
+    --yaml-version=       '1.2' (default), '1.1', '1.2,1.1', '1.1,1.2'
+    --version-directive   Print '%YAML <version>'
+EOM
+    exit $rc;
+}

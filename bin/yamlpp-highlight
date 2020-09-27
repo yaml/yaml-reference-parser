@@ -1,0 +1,28 @@
+#!/home/ingy/perl5/perlbrew/perls/perl-5.28.0/bin/perl
+use strict;
+use warnings;
+
+use YAML::PP::Highlight;
+use Encode;
+
+my ($file) = @ARGV;
+my $yaml;
+
+unless ($file) {
+    $yaml = do { local $/; <STDIN> };
+    $yaml = decode_utf8($yaml);
+}
+
+my $error;
+my $tokens;
+if (defined $file) {
+    ($error, $tokens) = YAML::PP::Parser->yaml_to_tokens( file => $file );
+}
+else {
+    ($error, $tokens) = YAML::PP::Parser->yaml_to_tokens( string => $yaml );
+}
+my $highlighted = YAML::PP::Highlight->ansicolored($tokens);
+print encode_utf8 $highlighted;
+if ($error) {
+    die $error;
+}

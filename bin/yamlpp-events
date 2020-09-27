@@ -1,0 +1,27 @@
+#!/home/ingy/perl5/perlbrew/perls/perl-5.28.0/bin/perl
+use strict;
+use warnings;
+
+use Encode;
+use YAML::PP::Parser;
+use YAML::PP::Common;
+
+my ($file) = @ARGV;
+
+my $parser = YAML::PP::Parser->new(
+    receiver => sub {
+      my ($self, undef, $event) = @_;
+      print encode_utf8(YAML::PP::Common::event_to_test_suite($event, { flow => 1 })), "\n";
+    },
+    $file ? (reader => YAML::PP::Reader::File->new) : (),
+);
+if ($file) {
+    $parser->parse_file($file);
+}
+else {
+    my $yaml;
+    $yaml = do { local $/; <STDIN> };
+    $yaml = decode_utf8($yaml);
+    $parser->parse_string($yaml);
+}
+

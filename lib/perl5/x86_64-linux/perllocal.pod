@@ -1,0 +1,66 @@
+=head2 Sun Sep  6 22:54:08 2020: C<Module> L<boolean|boolean>
+
+=over 4
+
+=item *
+
+C<installed into: /home/ingy/src/yaml-grammar/lib/perl5>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 0.46>
+
+=item *
+
+C<EXE_FILES: >
+
+=back
+
+=head2 Sun Sep  6 22:54:09 2020: C<Module> L<YAML::PP|YAML::PP>
+
+=over 4
+
+=item *
+
+C<installed into: /home/ingy/src/yaml-grammar/lib/perl5>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 0.025>
+
+=item *
+
+C<EXE_FILES: bin/yamlpp-events bin/yamlpp-highlight bin/yamlpp-load bin/yamlpp-load-dump bin/yamlpp-parse-emit>
+
+=back
+
+=head2 Sun Sep  6 22:54:10 2020: C<Module> L<XXX|XXX>
+
+=over 4
+
+=item *
+
+C<installed into: /home/ingy/src/yaml-grammar/lib/perl5>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 0.35>
+
+=item *
+
+C<EXE_FILES: >
+
+=back
+
