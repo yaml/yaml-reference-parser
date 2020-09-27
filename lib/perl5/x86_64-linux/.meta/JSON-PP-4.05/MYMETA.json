@@ -1,0 +1,51 @@
+{
+   "abstract" : "JSON::XS compatible pure-Perl module.",
+   "author" : [
+      "Makamaka Hannyaharamitu, E<lt>makamaka[at]cpan.orgE<gt>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "ExtUtils::MakeMaker version 7.24, CPAN::Meta::Converter version 2.150010",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : 2
+   },
+   "name" : "JSON-PP",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "inc"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "0"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "0"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Scalar::Util" : "1.08",
+            "Test::More" : "0"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/makamaka/JSON-PP/issues"
+      },
+      "repository" : {
+         "url" : "https://github.com/makamaka/JSON-PP"
+      }
+   },
+   "version" : "4.05",
+   "x_serialization_backend" : "JSON::PP version 4.05"
+}

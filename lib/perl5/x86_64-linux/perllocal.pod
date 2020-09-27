@@ -64,3 +64,25 @@ C<EXE_FILES: >
 
 =back
 
+=head2 Sun Sep 27 22:15:26 2020: C<Module> L<JSON::PP|JSON::PP>
+
+=over 4
+
+=item *
+
+C<installed into: /home/ingy/src/yaml-reference-parser/perl/ext-perl/lib/perl5>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 4.05>
+
+=item *
+
+C<EXE_FILES: bin/json_pp>
+
+=back
+
