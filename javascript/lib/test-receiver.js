@@ -117,6 +117,18 @@
       return this.cache_drop();
     }
 
+    try__ns_l_block_map_implicit_entry() {
+      return this.cache_up();
+    }
+
+    got__ns_l_block_map_implicit_entry() {
+      return this.cache_down();
+    }
+
+    not__ns_l_block_map_implicit_entry() {
+      return this.cache_drop();
+    }
+
     try__c_ns_flow_map_empty_key_entry() {
       return this.cache_up();
     }

@@ -336,7 +336,6 @@ foo: [1,
 
 
 === Block sequence
---- SKIP
 --- yaml
 - foo
 - bar
@@ -363,6 +362,93 @@ baz: 42
 =VAL :bar
 =VAL :baz
 =VAL :42
+-MAP
+-DOC
+-STR
+
+
+=== Flow mapping in block mapping
+--- yaml
+foo: {bar: 42}
+--- events
++STR
++DOC
++MAP
+=VAL :foo
++MAP {}
+=VAL :bar
+=VAL :42
+-MAP
+-MAP
+-DOC
+-STR
+
+
+=== Flow mapping in block sequence
+--- yaml
+- {foo: 42}
+--- events
++STR
++DOC
++SEQ
++MAP {}
+=VAL :foo
+=VAL :42
+-MAP
+-SEQ
+-DOC
+-STR
+
+
+=== Flow mapping multiline in block sequence
+--- yaml
+- {foo:
+   42
+  }
+--- events
++STR
++DOC
++SEQ
++MAP {}
+=VAL :foo
+=VAL :42
+-MAP
+-SEQ
+-DOC
+-STR
+
+
+=== Map in block seq
+--- SKIP
+--- yaml
+- foo: bar
+--- events
++STR
++DOC
++SEQ
++MAP
+=VAL :foo
+=VAL :bar
+-MAP
+-SEQ
+-DOC
+-STR
+
+
+=== Block mapping in block mapping
+--- SKIP
+--- yaml
+foo:
+  bar: 42
+--- events
++STR
++DOC
++MAP
+=VAL :foo
++MAP
+=VAL :bar
+=VAL :42
+-MAP
 -MAP
 -DOC
 -STR

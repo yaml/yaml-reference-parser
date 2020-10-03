@@ -116,6 +116,10 @@ sub try__ns_flow_pair { $_[0]->cache_up }
 sub got__ns_flow_pair { xxxxx @_ }
 sub not__ns_flow_pair { $_[0]->cache_drop }
 
+sub try__ns_l_block_map_implicit_entry{ $_[0]->cache_up() }
+sub got__ns_l_block_map_implicit_entry{ $_[0]->cache_down() }
+sub not__ns_l_block_map_implicit_entry{ $_[0]->cache_drop() }
+
 sub try__c_ns_flow_map_empty_key_entry { $_[0]->cache_up }
 sub got__c_ns_flow_map_empty_key_entry { xxxxx @_ }
 sub not__c_ns_flow_map_empty_key_entry { $_[0]->cache_drop }

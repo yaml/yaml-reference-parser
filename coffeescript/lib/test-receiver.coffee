@@ -69,6 +69,10 @@ global.TestReceiver = class TestReceiver
   got__ns_flow_pair: -> xxxxx @
   not__ns_flow_pair: -> @cache_drop()
 
+  try__ns_l_block_map_implicit_entry: -> @cache_up()
+  got__ns_l_block_map_implicit_entry: -> @cache_down()
+  not__ns_l_block_map_implicit_entry: -> @cache_drop()
+
   try__c_ns_flow_map_empty_key_entry: -> @cache_up()
   got__c_ns_flow_map_empty_key_entry: -> xxxxx @
   not__c_ns_flow_map_empty_key_entry: -> @cache_drop()
