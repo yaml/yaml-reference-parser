@@ -419,7 +419,6 @@ foo: {bar: 42}
 
 
 === Map in block seq
---- SKIP
 --- yaml
 - foo: bar
 --- events
@@ -430,6 +429,24 @@ foo: {bar: 42}
 =VAL :foo
 =VAL :bar
 -MAP
+-SEQ
+-DOC
+-STR
+
+
+=== Block seq in seq in seq
+--- SKIP
+--- yaml
+- - - foo
+--- events
++STR
++DOC
++SEQ
++SEQ
++SEQ
+=VAL :foo
+-SEQ
+-SEQ
 -SEQ
 -DOC
 -STR

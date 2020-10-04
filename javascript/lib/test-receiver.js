@@ -18,19 +18,23 @@
       }
     }
 
-    cache_up() {
-      return this.cache.push([]);
+    cache_up(event = null) {
+      this.cache.push([]);
+      if (event != null) {
+        return this.add(event);
+      }
     }
 
-    cache_down() {
-      var e, events, i, len, results;
+    cache_down(event = null) {
+      var e, events, i, len;
       events = this.cache.pop() || xxxxx(this);
-      results = [];
       for (i = 0, len = events.length; i < len; i++) {
         e = events[i];
-        results.push(this.add(e));
+        this.add(e);
       }
-      return results;
+      if (event != null) {
+        return this.add(event);
+      }
     }
 
     cache_drop() {
@@ -78,13 +82,11 @@
     }
 
     try__l_block_mapping() {
-      this.cache_up();
-      return this.add('+MAP');
+      return this.cache_up('+MAP');
     }
 
     got__l_block_mapping() {
-      this.cache_down();
-      return this.add('-MAP');
+      return this.cache_down('-MAP');
     }
 
     not__l_block_mapping() {
@@ -92,16 +94,26 @@
     }
 
     try__l_block_sequence() {
-      this.cache_up();
-      return this.add('+SEQ');
+      return this.cache_up('+SEQ');
     }
 
     got__l_block_sequence() {
-      this.cache_down();
-      return this.add('-SEQ');
+      return this.cache_down('-SEQ');
     }
 
     not__l_block_sequence() {
+      return this.cache_drop();
+    }
+
+    try__ns_l_compact_mapping() {
+      return this.cache_up('+MAP');
+    }
+
+    got__ns_l_compact_mapping() {
+      return this.cache_down('-MAP');
+    }
+
+    not__ns_l_compact_mapping() {
       return this.cache_drop();
     }
 
@@ -146,15 +158,11 @@
     }
 
     got__c_single_quoted(o) {
-      var value;
-      value = o.text.slice(1, -1);
-      return this.add(`=VAL '${value}`);
+      return this.add(`=VAL '${o.text.slice(1, -1)}`);
     }
 
     got__c_double_quoted(o) {
-      var value;
-      value = o.text.slice(1, -1);
-      return this.add(`=VAL \"${value}`);
+      return this.add(`=VAL \"${o.text.slice(1, -1)}`);
     }
 
     got__e_scalar() {
