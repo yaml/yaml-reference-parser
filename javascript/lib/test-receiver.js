@@ -10,7 +10,31 @@
       this.cache = [];
     }
 
-    add(event) {
+    add(type, value) {
+      var event;
+      event = {
+        type: type
+      };
+      if (this.header != null) {
+        event.header = this.header;
+        delete this.header;
+      }
+      if (this.anchor != null) {
+        event.anchor = this.anchor;
+        delete this.anchor;
+      }
+      if (this.tag != null) {
+        event.tag = this.tag;
+        delete this.tag;
+      }
+      if (value != null) {
+        event.value = value;
+      }
+      this.push(event);
+      return event;
+    }
+
+    push(event) {
       if (this.cache.length) {
         return _.last(this.cache).push(event);
       } else {
@@ -30,7 +54,7 @@
       events = this.cache.pop() || xxxxx(this);
       for (i = 0, len = events.length; i < len; i++) {
         e = events[i];
-        this.add(e);
+        this.push(e);
       }
       if (event != null) {
         return this.add(event);
@@ -38,7 +62,9 @@
     }
 
     cache_drop() {
-      return this.cache.pop() || xxxxx(this);
+      var events;
+      events = this.cache.pop() || xxxxx(this);
+      return events[0];
     }
 
     send(event) {
@@ -46,7 +72,11 @@
     }
 
     output() {
-      return [...this.event, ''].join("\n");
+      var output;
+      output = this.event.map(function(e) {
+        return e.type + (e.header ? ` ${e.header}` : '') + (e.anchor ? ` ${e.anchor}` : '') + (e.tag ? ` <${e.tag}>` : '') + (e.value ? ` ${e.value}` : '') + "\n";
+      });
+      return output.join('');
     }
 
     try__l_yaml_stream() {
@@ -102,7 +132,10 @@
     }
 
     not__l_block_sequence() {
-      return this.cache_drop();
+      var event;
+      event = this.cache_drop();
+      this.anchor = event.anchor;
+      return this.tag = event.tag;
     }
 
     try__ns_l_compact_mapping() {
@@ -154,19 +187,35 @@
     }
 
     got__ns_plain(o) {
-      return this.add(`=VAL :${o.text}`);
+      return this.add('=VAL', ':' + o.text);
     }
 
     got__c_single_quoted(o) {
-      return this.add(`=VAL '${o.text.slice(1, -1)}`);
+      return this.add('=VAL', "'" + o.text.slice(1, -1));
     }
 
     got__c_double_quoted(o) {
-      return this.add(`=VAL \"${o.text.slice(1, -1)}`);
+      return this.add('=VAL', '"' + o.text.slice(1, -1));
     }
 
     got__e_scalar() {
-      return this.add("=VAL :");
+      return this.add('=VAL', ':');
+    }
+
+    got__c_directives_end(o) {
+      return this.header = '---';
+    }
+
+    got__c_ns_anchor_property(o) {
+      return this.anchor = o.text;
+    }
+
+    got__c_ns_tag_property(o) {
+      return this.tag = o.text;
+    }
+
+    got__c_ns_alias_node(o) {
+      return this.add('=ALI', o.text);
     }
 
   };

@@ -5,7 +5,23 @@ global.TestReceiver = class TestReceiver
     @event = []
     @cache = []
 
-  add: (event)->
+  add: (type, value)->
+    event = type: type
+    if @header?
+      event.header = @header
+      delete @header
+    if @anchor?
+      event.anchor = @anchor
+      delete @anchor
+    if @tag?
+      event.tag = @tag
+      delete @tag
+    if value?
+      event.value = value
+    @push event
+    return event
+
+  push: (event)->
     if @cache.length
       _.last(@cache).push event
     else
@@ -17,17 +33,25 @@ global.TestReceiver = class TestReceiver
 
   cache_down: (event=null)->
     events = @cache.pop() or xxxxx @
-    @add e for e in events
+    @push e for e in events
     @add event if event?
 
   cache_drop: ->
-    @cache.pop() or xxxxx @
+    events = @cache.pop() or xxxxx @
+    return events[0]
 
   send: (event)->
     @event.push event
 
   output: ->
-    [@event..., ''].join "\n"
+    output = @event.map (e)->
+      e.type +
+        (if e.header then " #{e.header}" else '') +
+        (if e.anchor then " #{e.anchor}" else '') +
+        (if e.tag then " <#{e.tag}>" else '') +
+        (if e.value then " #{e.value}" else '') +
+        "\n"
+    output.join ''
 
   try__l_yaml_stream: -> @add '+STR'
   got__l_yaml_stream: -> @add '-STR'
@@ -47,7 +71,10 @@ global.TestReceiver = class TestReceiver
 
   try__l_block_sequence: -> @cache_up '+SEQ'
   got__l_block_sequence: -> @cache_down '-SEQ'
-  not__l_block_sequence: -> @cache_drop()
+  not__l_block_sequence: ->
+    event = @cache_drop()
+    @anchor = event.anchor
+    @tag = event.tag
 
   try__ns_l_compact_mapping: -> @cache_up '+MAP'
   got__ns_l_compact_mapping: -> @cache_down '-MAP'
@@ -65,11 +92,19 @@ global.TestReceiver = class TestReceiver
   got__c_ns_flow_map_empty_key_entry: -> xxxxx @
   not__c_ns_flow_map_empty_key_entry: -> @cache_drop()
 
-  got__ns_plain: (o)-> @add "=VAL :#{o.text}"
+  got__ns_plain: (o)-> @add '=VAL', ':' + o.text
   got__c_single_quoted: (o)->
-    @add "=VAL '#{o.text[1...-1]}"
+    @add '=VAL', "'" + o.text[1...-1]
   got__c_double_quoted: (o)->
-    @add "=VAL \"#{o.text[1...-1]}"
-  got__e_scalar: -> @add "=VAL :"
+    @add '=VAL', '"' + o.text[1...-1]
+  got__e_scalar: -> @add '=VAL', ':'
+
+  got__c_directives_end: (o)-> @header = '---'
+
+  got__c_ns_anchor_property: (o)-> @anchor = o.text
+
+  got__c_ns_tag_property: (o)-> @tag = o.text
+
+  got__c_ns_alias_node: (o)-> @add '=ALI', o.text
 
 # vim: sw=2:

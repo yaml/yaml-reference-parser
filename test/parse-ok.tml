@@ -53,7 +53,12 @@ foo
 === Top level scalar with header
 --- yaml(<)
     --- foo
---- ^events
+--- events
++STR
++DOC ---
+=VAL :foo
+-DOC
+-STR
 
 
 === Top level double quoted scalar

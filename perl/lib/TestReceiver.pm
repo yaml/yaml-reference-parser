@@ -7,10 +7,30 @@ sub new {
   bless {
     event => [],
     cache => [],
+    props => undef,
   }, $class;
 }
 
 sub add {
+  my ($self, $type, $value) = @_;
+  my $event = { type => $type };
+  if ($self->{header}) {
+    $event->{header} = delete $self->{header};
+  }
+  if (my $anchor = $self->{anchor}) {
+    $event->{anchor} = delete $self->{anchor};
+  }
+  if (my $tag = $self->{tag}) {
+    $event->{tag} = delete $self->{tag};
+  }
+  if (defined $value) {
+    $event->{value} = $value;
+  }
+  $self->push($event);
+  return $event;
+}
+
+sub push {
   my ($self, $event) = @_;
   if (@{$self->{cache}}) {
     push @{$self->{cache}[-1]}, $event;
@@ -29,13 +49,17 @@ sub cache_up {
 sub cache_down {
   my ($self, $event) = @_;
   my $events = pop @{$self->{cache}} or xxxxx @_;
-  $self->add($_) for @$events;
+  $self->push($_) for @$events;
+#   if (my $anchor = $events->[-1]{anchor}) {
+#     $self->{anchor} = $anchor;
+#   }
   $self->add($event) if $event;
 }
 
 sub cache_drop {
   my ($self) = @_;
-  pop @{$self->{cache}} or xxxxx @_;
+  my $events = pop @{$self->{cache}} or xxxxx @_;
+  return $events->[0];
 }
 
 sub send {
@@ -45,7 +69,14 @@ sub send {
 
 sub output {
   my ($self) = @_;
-  join "\n", @{$self->{event}}, '';
+  join '', map {
+    $_->{type}
+    . ($_->{header} ? " $_->{header}" : '')
+    . ($_->{anchor} ? " $_->{anchor}" : '')
+    . ($_->{tag} ? " <$_->{tag}>" : '')
+    . ($_->{value} ? " $_->{value}" : '')
+    . "\n"
+  } @{$self->{event}};
 }
 
 sub try__l_yaml_stream { $_[0]->add('+STR') }
@@ -66,7 +97,11 @@ sub not__l_block_mapping { $_[0]->cache_drop }
 
 sub try__l_block_sequence { $_[0]->cache_up('+SEQ') }
 sub got__l_block_sequence { $_[0]->cache_down('-SEQ') }
-sub not__l_block_sequence { $_[0]->cache_drop }
+sub not__l_block_sequence {
+  my $event = $_[0]->cache_drop;
+  $_[0]->{anchor} = $event->{anchor};
+  $_[0]->{tag} = $event->{tag};
+}
 
 sub try__ns_l_compact_mapping { $_[0]->cache_up('+MAP') }
 sub got__ns_l_compact_mapping { $_[0]->cache_down('-MAP') }
@@ -84,15 +119,22 @@ sub try__c_ns_flow_map_empty_key_entry { $_[0]->cache_up }
 sub got__c_ns_flow_map_empty_key_entry { xxxxx @_ }
 sub not__c_ns_flow_map_empty_key_entry { $_[0]->cache_drop }
 
-sub got__ns_plain { $_[0]->add("=VAL :${\ $_[1]->{text}}"); }
+sub got__ns_plain { $_[0]->add('=VAL', ':'.$_[1]->{text}) }
 sub got__c_single_quoted {
-  $_[0]->add("=VAL \'${\substr($_[1]->{text}, 1, -1)}");
+  $_[0]->add('=VAL', "'".substr($_[1]->{text}, 1, -1));
 }
 sub got__c_double_quoted {
-  $_[0]->add("=VAL \"${\substr($_[1]->{text}, 1, -1)}");
+  $_[0]->add('=VAL', '"'.substr($_[1]->{text}, 1, -1));
 }
-sub got__e_scalar { $_[0]->add("=VAL :") }
+sub got__e_scalar { $_[0]->add('=VAL', ':') }
 
+sub got__c_directives_end { $_[0]->{header} = '---' }
+
+sub got__c_ns_anchor_property { $_[0]->{anchor} = $_[1]->{text} }
+
+sub got__c_ns_tag_property { $_[0]->{tag} = $_[1]->{text} }
+
+sub got__c_ns_alias_node { $_[0]->add("=ALI $_[1]->{text}") }
 1;
 
 # vim: sw=2:
