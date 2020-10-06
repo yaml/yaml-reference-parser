@@ -21,7 +21,8 @@
       this.pos = 0;
       this.end = 0;
       this.state = [];
-      this.trace_num = 1;
+      this.trace_num = 0;
+      this.trace_line = 0;
       this.trace_on = true;
       this.trace_off = 0;
       this.trace_info = ['', '', ''];
@@ -110,6 +111,7 @@
         func.trace = func.name;
       }
       this.state_push(func.trace);
+      this.trace_num++;
       if (TRACE) {
         this.trace('?', func.trace, args);
       }
@@ -131,6 +133,7 @@
       if (type !== 'any' && typeof_(value) !== type) {
         xxxxx(`Calling '${func.trace}' returned '${typeof_(value)}' instead of '${type}'`);
       }
+      this.trace_num++;
       if (type !== 'boolean') {
         if (TRACE) {
           this.trace('>', value);
@@ -525,7 +528,7 @@
     }
 
     trace(type, call, args = []) {
-      var indent, input, l, level, line, prev_level, prev_line, prev_type, trace_info;
+      var indent, input, l, level, line, prev_level, prev_line, prev_type, trace_info, trace_num;
       if (!isString(call)) { // XXX
         call = String(call);
       }
@@ -546,16 +549,16 @@
       trace_info = null;
       level = `${level}_${call}`;
       if (type === '?' && this.trace_off === 0) {
-        trace_info = [type, level, line];
+        trace_info = [type, level, line, this.trace_num];
       }
       if (indexOf.call(this.trace_quiet(), call) >= 0) {
         this.trace_off += type === '?' ? 1 : -1;
       }
       if (type !== '?' && this.trace_off === 0) {
-        trace_info = [type, level, line];
+        trace_info = [type, level, line, this.trace_num];
       }
       if (trace_info != null) {
-        [prev_type, prev_level, prev_line] = this.trace_info;
+        [prev_type, prev_level, prev_line, trace_num] = this.trace_info;
         if (prev_type === '?' && prev_level === level) {
           trace_info[1] = '';
           if (line.match(/^\d*\ *\+/)) {
@@ -565,7 +568,7 @@
           }
         }
         if (prev_level) {
-          warn(sprintf("%5d %s", this.trace_num++, prev_line));
+          warn(sprintf("%6d %5d %s", trace_num, ++this.trace_line, prev_line));
         }
         this.trace_info = trace_info;
       }
@@ -587,9 +590,10 @@
     }
 
     trace_flush() {
-      var line;
-      if (line = this.trace_info[2]) {
-        return warn(sprintf("%5d %s", this.trace_num++, line));
+      var count, level, line, type;
+      [type, level, line, count] = this.trace_info;
+      if (line) {
+        return warn(sprintf("%6d %5d %s", count, ++this.trace_line, line));
       }
     }
 

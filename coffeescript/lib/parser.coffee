@@ -17,7 +17,8 @@ global.Parser = class Parser extends Grammar
     @pos = 0
     @end = 0
     @state = []
-    @trace_num = 1
+    @trace_num = 0
+    @trace_line = 0
     @trace_on = true
     @trace_off = 0
     @trace_info = ['', '', '']
@@ -87,6 +88,7 @@ global.Parser = class Parser extends Grammar
 
     @state_push(func.trace)
 
+    @trace_num++
     @trace '?', func.trace, args if TRACE
 
     args = args.map (a)=>
@@ -104,6 +106,7 @@ global.Parser = class Parser extends Grammar
     xxxxx "Calling '#{func.trace}' returned '#{typeof_ value}' instead of '#{type}'" \
       if type != 'any' and typeof_(value) != type
 
+    @trace_num++
     if type != 'boolean'
       @trace '>', value if TRACE
     else
@@ -396,14 +399,15 @@ global.Parser = class Parser extends Grammar
     trace_info = null
     level = "#{level}_#{call}"
     if type == '?' and @trace_off == 0
-      trace_info = [type, level, line]
+      trace_info = [type, level, line, @trace_num]
     if call in @trace_quiet()
       @trace_off += if type == '?' then 1 else -1
     if type != '?' and @trace_off == 0
-      trace_info = [type, level, line]
+      trace_info = [type, level, line, @trace_num]
 
     if trace_info?
-      [prev_type, prev_level, prev_line] = @trace_info
+      [prev_type, prev_level, prev_line, trace_num] =
+        @trace_info
       if prev_type == '?' and prev_level == level
         trace_info[1] = ''
         if line.match /^\d*\ *\+/
@@ -411,7 +415,8 @@ global.Parser = class Parser extends Grammar
         else
           prev_line = prev_line.replace /\?/, '!'
       if prev_level
-        warn sprintf "%5d %s", @trace_num++, prev_line
+        warn sprintf "%6d %5d %s",
+          trace_num, ++@trace_line, prev_line
 
       @trace_info = trace_info
 
@@ -426,7 +431,9 @@ global.Parser = class Parser extends Grammar
     return "#{call}(#{list})"
 
   trace_flush: ->
-    if line = @trace_info[2]
-      warn sprintf "%5d %s", @trace_num++, line
+    [type, level, line, count] = @trace_info
+    if line
+      warn sprintf "%6d %5d %s",
+        count, ++@trace_line, line
 
 # vim: sw=2:

@@ -22,7 +22,8 @@ sub new {
     pos => 0,
     end => 0,
     state => [],
-    trace_num => 1,
+    trace_num => 0,
+    trace_line => 0,
     trace_on => true,
     trace_off => 0,
     trace_info => ['', '', ''],
@@ -119,6 +120,7 @@ sub call {
 
   $self->state_push($func->{trace});
 
+  $self->{trace_num}++;
   $self->trace('?', $func->{trace}, $args) if TRACE;
 
   @$args = map {
@@ -138,6 +140,7 @@ sub call {
   xxxxx "Calling '$func->{trace}' returned '${\ typeof($value)}' instead of '$type'"
     if $type ne 'any' and typeof($value) ne $type;
 
+  $self->{trace_num}++;
   if ($type ne 'boolean') {
     $self->trace('>', $value) if TRACE;
   }
@@ -536,17 +539,18 @@ sub trace {
   my $trace_info = undef;
   $level = "${level}_$call";
   if ($type eq '?' and not $self->{trace_off}) {
-    $trace_info = [$type, $level, $line];
+    $trace_info = [$type, $level, $line, $self->{trace_num}];
   }
   if (grep $_ eq $call, @{$self->trace_quiet}) {
     $self->{trace_off} += $type eq '?' ? 1 : -1;
   }
   if ($type ne '?' and not $self->{trace_off}) {
-    $trace_info = [$type, $level, $line];
+    $trace_info = [$type, $level, $line, $self->{trace_num}];
   }
 
   if (defined $trace_info) {
-    my ($prev_type, $prev_level, $prev_line) = @{$self->{trace_info}};
+    my ($prev_type, $prev_level, $prev_line, $trace_num) =
+      @{$self->{trace_info}};
     if ($prev_type eq '?' and $prev_level eq $level) {
       $trace_info->[1] = '';
       if ($line =~ /^\d*\ *\+/) {
@@ -557,8 +561,8 @@ sub trace {
       }
     }
     if ($prev_level) {
-      # die $prev_line if $prev_line =~ /\\\\/;
-      warn sprintf "%5d %s", $self->{trace_num}++, $prev_line;
+      warn sprintf "%6d %5d %s",
+        $trace_num, ++$self->{trace_line}, $prev_line;
     }
 
     $self->{trace_info} = $trace_info;
@@ -578,8 +582,10 @@ sub trace_format_call {
 
 sub trace_flush {
   my ($self) = @_;
+  my ($type, $level, $line, $count) = @{$self->{trace_info}};
   if (my $line = $self->{trace_info}[2]) {
-    warn sprintf "%5d %s", $self->{trace_num}++, $line;
+    warn sprintf "%6d %5d %s",
+      $count, ++$self->{trace_line}, $line;
   }
 }
 
