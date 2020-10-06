@@ -14,8 +14,8 @@ sub new {
 sub add {
   my ($self, $type, $value) = @_;
   my $event = { type => $type };
-  if ($self->{header}) {
-    $event->{header} = delete $self->{header};
+  if ($self->{marker}) {
+    $event->{marker} = delete $self->{marker};
   }
   if (my $anchor = $self->{anchor}) {
     $event->{anchor} = delete $self->{anchor};
@@ -50,9 +50,6 @@ sub cache_down {
   my ($self, $event) = @_;
   my $events = pop @{$self->{cache}} or xxxxx @_;
   $self->push($_) for @$events;
-#   if (my $anchor = $events->[-1]{anchor}) {
-#     $self->{anchor} = $anchor;
-#   }
   $self->add($event) if $event;
 }
 
@@ -60,6 +57,15 @@ sub cache_drop {
   my ($self) = @_;
   my $events = pop @{$self->{cache}} or xxxxx @_;
   return $events->[0];
+}
+
+sub cache_get {
+  my ($self, $type) = @_;
+  return
+    $self->{cache}[-1] &&
+    $self->{cache}[-1][0] &&
+    $self->{cache}[-1][0]{type} eq $type &&
+    $self->{cache}[-1][0];
 }
 
 sub send {
@@ -71,7 +77,7 @@ sub output {
   my ($self) = @_;
   join '', map {
     $_->{type}
-    . ($_->{header} ? " $_->{header}" : '')
+    . ($_->{marker} ? " $_->{marker}" : '')
     . ($_->{anchor} ? " $_->{anchor}" : '')
     . ($_->{tag} ? " <$_->{tag}>" : '')
     . ($_->{value} ? " $_->{value}" : '')
@@ -82,8 +88,30 @@ sub output {
 sub try__l_yaml_stream { $_[0]->add('+STR') }
 sub got__l_yaml_stream { $_[0]->add('-STR') }
 
-sub try__l_bare_document { $_[0]->add('+DOC') }
-sub got__l_bare_document { $_[0]->add('-DOC') }
+sub try__l_bare_document {
+  my ($self) = @_;
+  my $parser = $self->{parser};
+  if (
+    substr($parser->{input}, $parser->{pos}) =~
+      /^(\s|\#.*\n?)*\S/
+  ) {
+    $self->add('+DOC');
+  }
+}
+sub got__l_bare_document { $_[0]->cache_up('-DOC') }
+sub got__c_directives_end { $_[0]->{marker} = '---' }
+sub got__c_document_end {
+  my ($self) = @_;
+  if (my $event = $self->cache_get('-DOC')) {
+    $event->{marker} = '...';
+    $self->cache_down;
+  }
+}
+sub not__c_document_end {
+  if ($_[0]->cache_get('-DOC')) {
+    $_[0]->cache_down;
+  }
+}
 
 sub got__c_flow_mapping__all__x7b { $_[0]->add('+MAP {}') }
 sub got__c_flow_mapping__all__x7d { $_[0]->add('-MAP') }
@@ -111,9 +139,9 @@ sub try__ns_flow_pair { $_[0]->cache_up }
 sub got__ns_flow_pair { xxxxx @_ }
 sub not__ns_flow_pair { $_[0]->cache_drop }
 
-sub try__ns_l_block_map_implicit_entry{ $_[0]->cache_up() }
-sub got__ns_l_block_map_implicit_entry{ $_[0]->cache_down() }
-sub not__ns_l_block_map_implicit_entry{ $_[0]->cache_drop() }
+sub try__ns_l_block_map_implicit_entry{ $_[0]->cache_up }
+sub got__ns_l_block_map_implicit_entry{ $_[0]->cache_down }
+sub not__ns_l_block_map_implicit_entry{ $_[0]->cache_drop }
 
 sub try__c_ns_flow_map_empty_key_entry { $_[0]->cache_up }
 sub got__c_ns_flow_map_empty_key_entry { xxxxx @_ }
@@ -128,13 +156,12 @@ sub got__c_double_quoted {
 }
 sub got__e_scalar { $_[0]->add('=VAL', ':') }
 
-sub got__c_directives_end { $_[0]->{header} = '---' }
-
 sub got__c_ns_anchor_property { $_[0]->{anchor} = $_[1]->{text} }
 
 sub got__c_ns_tag_property { $_[0]->{tag} = $_[1]->{text} }
 
 sub got__c_ns_alias_node { $_[0]->add("=ALI $_[1]->{text}") }
+
 1;
 
 # vim: sw=2:

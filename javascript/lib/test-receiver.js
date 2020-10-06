@@ -15,9 +15,9 @@
       event = {
         type: type
       };
-      if (this.header != null) {
-        event.header = this.header;
-        delete this.header;
+      if (this.marker != null) {
+        event.marker = this.marker;
+        delete this.marker;
       }
       if (this.anchor != null) {
         event.anchor = this.anchor;
@@ -67,6 +67,12 @@
       return events[0];
     }
 
+    cache_get(type) {
+      var last;
+      last = _.last(this.cache);
+      return last && last[0] && last[0].type === type && last[0];
+    }
+
     send(event) {
       return this.event.push(event);
     }
@@ -74,7 +80,7 @@
     output() {
       var output;
       output = this.event.map(function(e) {
-        return e.type + (e.header ? ` ${e.header}` : '') + (e.anchor ? ` ${e.anchor}` : '') + (e.tag ? ` <${e.tag}>` : '') + (e.value ? ` ${e.value}` : '') + "\n";
+        return e.type + (e.marker ? ` ${e.marker}` : '') + (e.anchor ? ` ${e.anchor}` : '') + (e.tag ? ` <${e.tag}>` : '') + (e.value ? ` ${e.value}` : '') + "\n";
       });
       return output.join('');
     }
@@ -88,11 +94,33 @@
     }
 
     try__l_bare_document() {
-      return this.add('+DOC');
+      var parser;
+      parser = this.parser;
+      if (parser.input.slice(parser.pos).match(/^(\s|\#.*\n?)*\S/)) {
+        return this.add('+DOC');
+      }
     }
 
     got__l_bare_document() {
-      return this.add('-DOC');
+      return this.cache_up('-DOC');
+    }
+
+    got__c_directives_end() {
+      return this.marker = '---';
+    }
+
+    got__c_document_end() {
+      var event;
+      if (event = this.cache_get('-DOC')) {
+        event.marker = '...';
+        return this.cache_down();
+      }
+    }
+
+    not__c_document_end() {
+      if (this.cache_get('-DOC')) {
+        return this.cache_down();
+      }
     }
 
     got__c_flow_mapping__all__x7b() {
@@ -200,10 +228,6 @@
 
     got__e_scalar() {
       return this.add('=VAL', ':');
-    }
-
-    got__c_directives_end(o) {
-      return this.header = '---';
     }
 
     got__c_ns_anchor_property(o) {

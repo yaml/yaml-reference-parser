@@ -241,7 +241,7 @@
         count = 0;
         pos = this.pos;
         pos_start = pos;
-        while ((max === -1 || count < max) && this.pos < this.end) {
+        while (max === -1 || count < max) {
           if (!this.call(func)) {
             break;
           }
@@ -493,7 +493,7 @@
     // Special grammar rules
     //------------------------------------------------------------------------------
     start_of_line() {
-      return this.pos === 0 || this.input[this.pos - 1] === "\n";
+      return this.pos === 0 || this.pos >= this.end || this.input[this.pos - 1] === "\n";
     }
 
     end_of_stream() {

@@ -182,7 +182,7 @@ global.Parser = class Parser extends Grammar
       count = 0
       pos = @pos
       pos_start = pos
-      while (max == -1 or count < max) and @pos < @end
+      while max == -1 or count < max
         break unless @call func
         break if @pos == pos
         count++
@@ -334,6 +334,7 @@ global.Parser = class Parser extends Grammar
 #------------------------------------------------------------------------------
   start_of_line: ->
     @pos == 0 or
+      @pos >= @end or
       @input[@pos - 1] == "\n"
 
   end_of_stream: ->

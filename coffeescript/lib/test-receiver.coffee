@@ -7,9 +7,9 @@ global.TestReceiver = class TestReceiver
 
   add: (type, value)->
     event = type: type
-    if @header?
-      event.header = @header
-      delete @header
+    if @marker?
+      event.marker = @marker
+      delete @marker
     if @anchor?
       event.anchor = @anchor
       delete @anchor
@@ -40,13 +40,21 @@ global.TestReceiver = class TestReceiver
     events = @cache.pop() or xxxxx @
     return events[0]
 
+  cache_get: (type)->
+    last = _.last @cache
+    return \
+      last &&
+      last[0] &&
+      last[0].type == type &&
+      last[0]
+
   send: (event)->
     @event.push event
 
   output: ->
     output = @event.map (e)->
       e.type +
-        (if e.header then " #{e.header}" else '') +
+        (if e.marker then " #{e.marker}" else '') +
         (if e.anchor then " #{e.anchor}" else '') +
         (if e.tag then " <#{e.tag}>" else '') +
         (if e.value then " #{e.value}" else '') +
@@ -56,8 +64,19 @@ global.TestReceiver = class TestReceiver
   try__l_yaml_stream: -> @add '+STR'
   got__l_yaml_stream: -> @add '-STR'
 
-  try__l_bare_document: -> @add '+DOC'
-  got__l_bare_document: -> @add '-DOC'
+  try__l_bare_document: ->
+    parser = @parser
+    if parser.input[parser.pos..].match /^(\s|\#.*\n?)*\S/
+      @add '+DOC'
+  got__l_bare_document: -> @cache_up '-DOC'
+  got__c_directives_end: -> @marker = '---'
+  got__c_document_end: ->
+    if event = @cache_get '-DOC'
+      event.marker = '...'
+      @cache_down()
+  not__c_document_end: ->
+    if @cache_get '-DOC'
+      @cache_down()
 
   got__c_flow_mapping__all__x7b: -> @add '+MAP {}'
   got__c_flow_mapping__all__x7d: -> @add '-MAP'
@@ -98,8 +117,6 @@ global.TestReceiver = class TestReceiver
   got__c_double_quoted: (o)->
     @add '=VAL', '"' + o.text[1...-1]
   got__e_scalar: -> @add '=VAL', ':'
-
-  got__c_directives_end: (o)-> @header = '---'
 
   got__c_ns_anchor_property: (o)-> @anchor = o.text
 

@@ -240,10 +240,7 @@ sub rep {
     my $count = 0;
     my $pos = $self->{pos};
     my $pos_start = $pos;
-    while (
-      ($max == -1 or $count < $max) and
-      $self->{pos} < $self->{end}
-    ) {
+    while ($max == -1 or $count < $max) {
       last unless $self->call($func);
       last if $self->{pos} == $pos;
       $count++;
@@ -458,6 +455,7 @@ sub start_of_line {
   my ($self) = @_;
   (
     $self->{pos} == 0 ||
+    $self->{pos} >= $self->{end} ||
     substr($self->{input}, $self->{pos} - 1, 1) eq "\n"
   ) ? true : false;
 }
