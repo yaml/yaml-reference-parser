@@ -15,6 +15,7 @@ PATH := $(ROOT)/node_modules/.bin:$(PATH)
 PATH := $(ROOT)/test/testml/bin:$(PATH)
 export PATH
 export TESTML_RUN := node-tap
+export TESTML_LIB := $(ROOT)/test/suite/test:$(TESTML_LIB)
 
 test := test/*.tml
 

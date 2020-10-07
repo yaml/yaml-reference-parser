@@ -13,6 +13,7 @@ TEST_DEPS := \
 include $(ROOT)/.common.mk
 
 export TESTML_RUN := perl-tap
+export TESTML_LIB := $(ROOT)/test/suite/test:$(TESTML_LIB)
 export PERL5LIB := $(ROOT)/perl/ext-perl/lib/perl5
 
 ext-perl:
