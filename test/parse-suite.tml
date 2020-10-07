@@ -2,7 +2,7 @@
 
 
 "({*Name}) {*Label} -- '{*in-yaml}'":
-  parse(*in-yaml) == *test-event
+  *in-yaml.unescape.parse == *test-event
 
 # %Import 229Q  # Spec Example 2.4. Sequence of Mappings
 # %Import 26DV    # Whitespace around colon in mappings
@@ -78,7 +78,7 @@
 # %Import 82AN    # Three dashes and content without space
 # %Import 87E4    # Spec Example 7.8. Single Quoted Implicit Keys
 %Import 8CWC    # Plain mapping key ending with colon
-# %Import 8G76    # Spec Example 6.10. Comment Lines
+%Import 8G76    # Spec Example 6.10. Comment Lines
 # %Import 8KB6    # Multiline plain flow mapping key without value
 %Import 8MK2    # Explicit Non-Specific Tag
 %Import 8QBE    # Block Sequence in Block Mapping
@@ -122,7 +122,7 @@
 # %Import D88J    # Flow Sequence in Block Mapping
 %Import D9TU    # Single Pair Block Mapping
 # %Import DBG4    # Spec Example 7.10. Plain Characters
-# %Import DC7X    # Various trailing tabs
+%Import DC7X    # Various trailing tabs
 # %Import DFF7    # Spec Example 7.16. Flow Mapping Entries
 # %Import DHP8    # Flow Sequence
 # %Import DK3J    # Zero indented block scalar with line that looks like a comment
@@ -165,7 +165,7 @@
 # %Import K3WX    # Colon and adjacent value after comment on next line
 %Import K4SU    # Multiple Entry Block Sequence
 # %Import K527    # Spec Example 6.6. Line Folding
-# %Import K54U    # Tab after document header
+%Import K54U    # Tab after document header
 # %Import K858    # Spec Example 8.6. Empty Scalar Chomping
 # %Import KK5P    # Various combinations of explicit block mappings
 # %Import KMK3    # Block Submapping

@@ -30,6 +30,10 @@
       }
     }
 
+    unescape(yaml) {
+      return yaml.replace(/<SPC>/g, ' ').replace(/<TAB>/g, "\t");
+    }
+
   };
 
 }).call(this);

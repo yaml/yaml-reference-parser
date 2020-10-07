@@ -20,3 +20,7 @@ class TestMLBridge extends TestML.Bridge
       error
     else
       parser.receiver.output()
+
+  unescape: (yaml)->
+    yaml.replace(/<SPC>/g, ' ')
+      .replace(/<TAB>/g, "\t")

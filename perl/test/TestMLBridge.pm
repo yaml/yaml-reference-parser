@@ -19,4 +19,11 @@ sub parse {
     : $parser->{receiver}->output;
 }
 
+sub unescape {
+  my ($self, $yaml) = @_;
+  $yaml =~ s/<SPC>/ /g;
+  $yaml =~ s/<TAB>/\t/g;
+  return $yaml;
+}
+
 1;

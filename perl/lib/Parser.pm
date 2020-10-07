@@ -258,7 +258,8 @@ sub rep {
 sub case {
   my ($self, $var, $map) = @_;
   name case => sub {
-    my $rule = $map->{$var} or
+    my $rule = $map->{$var};
+    defined $rule or
       xxxxx "Can't find '$var' in:", $map;
     $self->call($rule);
   }, "case($var,${\ stringify $map})";
@@ -267,7 +268,8 @@ sub case {
 # Call a rule depending on state value:
 sub flip {
   my ($self, $var, $map) = @_;
-  my $value = $map->{$var} or
+  my $value = $map->{$var};
+  defined $value or
     xxxxx "Can't find '$var' in:", $map;
   return $value if not ref $value;
   return $self->call($value, 'number');
@@ -521,6 +523,8 @@ sub trace {
   }
 
   my $input = substr($self->{input}, $self->{pos});
+  $input = substr($input, 0, 30) . '…'
+    if length($input) > 30;
   $input =~ s/\t/\\t/g;
   $input =~ s/\r/\\r/g;
   $input =~ s/\n/\\n/g;

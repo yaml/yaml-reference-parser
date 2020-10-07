@@ -196,14 +196,16 @@ global.Parser = class Parser extends Grammar
   # Call a rule depending on state value:
   case: (var_, map)->
     case_ = ->
-      rule = map[var_] or
+      rule = map[var_]
+      rule? or
         xxxxx "Can't find '#{var_}' in:", map
       @call rule
     name_ 'case', case_, "case(#{var_},#{stringify map})"
 
   # Call a rule depending on state value:
   flip: (var_, map)->
-    value = map[var_] or
+    value = map[var_]
+    value? or
       xxxxx "Can't find '#{var_}' in:", map
     return value if isString value
     return @call value, 'number'
@@ -384,6 +386,9 @@ global.Parser = class Parser extends Grammar
       indent = "#{level}" + indent[l..]
 
     input = @input[@pos..]
+    input = "#{input[0..30]}…" \
+      if input.length > 30
+    input = input \
       .replace(/\t/g, '\\t')
       .replace(/\r/g, '\\r')
       .replace(/\n/g, '\\n')

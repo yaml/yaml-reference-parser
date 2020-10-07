@@ -265,7 +265,8 @@
       var case_;
       case_ = function() {
         var rule;
-        rule = map[var_] || xxxxx(`Can't find '${var_}' in:`, map);
+        rule = map[var_];
+        (rule != null) || xxxxx(`Can't find '${var_}' in:`, map);
         return this.call(rule);
       };
       return name_('case', case_, `case(${var_},${stringify(map)})`);
@@ -274,7 +275,8 @@
     // Call a rule depending on state value:
     flip(var_, map) {
       var value;
-      value = map[var_] || xxxxx(`Can't find '${var_}' in:`, map);
+      value = map[var_];
+      (value != null) || xxxxx(`Can't find '${var_}' in:`, map);
       if (isString(value)) {
         return value;
       }
@@ -544,7 +546,11 @@
         l = `${level}`.length;
         indent = `${level}` + indent.slice(l);
       }
-      input = this.input.slice(this.pos).replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
+      input = this.input.slice(this.pos);
+      if (input.length > 30) {
+        input = `${input.slice(0, 31)}…`;
+      }
+      input = input.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
       line = sprintf("%s%s %-30s  %4d '%s'", indent, type, this.trace_format_call(call, args), this.pos, input);
       trace_info = null;
       level = `${level}_${call}`;
