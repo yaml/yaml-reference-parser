@@ -14,6 +14,9 @@ PATH := $(NODE_MODULES)/.bin:$(PATH)
 PATH := $(ROOT)/test/testml/bin:$(PATH)
 export PATH
 
+export TESTML_RUN := $(BIN)-tap
+export TESTML_LIB := $(ROOT)/test/suite/test:$(TESTML_LIB)
+
 test := test/*.tml
 
 .DELETE_ON_ERROR:
@@ -36,7 +39,7 @@ $(GRAMMAR): $(SPEC_YAML) $(GENERATOR) $(GENERATOR_LIB) $(GENERATOR_LANG_LIB)
 	> $@
 
 ../test/testml:
-	git clone https://github.com/testml-lang/testml $@
+	git clone git@github.com:testml-lang/testml $@
 	make -C $@ ext/perl
 	make -C $@ src/node_modules
 

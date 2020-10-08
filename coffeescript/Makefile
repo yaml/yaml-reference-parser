@@ -9,7 +9,4 @@ BUILD_DEPS := \
 TEST_DEPS := \
     ../test/testml \
 
-export TESTML_RUN := coffee-tap
-export TESTML_LIB := $(ROOT)/test/suite/test:$(TESTML_LIB)
-
 include ../.common.mk

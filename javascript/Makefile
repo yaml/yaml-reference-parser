@@ -1,4 +1,7 @@
-SHELL := bash
+ROOT := $(shell cd ..; pwd)
+LANG := javascript
+BIN := node
+GRAMMAR :=
 
 ALL_JS := \
     bin/yaml-parser \
@@ -9,26 +12,18 @@ ALL_JS := \
     lib/test-receiver.js \
     test/testml-bridge.js \
 
-ROOT := $(shell cd ..; pwd)
+BUILD_DEPS := \
+    build-coffee \
+    $(ALL_JS) \
 
-PATH := $(ROOT)/node_modules/.bin:$(PATH)
-PATH := $(ROOT)/test/testml/bin:$(PATH)
-export PATH
-export TESTML_RUN := node-tap
-export TESTML_LIB := $(ROOT)/test/suite/test:$(TESTML_LIB)
+TEST_DEPS := \
+    ../test/testml \
 
-test := test/*.tml
 
-.DELETE_ON_ERROR:
+include $(ROOT)/.common.mk
 
-default:
 
-build: build-coffee $(ALL_JS)
-
-test: build ../test/testml/src/node/lib
-	prove -v $(test)
-
-clean:
+build:: ../test/testml/src/node/lib
 
 build-coffee:
 	make -C ../coffeescript build
@@ -52,3 +47,6 @@ test/%.js: ../coffeescript/test/%.coffee
 	git clone https://github.com/testml-lang/testml $@
 	make -C $@ ext/perl
 	make -C $@ src/node_modules
+
+../test/testml/src/node/lib:
+	make -C ../test/testml src/node/lib
