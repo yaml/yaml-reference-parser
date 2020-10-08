@@ -120,7 +120,11 @@ global.TestReceiver = class TestReceiver
 
   got__c_ns_anchor_property: (o)-> @anchor = o.text
 
-  got__c_ns_tag_property: (o)-> @tag = o.text
+  got__c_ns_tag_property: (o)->
+    tag = o.text
+    if m = tag.match /^!!(.*)/
+      tag = "tag:yaml.org,2002:#{m[1]}"
+    @tag = tag
 
   got__c_ns_alias_node: (o)-> @add '=ALI', o.text
 

@@ -158,7 +158,14 @@ sub got__e_scalar { $_[0]->add('=VAL', ':') }
 
 sub got__c_ns_anchor_property { $_[0]->{anchor} = $_[1]->{text} }
 
-sub got__c_ns_tag_property { $_[0]->{tag} = $_[1]->{text} }
+sub got__c_ns_tag_property {
+  my ($self, $o) = @_;
+  my $tag = $o->{text};
+  if ($tag =~ /^!!(.*)/) {
+    $tag = "tag:yaml.org,2002:$1";
+  }
+  $self->{tag} = $tag;
+}
 
 sub got__c_ns_alias_node { $_[0]->add("=ALI $_[1]->{text}") }
 

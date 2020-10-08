@@ -235,7 +235,12 @@
     }
 
     got__c_ns_tag_property(o) {
-      return this.tag = o.text;
+      var m, tag;
+      tag = o.text;
+      if (m = tag.match(/^!!(.*)/)) {
+        tag = `tag:yaml.org,2002:${m[1]}`;
+      }
+      return this.tag = tag;
     }
 
     got__c_ns_alias_node(o) {
