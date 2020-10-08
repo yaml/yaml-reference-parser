@@ -17,6 +17,11 @@ export PATH
 export TESTML_RUN := $(BIN)-tap
 export TESTML_LIB := $(ROOT)/test/suite/test:$(TESTML_LIB)
 
+BUILD_DEPS ?= $(ROOT)/node_modules
+TEST_DEPS ?= \
+    ../test/testml \
+    ../test/suite \
+
 test := test/*.tml
 
 .DELETE_ON_ERROR:
@@ -39,9 +44,12 @@ $(GRAMMAR): $(SPEC_YAML) $(GENERATOR) $(GENERATOR_LIB) $(GENERATOR_LANG_LIB)
 	> $@
 
 ../test/testml:
-	git clone git@github.com:testml-lang/testml $@
+	git clone https://github.com/testml-lang/testml $@
 	make -C $@ ext/perl
 	make -C $@ src/node_modules
+
+../test/suite:
+	git clone https://github.com/yaml/yaml-test-suite $@
 
 $(NODE_MODULES) $(SPEC_YAML):
 	make -C $(ROOT) $(@:$(ROOT)/%=%)

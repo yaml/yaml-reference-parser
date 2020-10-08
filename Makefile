@@ -29,6 +29,7 @@ clean: $(ALL_CLEAN)
 	rm -fr node_modules
 	rm -fr test/testml
 	rm -fr test/.testml
+	rm -fr test/suite
 
 clean-%:
 	make -C $(@:clean-%=%) clean

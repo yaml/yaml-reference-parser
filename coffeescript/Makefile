@@ -3,10 +3,5 @@ LANG := coffeescript
 BIN := coffee
 GRAMMAR := lib/grammar.coffee
 
-BUILD_DEPS := \
-    $(ROOT)/node_modules \
-
-TEST_DEPS := \
-    ../test/testml \
 
 include ../.common.mk

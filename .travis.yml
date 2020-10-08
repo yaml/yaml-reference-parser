@@ -4,7 +4,7 @@ node_js:
 - '12'
 - '14'
 
-branches: {only: [master, travis]}
+branches: {only: [master, cicd]}
 
 script:
 - git fetch --unshallow || true

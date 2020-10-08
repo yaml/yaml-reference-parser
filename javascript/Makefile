@@ -13,17 +13,14 @@ ALL_JS := \
     test/testml-bridge.js \
 
 BUILD_DEPS := \
+    $(ROOT)/node_modules \
     build-coffee \
     $(ALL_JS) \
-
-TEST_DEPS := \
-    ../test/testml \
+    ../test/testml/src/node/lib \
 
 
 include $(ROOT)/.common.mk
 
-
-build:: ../test/testml/src/node/lib
 
 build-coffee:
 	make -C ../coffeescript build
@@ -42,11 +39,3 @@ test/%.js: ../coffeescript/test/%.coffee
 
 ../test/testml/src/node/lib: ../test/testml
 	make -C $(@:%/lib=%) js-files
-
-../test/testml:
-	git clone https://github.com/testml-lang/testml $@
-	make -C $@ ext/perl
-	make -C $@ src/node_modules
-
-../test/testml/src/node/lib:
-	make -C ../test/testml src/node/lib

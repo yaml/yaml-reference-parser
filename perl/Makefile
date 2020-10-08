@@ -3,11 +3,9 @@ LANG := perl
 BIN := perl
 GRAMMAR := lib/Grammar.pm
 
-BUILD_DEPS := \
-    $(ROOT)/node_modules \
-
 TEST_DEPS := \
-    $(ROOT)/test/testml \
+    ../test/testml \
+    ../test/suite \
     ext-perl \
 
 
