@@ -3,6 +3,9 @@ YAML 1.2 Reference Parsers
 
 Generate YAML 1.2 Reference Parsers from the Spec
 
+[![Travis Test Status](https://travis-ci.org/yaml/yaml-reference-parser.svg?branch=master)](https://travis-ci.org/yaml/yaml-reference-parser)
+[![Actions Status: Test](https://github.com/yaml/yaml-reference-parser/workflows/Test/badge.svg)](https://github.com/yaml/yaml-reference-parser/actions?query=workflow%3A"Test")
+
 # Synopsis
 ```
 make test
