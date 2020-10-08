@@ -107,11 +107,17 @@ global.TestReceiver = class TestReceiver
   got__ns_l_block_map_implicit_entry: -> @cache_down()
   not__ns_l_block_map_implicit_entry: -> @cache_drop()
 
+  try__c_l_block_map_explicit_entry: -> @cache_up()
+  got__c_l_block_map_explicit_entry: -> @cache_down()
+  not__c_l_block_map_explicit_entry: -> @cache_drop()
+
   try__c_ns_flow_map_empty_key_entry: -> @cache_up()
   got__c_ns_flow_map_empty_key_entry: -> xxxxx @
   not__c_ns_flow_map_empty_key_entry: -> @cache_drop()
 
-  got__ns_plain: (o)-> @add '=VAL', ':' + o.text
+  got__ns_plain: (o)->
+    text = o.text.replace /\\/g, "\\\\"
+    @add '=VAL', ":#{text}"
   got__c_single_quoted: (o)->
     @add '=VAL', "'" + o.text[1...-1]
   got__c_double_quoted: (o)->

@@ -8,7 +8,7 @@
 # %Import 26DV    # Whitespace around colon in mappings
 %Import 27NA    # Spec Example 5.9. Directive Indicator
 %Import 2AUY    # Tags in Block Sequence
-# %Import 2EBW    # Allowed characters in keys
+%Import 2EBW    # Allowed characters in keys
 %Import 2JQS    # Block Mapping with Missing Keys
 %Import 2LFX    # Spec Example 6.13. Reserved Directives [1.3]
 # %Import 2SXE    # Anchors With Colon in Name
@@ -29,7 +29,7 @@
 # %Import 4Q9F    # Folded Block Scalar [1.3]
 # %Import 4QFQ    # Spec Example 8.2. Block Indentation Indicator [1.3]
 # %Import 4UYU    # Colon in Double Quoted String
-# %Import 4V8U    # Plain scalar with backslashes
+%Import 4V8U    # Plain scalar with backslashes
 # %Import 4ZYM    # Spec Example 6.4. Line Prefixes
 %Import 52DL    # Explicit Non-Specific Tag [1.3]
 # %Import 54T7    # Flow Mapping

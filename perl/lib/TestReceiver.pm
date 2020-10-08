@@ -143,11 +143,20 @@ sub try__ns_l_block_map_implicit_entry{ $_[0]->cache_up }
 sub got__ns_l_block_map_implicit_entry{ $_[0]->cache_down }
 sub not__ns_l_block_map_implicit_entry{ $_[0]->cache_drop }
 
+sub try__c_l_block_map_explicit_entry{ $_[0]->cache_up }
+sub got__c_l_block_map_explicit_entry{ $_[0]->cache_down }
+sub not__c_l_block_map_explicit_entry{ $_[0]->cache_drop }
+
 sub try__c_ns_flow_map_empty_key_entry { $_[0]->cache_up }
 sub got__c_ns_flow_map_empty_key_entry { xxxxx @_ }
 sub not__c_ns_flow_map_empty_key_entry { $_[0]->cache_drop }
 
-sub got__ns_plain { $_[0]->add('=VAL', ':'.$_[1]->{text}) }
+sub got__ns_plain {
+  my ($self, $o) = @_;
+  my $text = $o->{text};
+  $text =~ s/\\/\\\\/g;
+  $self->add('=VAL', ":$text");
+}
 sub got__c_single_quoted {
   $_[0]->add('=VAL', "'".substr($_[1]->{text}, 1, -1));
 }

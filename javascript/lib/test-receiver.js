@@ -202,6 +202,18 @@
       return this.cache_drop();
     }
 
+    try__c_l_block_map_explicit_entry() {
+      return this.cache_up();
+    }
+
+    got__c_l_block_map_explicit_entry() {
+      return this.cache_down();
+    }
+
+    not__c_l_block_map_explicit_entry() {
+      return this.cache_drop();
+    }
+
     try__c_ns_flow_map_empty_key_entry() {
       return this.cache_up();
     }
@@ -215,7 +227,9 @@
     }
 
     got__ns_plain(o) {
-      return this.add('=VAL', ':' + o.text);
+      var text;
+      text = o.text.replace(/\\/g, "\\\\");
+      return this.add('=VAL', `:${text}`);
     }
 
     got__c_single_quoted(o) {
