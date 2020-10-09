@@ -1,3 +1,4 @@
 /node_modules/
 /perl5lib/
 .testml/
+/.traces/
