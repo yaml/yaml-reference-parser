@@ -53,11 +53,16 @@ global.TestReceiver = class TestReceiver
 
   output: ->
     output = @event.map (e)->
+      value = (if e.value? then e.value else '')
+        .replace(/\\/g, '\\\\')
+        .replace(/\n/g, '\\n')
+        .replace(/\t/g, '\\t')
+        .replace(/\ $/g, '<SPC>')
       e.type +
         (if e.marker then " #{e.marker}" else '') +
         (if e.anchor then " #{e.anchor}" else '') +
         (if e.tag then " <#{e.tag}>" else '') +
-        (if e.value then " #{e.value}" else '') +
+        (if e.value then " #{value}" else '') +
         "\n"
     output.join ''
 
@@ -116,12 +121,27 @@ global.TestReceiver = class TestReceiver
   not__c_ns_flow_map_empty_key_entry: -> @cache_drop()
 
   got__ns_plain: (o)->
-    text = o.text.replace /\\/g, "\\\\"
+    text = o.text
+      .replace(/(?:[\ \t]*\r?\n[\ \t]*)/g, "\n")
+      .replace(/(\n)(\n*)/g, (m...)-> if m[2].length then m[2] else ' ')
     @add '=VAL', ":#{text}"
   got__c_single_quoted: (o)->
-    @add '=VAL', "'" + o.text[1...-1]
+    text = o.text[1...-1]
+      .replace(/(?:[\ \t]*\r?\n[\ \t]*)/g, "\n")
+      .replace(/(\n)(\n*)/g, (m...)-> if m[2].length then m[2] else ' ')
+      .replace(/''/g, "'")
+    @add '=VAL', "'#{text}"
   got__c_double_quoted: (o)->
-    @add '=VAL', '"' + o.text[1...-1]
+    text = o.text[1...-1]
+      .replace(/(?:[\ \t]*\r?\n[\ \t]*)/g, "\n")
+      .replace(/\\\n[\ \t]*/g, '')
+      .replace(/(\n)(\n*)/g, (m...)-> if m[2].length then m[2] else ' ')
+      .replace(/\\(["\/])/g, "$1")
+      .replace(/\\ /g, ' ')
+      .replace(/\\t/g, "\t")
+      .replace(/\\n/g, "\n")
+      .replace(/\\\\/g, '\\')
+    @add '=VAL', "\"#{text}"
   got__e_scalar: -> @add '=VAL', ':'
 
   got__c_ns_anchor_property: (o)-> @anchor = o.text

@@ -76,11 +76,16 @@ sub send {
 sub output {
   my ($self) = @_;
   join '', map {
+    my $value = exists $_->{value} ? $_->{value} : '';
+    $value =~ s/\\/\\\\/g;
+    $value =~ s/\n/\\n/g;
+    $value =~ s/\t/\\t/g;
+    $value =~ s/\ \z/<SPC>/;
     $_->{type}
     . ($_->{marker} ? " $_->{marker}" : '')
     . ($_->{anchor} ? " $_->{anchor}" : '')
     . ($_->{tag} ? " <$_->{tag}>" : '')
-    . ($_->{value} ? " $_->{value}" : '')
+    . ($value ? " $value" : '')
     . "\n"
   } @{$self->{event}};
 }
@@ -154,14 +159,30 @@ sub not__c_ns_flow_map_empty_key_entry { $_[0]->cache_drop }
 sub got__ns_plain {
   my ($self, $o) = @_;
   my $text = $o->{text};
-  $text =~ s/\\/\\\\/g;
-  $self->add('=VAL', ":$text");
+  $text =~ s/(?:[\ \t]*\r?\n[\ \t]*)/\n/g;
+  $text =~ s/(\n)(\n*)/length($2) ? $2 : ' '/ge;
+  $self->add('=VAL', qq<:$text>);
 }
 sub got__c_single_quoted {
-  $_[0]->add('=VAL', "'".substr($_[1]->{text}, 1, -1));
+  my ($self, $o) = @_;
+  my $text = substr($o->{text}, 1, -1);
+  $text =~ s/(?:[\ \t]*\r?\n[\ \t]*)/\n/g;
+  $text =~ s/(\n)(\n*)/length($2) ? $2 : ' '/ge;
+  $text =~ s/''/'/g;
+  $self->add('=VAL', qq<'$text>);
 }
 sub got__c_double_quoted {
-  $_[0]->add('=VAL', '"'.substr($_[1]->{text}, 1, -1));
+  my ($self, $o) = @_;
+  my $text = substr($o->{text}, 1, -1);
+  $text =~ s/(?:[\ \t]*\r?\n[\ \t]*)/\n/g;
+  $text =~ s/\\\n[\ \t]*//g;
+  $text =~ s/(\n)(\n*)/length($2) ? $2 : ' '/ge;
+  $text =~ s/\\(["\/])/$1/g;
+  $text =~ s/\\ / /g;
+  $text =~ s/\\t/\t/g;
+  $text =~ s/\\n/\n/g;
+  $text =~ s/\\\\/\\/g;
+  $self->add('=VAL', qq<"$text>);
 }
 sub got__e_scalar { $_[0]->add('=VAL', ':') }
 

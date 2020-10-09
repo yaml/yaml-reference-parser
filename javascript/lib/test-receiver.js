@@ -80,7 +80,9 @@
     output() {
       var output;
       output = this.event.map(function(e) {
-        return e.type + (e.marker ? ` ${e.marker}` : '') + (e.anchor ? ` ${e.anchor}` : '') + (e.tag ? ` <${e.tag}>` : '') + (e.value ? ` ${e.value}` : '') + "\n";
+        var value;
+        value = (e.value != null ? e.value : '').replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/\t/g, '\\t').replace(/\ $/g, '<SPC>');
+        return e.type + (e.marker ? ` ${e.marker}` : '') + (e.anchor ? ` ${e.anchor}` : '') + (e.tag ? ` <${e.tag}>` : '') + (e.value ? ` ${value}` : '') + "\n";
       });
       return output.join('');
     }
@@ -228,16 +230,38 @@
 
     got__ns_plain(o) {
       var text;
-      text = o.text.replace(/\\/g, "\\\\");
+      text = o.text.replace(/(?:[\ \t]*\r?\n[\ \t]*)/g, "\n").replace(/(\n)(\n*)/g, function(...m) {
+        if (m[2].length) {
+          return m[2];
+        } else {
+          return ' ';
+        }
+      });
       return this.add('=VAL', `:${text}`);
     }
 
     got__c_single_quoted(o) {
-      return this.add('=VAL', "'" + o.text.slice(1, -1));
+      var text;
+      text = o.text.slice(1, -1).replace(/(?:[\ \t]*\r?\n[\ \t]*)/g, "\n").replace(/(\n)(\n*)/g, function(...m) {
+        if (m[2].length) {
+          return m[2];
+        } else {
+          return ' ';
+        }
+      }).replace(/''/g, "'");
+      return this.add('=VAL', `'${text}`);
     }
 
     got__c_double_quoted(o) {
-      return this.add('=VAL', '"' + o.text.slice(1, -1));
+      var text;
+      text = o.text.slice(1, -1).replace(/(?:[\ \t]*\r?\n[\ \t]*)/g, "\n").replace(/\\\n[\ \t]*/g, '').replace(/(\n)(\n*)/g, function(...m) {
+        if (m[2].length) {
+          return m[2];
+        } else {
+          return ' ';
+        }
+      }).replace(/\\(["\/])/g, "$1").replace(/\\ /g, ' ').replace(/\\t/g, "\t").replace(/\\n/g, "\n").replace(/\\\\/g, '\\');
+      return this.add('=VAL', `\"${text}`);
     }
 
     got__e_scalar() {
