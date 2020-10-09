@@ -26,4 +26,11 @@ sub unescape {
   return $yaml;
 }
 
+sub fix1 {
+  my ($self, $events) = @_;
+  $events =~ s/^\+MAP\ \{\}/+MAP/gm;
+  $events =~ s/^\+SEQ\ \[\]/+SEQ/gm;
+  return $events;
+}
+
 1;

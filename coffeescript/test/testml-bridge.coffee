@@ -24,3 +24,8 @@ class TestMLBridge extends TestML.Bridge
   unescape: (yaml)->
     yaml.replace(/<SPC>/g, ' ')
       .replace(/<TAB>/g, "\t")
+
+  fix1: (events)->
+    return events
+      .replace(/^\+MAP\ \{\}/gm, '+MAP')
+      .replace(/^\+SEQ\ \[\]/gm, '+SEQ')
