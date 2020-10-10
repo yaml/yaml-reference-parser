@@ -6,8 +6,9 @@
 
 
 # Close:
-# 3ALJ 6BCT 6CK3+ 6WLZ+ 6XDY 6ZKB 7ZZ5 82AN 9DXL 9WXW+
-# CC74+ G4RS% HWV9 P76L+ PUW8 QT73 RTP8 UT92 Z9M4+
+# 3ALJ- 6BCT- 6XDY 6ZKB 7ZZ5- 82AN 9DXL G4RS% HWV9 PUW8 QT73 RTP8 UT92
+# - Block sequence
+# % Unicode
 
 
 # %Import 229Q  # Spec Example 2.4. Sequence of Mappings
@@ -53,7 +54,7 @@
 %Import 65WH    # Single Entry Block Sequence
 # %Import 6BCT    # Spec Example 6.3. Separation Spaces
 %Import 6BFJ    # Mapping, key and flow sequence item anchors
-# %Import 6CK3    # Spec Example 6.26. Tag Shorthands
+%Import 6CK3    # Spec Example 6.26. Tag Shorthands
 # %Import 6FWR    # Block Scalar Keep
 %Import 6H3V    # Backslashes in singlequotes
 # %Import 6HB6    # Spec Example 6.1. Indentation Spaces
@@ -65,7 +66,7 @@
 %Import 6PBE    # Zero-indented sequences in explicit mapping keys
 %Import 6SLA    # Allowed characters in quoted mapping key
 # %Import 6VJK    # Spec Example 2.15. Folded newlines are preserved for "more indented" and blank lines
-# %Import 6WLZ    # Spec Example 6.18. Primary Tag Handle [1.3]
+%Import 6WLZ    # Spec Example 6.18. Primary Tag Handle [1.3]
 %Import 6WPF    # Spec Example 6.8. Flow Folding [1.3]
 # %Import 6XDY    # Two document start markers
 # %Import 6ZKB    # Spec Example 9.6. Stream
@@ -104,7 +105,7 @@
 %Import 9SHH    # Spec Example 5.8. Quoted Scalar Indicators
 %Import 9TFX    # Spec Example 7.6. Double Quoted Lines [1.3]
 %Import 9U5K    # Spec Example 2.12. Compact Nested Mapping
-# %Import 9WXW    # Spec Example 6.18. Primary Tag Handle
+%Import 9WXW    # Spec Example 6.18. Primary Tag Handle
 %Import 9YRD    # Multiline Scalar at Top Level
 # %Import A2M4    # Spec Example 6.2. Indentation Indicators
 # %Import A6F9    # Spec Example 8.4. Chomping Final Line Break
@@ -118,7 +119,7 @@
 # %Import BU8L    # Node Anchor and Tag on Seperate Lines
 %Import C2DT    # Spec Example 7.18. Flow Mapping Adjacent Values
 # %Import C4HZ    # Spec Example 2.24. Global Tags
-# %Import CC74    # Spec Example 6.20. Tag Handles
+%Import CC74    # Spec Example 6.20. Tag Handles
 # %Import CFD4    # Empty implicit key in single pair flow sequences
 # %Import CN3R    # Various location of anchors in flow sequence
 %Import CPZ3    # Doublequoted scalar starting with a tab
@@ -199,7 +200,7 @@
 # %Import NKF9    # Empty keys in block and flow mapping
 %Import NP9H    # Spec Example 7.5. Double Quoted Line Breaks
 # %Import P2AD    # Spec Example 8.1. Block Scalar Header
-# %Import P76L    # Spec Example 6.19. Secondary Tag Handle
+%Import P76L    # Spec Example 6.19. Secondary Tag Handle
 %Import P94K    # Spec Example 6.11. Multi-Line Comments
 %Import PBJ2    # Spec Example 2.3. Mapping Scalars to Sequences
 %Import PRH3    # Spec Example 7.9. Single Quoted Lines
@@ -233,7 +234,7 @@
 # %Import TE2A    # Spec Example 8.16. Block Mappings
 %Import TL85    # Spec Example 6.8. Flow Folding
 # %Import TS54    # Folded Block Scalar
-# %Import U3C3    # Spec Example 6.16. “TAG” directive
+%Import U3C3    # Spec Example 6.16. “TAG” directive
 # %Import U3XV    # Node and Mapping Key Anchors
 %Import U9NS    # Spec Example 2.8. Play by Play Feed from a Game
 %Import UDM2    # Plain URL in flow mapping
@@ -254,8 +255,8 @@
 %Import Y2GN    # Anchor with colon in the middle
 %Import YD5X    # Spec Example 2.5. Sequence of Sequences
 # %Import Z67P    # Spec Example 8.21. Block Scalar Nodes [1.3]
-# %Import Z9M4    # Spec Example 6.22. Global Tag Prefix
+%Import Z9M4    # Spec Example 6.22. Global Tag Prefix
 %Import ZF4X    # Spec Example 2.6. Mapping of Mappings
-# %Import ZH7C    # Anchors in Mapping
+# Import ZH7C    # Anchors in Mapping
 %Import ZK9H    # Nested top level flow mapping
 %Import ZWK4    # Key with anchor after missing explicit mapping value

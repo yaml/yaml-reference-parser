@@ -90,8 +90,21 @@ sub output {
   } @{$self->{event}};
 }
 
-sub try__l_yaml_stream { $_[0]->add('+STR') }
+sub try__l_yaml_stream {
+  my ($self) = @_;
+  $self->add('+STR');
+  $self->{tag_map} = {};
+}
 sub got__l_yaml_stream { $_[0]->add('-STR') }
+
+sub got__c_tag_handle {
+  my ($self, $o) = @_;
+  $self->{tag_handle} = $o->{text};
+}
+sub got__ns_tag_prefix {
+  my ($self, $o) = @_;
+  $self->{tag_map}{$self->{tag_handle}} = $o->{text};
+}
 
 sub try__l_bare_document {
   my ($self) = @_;
@@ -113,6 +126,7 @@ sub got__c_document_end {
   }
 }
 sub not__c_document_end {
+  my ($self) = @_;
   if ($_[0]->cache_get('-DOC')) {
     $_[0]->cache_down;
   }
@@ -131,9 +145,10 @@ sub not__l_block_mapping { $_[0]->cache_drop }
 sub try__l_block_sequence { $_[0]->cache_up('+SEQ') }
 sub got__l_block_sequence { $_[0]->cache_down('-SEQ') }
 sub not__l_block_sequence {
+  my ($self) = @_;
   my $event = $_[0]->cache_drop;
-  $_[0]->{anchor} = $event->{anchor};
-  $_[0]->{tag} = $event->{tag};
+  $self->{anchor} = $event->{anchor};
+  $self->{tag} = $event->{tag};
 }
 
 sub try__ns_l_compact_mapping { $_[0]->cache_up('+MAP') }
@@ -192,9 +207,26 @@ sub got__c_ns_tag_property {
   my ($self, $o) = @_;
   my $tag = $o->{text};
   if ($tag =~ /^!!(.*)/) {
-    $tag = "tag:yaml.org,2002:$1";
+    if (defined(my $prefix = $self->{tag_map}{'!!'})) {
+      $self->{tag} = $prefix . substr($tag, 2);
+    }
+    else {
+      $self->{tag} = "tag:yaml.org,2002:$1";
+    }
   }
-  $self->{tag} = $tag;
+  elsif (
+    $tag =~ /^(!.*?!)/ and
+    defined(my $prefix = $self->{tag_map}{$1})
+  ) {
+    $self->{tag} = $prefix . substr($tag, length($1));
+  }
+  elsif (defined(my $prefix = $self->{tag_map}{'!'})) {
+    $self->{tag} = $prefix . substr($tag, 1);
+  }
+  else {
+    $self->{tag} = $tag;
+  }
+  $self->{tag} =~ s/%([0-9a-fA-F]{2})/chr(hex($1))/eg;
 }
 
 sub got__c_ns_alias_node { $_[0]->add("=ALI $_[1]->{text}") }

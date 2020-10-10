@@ -88,11 +88,20 @@
     }
 
     try__l_yaml_stream() {
-      return this.add('+STR');
+      this.add('+STR');
+      return this.tag_map = {};
     }
 
     got__l_yaml_stream() {
       return this.add('-STR');
+    }
+
+    got__c_tag_handle(o) {
+      return this.tag_handle = o.text;
+    }
+
+    got__ns_tag_prefix(o) {
+      return this.tag_map[this.tag_handle] = o.text;
     }
 
     try__l_bare_document() {
@@ -273,12 +282,28 @@
     }
 
     got__c_ns_tag_property(o) {
-      var m, tag;
+      var m, prefix, tag;
       tag = o.text;
       if (m = tag.match(/^!!(.*)/)) {
-        tag = `tag:yaml.org,2002:${m[1]}`;
+        prefix = this.tag_map['!!'];
+        if (prefix != null) {
+          this.tag = prefix + tag.slice(2);
+        } else {
+          this.tag = `tag:yaml.org,2002:${m[1]}`;
+        }
+      } else if (m = tag.match(/^(!.*?!)/)) {
+        prefix = this.tag_map[m[1]];
+        if (prefix != null) {
+          this.tag = prefix + tag.slice((m[1].length));
+        }
+      } else if ((prefix = this.tag_map['!']) != null) {
+        this.tag = prefix + tag.slice(1);
+      } else {
+        this.tag = tag;
       }
-      return this.tag = tag;
+      return this.tag = this.tag.replace(/%([0-9a-fA-F]{2})/g, function(...m) {
+        return String.fromCharCode(parseInt(m[1], 16));
+      });
     }
 
     got__c_ns_alias_node(o) {

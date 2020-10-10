@@ -66,8 +66,15 @@ global.TestReceiver = class TestReceiver
         "\n"
     output.join ''
 
-  try__l_yaml_stream: -> @add '+STR'
+  try__l_yaml_stream: ->
+    @add '+STR'
+    @tag_map = {}
   got__l_yaml_stream: -> @add '-STR'
+
+  got__c_tag_handle: (o)->
+    @tag_handle = o.text
+  got__ns_tag_prefix: (o)->
+    @tag_map[@tag_handle] = o.text
 
   try__l_bare_document: ->
     parser = @parser
@@ -149,8 +156,21 @@ global.TestReceiver = class TestReceiver
   got__c_ns_tag_property: (o)->
     tag = o.text
     if m = tag.match /^!!(.*)/
-      tag = "tag:yaml.org,2002:#{m[1]}"
-    @tag = tag
+      prefix = @tag_map['!!']
+      if prefix?
+        @tag = prefix + tag[2..]
+      else
+        @tag = "tag:yaml.org,2002:#{m[1]}"
+    else if m = tag.match(/^(!.*?!)/)
+      prefix = @tag_map[m[1]]
+      if prefix?
+        @tag = prefix + tag[(m[1].length)..]
+    else if (prefix = @tag_map['!'])?
+      @tag = prefix + tag[1..]
+    else
+      @tag = tag
+    @tag = @tag.replace /%([0-9a-fA-F]{2})/g, (m...)->
+      String.fromCharCode parseInt m[1], 16
 
   got__c_ns_alias_node: (o)-> @add '=ALI', o.text
 
