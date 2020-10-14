@@ -6,6 +6,21 @@ parse(*yaml) == *events
 
 
 
+=== Empty stream
+--- yaml: ""
+--- events
++STR
+-STR
+
+
+=== Empty stream with comments
+--- yaml(<)
+    # comment
+
+    # blank line above
+--- ^events
+
+
 === Block node with header and footer
 --- yaml(<)
     ---
@@ -152,3 +167,5 @@ parse(*yaml) == *events
 --- events
 +STR
 -STR
+
+

@@ -1,0 +1,82 @@
+#!/usr/bin/env testml
+
+
+parse(*yaml) == *events
+  :"+ -- '{*yaml}'"
+
+
+
+=== Top plain scalar
+--- yaml: foo
+--- events
++STR
++DOC
+=VAL :foo
+-DOC
+-STR
+
+
+=== Top plain with newline
+--- yaml
+foo
+--- ^events
+
+
+=== Top plain with extra ws
+--- yaml: "   foo  "
+--- ^events
+
+
+=== Comment before node
+--- yaml(<)
+    # comment
+
+    foo
+--- ^events
+
+
+=== Top level scalar with header
+--- yaml(<)
+    --- foo
+--- events
++STR
++DOC ---
+=VAL :foo
+-DOC
+-STR
+
+
+=== Top level double quoted scalar
+--- yaml(-)
+"foo"
+--- events
++STR
++DOC
+=VAL "foo
+-DOC
+-STR
+
+
+=== Top level single quoted sclaar
+--- yaml: "'foo'"
+--- events
++STR
++DOC
+=VAL 'foo
+-DOC
+-STR
+
+
+=== Top level literal scalar
+--- SKIP
+--- yaml(<)
+    --- |
+      foo
+--- events
++STR
++DOC
+=VAL |foo\n
+-DOC
+-STR
+
+
