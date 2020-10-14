@@ -28,7 +28,7 @@ global.stringify = (o)->
   if o == "\ufeff"
     return "\\uFEFF"
   if isFunction o
-    return "@#{o.name}"
+    return "@#{o.trace || o.name}"
   if isObject o
     return JSON.stringify _.keys(o)
   if isArray o

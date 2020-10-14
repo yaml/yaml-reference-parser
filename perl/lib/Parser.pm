@@ -367,7 +367,7 @@ sub add {
   name add => sub {
     $y = $self->call($y, 'number') if isFunction $y;
     return $x + $y;
-  }, "add($x,$y)";
+  }, "add($x,${\ stringify $y})";
 }
 
 sub sub {
@@ -478,7 +478,12 @@ sub auto_detect_indent {
   substr($self->{input}, $self->{pos}) =~ /^(\ *)/ or die;
   my $indent = length $1;
   $indent++ if $state->{ind} == -1;
-  $state->{ind} += $indent;
+  my $ind = $state->{ind} += $indent;
+#   for (my $i = @{$self->{state}} - 2; $i > 1; $i--) {
+#     my $name = $self->{state}[$i]{name};
+#     last if $name =~ /^\w+_/;
+#     $self->{state}[$i]{ind} = $ind;
+#   }
   return $indent;
 }
 name 'auto_detect_indent', \&auto_detect_indent;
@@ -530,7 +535,7 @@ sub trace {
   $input =~ s/\n/\\n/g;
 
   my $line = sprintf(
-    "%s%s %-30s  %4d '%s'\n",
+    "%s%s %-40s  %4d '%s'\n",
     $indent,
     $type,
     $self->trace_format_call($call, $args),

@@ -391,7 +391,7 @@
         }
         return x + y;
       };
-      return name_('add', add, `add(${x},${y})`);
+      return name_('add', add, `add(${x},${stringify(y)})`);
     }
 
     sub(x, y) {
@@ -551,7 +551,7 @@
         input = `${input.slice(0, 31)}…`;
       }
       input = input.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
-      line = sprintf("%s%s %-30s  %4d '%s'", indent, type, this.trace_format_call(call, args), this.pos, input);
+      line = sprintf("%s%s %-40s  %4d '%s'", indent, type, this.trace_format_call(call, args), this.pos, input);
       trace_info = null;
       level = `${level}_${call}`;
       if (type === '?' && this.trace_off === 0) {

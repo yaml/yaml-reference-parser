@@ -53,7 +53,7 @@
       return "\\uFEFF";
     }
     if (isFunction(o)) {
-      return `@${o.name}`;
+      return `@${o.trace || o.name}`;
     }
     if (isObject(o)) {
       return JSON.stringify(_.keys(o));

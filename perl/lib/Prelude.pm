@@ -90,7 +90,7 @@ sub stringify {
     return "\\uFEFF";
   }
   if (isFunction $o) {
-    return "\@$o->{name}";
+    return "\@$o->{trace}";
   }
   if (isObject $o) {
     return json_stringify [ sort keys %$o ];

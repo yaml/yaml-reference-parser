@@ -274,7 +274,7 @@ global.Parser = class Parser extends Grammar
     add = =>
       y = @call y, 'number' if isFunction y
       x + y
-    name_ 'add', add, "add(#{x},#{y})"
+    name_ 'add', add, "add(#{x},#{stringify y})"
 
   sub: (x, y)->
     sub = ->
@@ -394,7 +394,7 @@ global.Parser = class Parser extends Grammar
       .replace(/\n/g, '\\n')
 
     line = sprintf(
-      "%s%s %-30s  %4d '%s'",
+      "%s%s %-40s  %4d '%s'",
       indent,
       type,
       @trace_format_call call, args
