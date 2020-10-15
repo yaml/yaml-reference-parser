@@ -30,7 +30,7 @@
 %Import 3UYS    # Escaped slash in double quotes
 %Import 4ABK    # Flow Mapping Separate Values
 %Import 4CQQ    # Spec Example 2.18. Multi-line Flow Scalars
-# %Import 4FJ6    # Nested implicit complex keys
+%Import 4FJ6    # Nested implicit complex keys
 %Import 4GC6    # Spec Example 7.7. Single Quoted Characters
 %Import 4MUZ    # Flow mapping colon on line after key
 # %Import 4Q9F    # Folded Block Scalar [1.3]
@@ -83,13 +83,13 @@
 %Import 7Z25    # Bare document after document end marker
 # %Import 7ZZ5    # Empty flow collections
 # %Import 82AN    # Three dashes and content without space
-# %Import 87E4    # Spec Example 7.8. Single Quoted Implicit Keys
+%Import 87E4    # Spec Example 7.8. Single Quoted Implicit Keys
 %Import 8CWC    # Plain mapping key ending with colon
 %Import 8G76    # Spec Example 6.10. Comment Lines
 %Import 8KB6    # Multiline plain flow mapping key without value
 %Import 8MK2    # Explicit Non-Specific Tag
 %Import 8QBE    # Block Sequence in Block Mapping
-# %Import 8UDB    # Spec Example 7.14. Flow Sequence Entries
+%Import 8UDB    # Spec Example 7.14. Flow Sequence Entries
 # %Import 8XYN    # Anchor with unicode character XXX Not working in js
 # %Import 93JH    # Block Mappings in Block Sequence
 # %Import 93WF    # Spec Example 6.6. Line Folding [1.3]
@@ -100,7 +100,7 @@
 %Import 9FMG    # Multi-level Mapping Indent
 %Import 9J7A    # Simple Mapping Indent
 # %Import 9KAX    # Various combinations of tags and anchors
-# %Import 9MMW    # Single Pair Implicit Entries
+%Import 9MMW    # Single Pair Implicit Entries
 %Import 9SA2    # Multiline double quoted flow mapping key
 %Import 9SHH    # Spec Example 5.8. Quoted Scalar Indicators
 %Import 9TFX    # Spec Example 7.6. Double Quoted Lines [1.3]
@@ -121,9 +121,9 @@
 %Import C4HZ    # Spec Example 2.24. Global Tags
 %Import CC74    # Spec Example 6.20. Tag Handles
 # %Import CFD4    # Empty implicit key in single pair flow sequences
-# %Import CN3R    # Various location of anchors in flow sequence
+%Import CN3R    # Various location of anchors in flow sequence
 %Import CPZ3    # Doublequoted scalar starting with a tab
-# %Import CT4Q    # Spec Example 7.20. Single Pair Explicit Entry
+%Import CT4Q    # Spec Example 7.20. Single Pair Explicit Entry
 %Import CUP7    # Spec Example 5.6. Node Property Indicators
 # %Import D83L    # Block scalar indicator order
 %Import D88J    # Flow Sequence in Block Mapping
@@ -178,10 +178,10 @@
 %Import KMK3    # Block Submapping
 %Import KSS4    # Scalars on --- line
 %Import L94M    # Tags in Explicit Mapping
-# %Import L9U5    # Spec Example 7.11. Plain Implicit Keys
+%Import L9U5    # Spec Example 7.11. Plain Implicit Keys
 %Import LE5A    # Spec Example 7.24. Flow Nodes
 %Import LP6E    # Whitespace After Scalars in Flow
-# %Import LQZ7    # Spec Example 7.4. Double Quoted Implicit Keys
+%Import LQZ7    # Spec Example 7.4. Double Quoted Implicit Keys
 %Import LX3P    # Implicit Flow Mapping Key on one line
 # %Import M29M    # Literal Block Scalar
 # %Import M5C3    # Spec Example 8.21. Block Scalar Nodes
@@ -210,7 +210,7 @@
 %Import Q88A    # Spec Example 7.23. Flow Content
 %Import Q8AD    # Spec Example 7.5. Double Quoted Line Breaks [1.3]
 %Import Q9WF    # Spec Example 6.12. Separation Spaces
-# %Import QF4Y    # Spec Example 7.19. Single Pair Flow Mappings
+%Import QF4Y    # Spec Example 7.19. Single Pair Flow Mappings
 # %Import QT73    # Comment and document-end marker
 # %Import R4YG    # Spec Example 8.2. Block Indentation Indicator
 %Import R52L    # Nested flow mapping sequence and mappings

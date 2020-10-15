@@ -111,8 +111,8 @@ global.TestReceiver = class TestReceiver
   got__ns_l_compact_mapping: -> @cache_down '-MAP'
   not__ns_l_compact_mapping: -> @cache_drop()
 
-  try__ns_flow_pair: -> @cache_up()
-  got__ns_flow_pair: -> xxxxx @
+  try__ns_flow_pair: -> @cache_up('+MAP {}')
+  got__ns_flow_pair: -> @cache_down('-MAP')
   not__ns_flow_pair: -> @cache_drop()
 
   try__ns_l_block_map_implicit_entry: -> @cache_up()

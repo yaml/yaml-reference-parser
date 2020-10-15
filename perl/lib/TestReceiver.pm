@@ -155,8 +155,8 @@ sub try__ns_l_compact_mapping { $_[0]->cache_up('+MAP') }
 sub got__ns_l_compact_mapping { $_[0]->cache_down('-MAP') }
 sub not__ns_l_compact_mapping { $_[0]->cache_drop }
 
-sub try__ns_flow_pair { $_[0]->cache_up }
-sub got__ns_flow_pair { xxxxx @_ }
+sub try__ns_flow_pair { $_[0]->cache_up('+MAP {}') }
+sub got__ns_flow_pair { $_[0]->cache_down('-MAP') }
 sub not__ns_flow_pair { $_[0]->cache_drop }
 
 sub try__ns_l_block_map_implicit_entry{ $_[0]->cache_up }

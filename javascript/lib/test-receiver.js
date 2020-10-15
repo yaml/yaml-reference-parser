@@ -190,11 +190,11 @@
     }
 
     try__ns_flow_pair() {
-      return this.cache_up();
+      return this.cache_up('+MAP {}');
     }
 
     got__ns_flow_pair() {
-      return xxxxx(this);
+      return this.cache_down('-MAP');
     }
 
     not__ns_flow_pair() {
