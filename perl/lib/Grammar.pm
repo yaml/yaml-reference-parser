@@ -1277,9 +1277,7 @@ rule '083', ns_reserved_directive => sub {
   debug_rule("ns_reserved_directive") if DEBUG;
   $self->all(
     $self->func('ns_directive_name'),
-    $self->rep(
-      0,
-      -1,
+    $self->rep(0, -1,
       $self->all(
         $self->func('s_separate_in_line'),
         $self->func('ns_directive_parameter')
@@ -1780,9 +1778,7 @@ rule '113', s_double_break => sub {
 rule '114', nb_ns_double_in_line => sub {
   my ($self) = @_;
   debug_rule("nb_ns_double_in_line") if DEBUG;
-  $self->rep(
-    0,
-    -1,
+  $self->rep(0, -1,
     $self->all(
       $self->rep(0, -1, $self->func('s_white')),
       $self->func('ns_double_char')
@@ -1942,9 +1938,7 @@ rule '122', nb_single_one_line => sub {
 rule '123', nb_ns_single_in_line => sub {
   my ($self) = @_;
   debug_rule("nb_ns_single_in_line") if DEBUG;
-  $self->rep(
-    0,
-    -1,
+  $self->rep(0, -1,
     $self->all(
       $self->rep(0, -1, $self->func('s_white')),
       $self->func('ns_single_char')
@@ -2133,9 +2127,7 @@ rule '131', ns_plain => sub {
 rule '132', nb_ns_plain_in_line => sub {
   my ($self, $c) = @_;
   debug_rule("nb_ns_plain_in_line",$c) if DEBUG;
-  $self->rep(
-    0,
-    -1,
+  $self->rep(0, -1,
     $self->all(
       $self->rep(0, -1, $self->func('s_white')),
       [ $self->func('ns_plain_char'), $c ]
@@ -2832,9 +2824,7 @@ rule '167', l_strip_empty => sub {
   my ($self, $n) = @_;
   debug_rule("l_strip_empty",$n) if DEBUG;
   $self->all(
-    $self->rep(
-      0,
-      -1,
+    $self->rep(0, -1,
       $self->all(
         [ $self->func('s_indent_le'), $n ],
         $self->func('b_non_content')
@@ -2997,9 +2987,7 @@ rule '176', l_nb_folded_lines => sub {
   debug_rule("l_nb_folded_lines",$n) if DEBUG;
   $self->all(
     [ $self->func('s_nb_folded_text'), $n ],
-    $self->rep(
-      0,
-      -1,
+    $self->rep(0, -1,
       $self->all(
         [ $self->func('b_l_folded'), $n, "block-in" ],
         [ $self->func('s_nb_folded_text'), $n ]
@@ -3052,9 +3040,7 @@ rule '179', l_nb_spaced_lines => sub {
   debug_rule("l_nb_spaced_lines",$n) if DEBUG;
   $self->all(
     [ $self->func('s_nb_spaced_text'), $n ],
-    $self->rep(
-      0,
-      -1,
+    $self->rep(0, -1,
       $self->all(
         [ $self->func('b_l_spaced'), $n ],
         [ $self->func('s_nb_spaced_text'), $n ]
@@ -3093,9 +3079,7 @@ rule '181', l_nb_diff_lines => sub {
   debug_rule("l_nb_diff_lines",$n) if DEBUG;
   $self->all(
     [ $self->func('l_nb_same_lines'), $n ],
-    $self->rep(
-      0,
-      -1,
+    $self->rep(0, -1,
       $self->all(
         $self->func('b_as_line_feed'),
         [ $self->func('l_nb_same_lines'), $n ]
@@ -3136,10 +3120,8 @@ rule '183', l_block_sequence => sub {
   my ($self, $n) = @_;
   debug_rule("l_block_sequence",$n) if DEBUG;
   $self->all(
-    $self->set('m', $self->func('auto_detect_indent')),
-    $self->rep(
-      1,
-      -1,
+    $self->set('m', [$self->func('auto_detect_indent'), $n]),
+    $self->rep(1, -1,
       $self->all(
         [ $self->func('s_indent'), $self->add($n, $self->m()) ],
         [ $self->func('c_l_block_seq_entry'), $self->add($n, $self->m()) ]
@@ -3205,9 +3187,7 @@ rule '186', ns_l_compact_sequence => sub {
   debug_rule("ns_l_compact_sequence",$n) if DEBUG;
   $self->all(
     [ $self->func('c_l_block_seq_entry'), $n ],
-    $self->rep(
-      0,
-      -1,
+    $self->rep(0, -1,
       $self->all(
         [ $self->func('s_indent'), $n ],
         [ $self->func('c_l_block_seq_entry'), $n ]
@@ -3227,10 +3207,8 @@ rule '187', l_block_mapping => sub {
   my ($self, $n) = @_;
   debug_rule("l_block_mapping",$n) if DEBUG;
   $self->all(
-    $self->set('m', $self->func('auto_detect_indent')),
-    $self->rep(
-      1,
-      -1,
+    $self->set('m', [$self->func('auto_detect_indent'), $n]),
+    $self->rep(1, -1,
       $self->all(
         [ $self->func('s_indent'), $self->add($n, $self->m()) ],
         [ $self->func('ns_l_block_map_entry'), $self->add($n, $self->m()) ]
@@ -3379,9 +3357,7 @@ rule '195', ns_l_compact_mapping => sub {
   debug_rule("ns_l_compact_mapping",$n) if DEBUG;
   $self->all(
     [ $self->func('ns_l_block_map_entry'), $n ],
-    $self->rep(
-      0,
-      -1,
+    $self->rep(0, -1,
       $self->all(
         [ $self->func('s_indent'), $n ],
         [ $self->func('ns_l_block_map_entry'), $n ]
@@ -3682,9 +3658,7 @@ rule '211', l_yaml_stream => sub {
   $self->all(
     $self->func('l_document_prefix'),
     $self->rep(0, 1, $self->func('l_any_document')),
-    $self->rep(
-      0,
-      -1,
+    $self->rep(0, -1,
       $self->any(
         $self->all(
           $self->func('l_document_suffix'),

@@ -6,29 +6,6 @@ parse(*yaml) == *events
 
 
 
-=== XXX
---- SKIP
---- yaml
-foo:
-  bar:
-    baz: 42
---- events
-+STR
-+DOC
-+MAP
-=VAL :foo
-+MAP
-=VAL :bar
-+MAP
-=VAL :baz
-=VAL :42
--MAP
--MAP
--MAP
--DOC
--STR
-
-
 === Block mapping
 --- yaml
 foo: bar
@@ -218,6 +195,29 @@ foo:
 +MAP
 =VAL :bar
 =VAL :42
+-MAP
+-MAP
+-DOC
+-STR
+
+
+=== XXX
+--- SKIP
+--- yaml
+foo:
+  bar:
+    baz: 42
+--- events
++STR
++DOC
++MAP
+=VAL :foo
++MAP
+=VAL :bar
++MAP
+=VAL :baz
+=VAL :42
+-MAP
 -MAP
 -MAP
 -DOC

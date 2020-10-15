@@ -55,10 +55,10 @@
     state_curr() {
       return this.state[this.state.length - 1] || {
         name: null,
+        doc: false,
         lvl: 0,
         beg: 0,
         end: 0,
-        ind: -1,
         m: null,
         t: null
       };
@@ -69,30 +69,28 @@
     }
 
     state_push(name) {
-      var prev;
-      prev = this.state_curr();
+      var curr;
+      curr = this.state_curr();
       return this.state.push({
         name: name,
-        lvl: prev.lvl + 1,
+        doc: curr.doc,
+        lvl: curr.lvl + 1,
         beg: this.pos,
         end: null,
-        ind: prev.ind,
-        m: prev.m,
-        t: prev.t
+        m: curr.m,
+        t: curr.t
       });
     }
 
     state_pop() {
-      var curr, prev;
-      prev = this.state.pop();
+      var child, curr;
+      child = this.state.pop();
       curr = this.state_curr();
       if (curr == null) {
         return;
       }
-      curr.beg = prev.beg;
-      curr.end = this.pos;
-      curr.m = prev.m;
-      return curr.t = prev.t;
+      curr.beg = child.beg;
+      return curr.end = this.pos;
     }
 
     call(func, type = 'boolean') {
@@ -114,6 +112,9 @@
       this.trace_num++;
       if (TRACE) {
         this.trace('?', func.trace, args);
+      }
+      if (func.name === 'l_bare_document') {
+        this.state_curr().doc = true;
       }
       args = args.map((a) => {
         if (isArray(a)) {
@@ -283,11 +284,15 @@
       return this.call(value, 'number');
     }
 
+    the_end() {
+      return this.pos >= this.end || (this.state_curr().doc && this.start_of_line() && this.input.slice(this.pos).match(/^(?:---|\.\.\.)(?=\s|$)/));
+    }
+
     // Match a single char:
     chr(char) {
       var chr;
       chr = function() {
-        if (this.pos >= this.end) {
+        if (this.the_end()) {
           return false;
         }
         if (this.input[this.pos] === char) {
@@ -304,7 +309,7 @@
       var rng;
       rng = function() {
         var ref;
-        if (this.pos >= this.input.length) {
+        if (this.the_end()) {
           return false;
         }
         if ((low <= (ref = this.input[this.pos]) && ref <= high)) {
@@ -321,6 +326,9 @@
       var but;
       return but = function() {
         var func, j, len1, pos1, pos2, ref;
+        if (this.the_end()) {
+          return false;
+        }
         pos1 = this.pos;
         if (!this.call(funcs[0])) {
           return false;
@@ -364,7 +372,11 @@
       set = () => {
         var value;
         value = this.call(expr, 'any');
-        this.state_curr()[var_] = value;
+        if (value === -1) {
+          return false;
+        }
+        this.state_prev()[var_] = value;
+        this.state_prev().xxx = value;
         return true;
       };
       return name_('set', set, `set('${var_}', ${stringify(expr)})`);
@@ -506,16 +518,15 @@
       return true;
     }
 
-    auto_detect_indent() {
-      var indent, m, state;
-      state = this.state_curr();
-      m = this.input.slice(this.pos).match(/^(\ *)/ || die());
-      indent = m[1].length;
-      if (state.ind === -1) {
-        indent += 1;
+    auto_detect_indent(n) {
+      var indent, m;
+      m = this.input.slice(this.pos).match(/^(\ *)/);
+      indent = m[1].length - n;
+      if (indent > 0) {
+        return indent;
+      } else {
+        return -1;
       }
-      state.ind += indent;
-      return indent;
     }
 
     //------------------------------------------------------------------------------
@@ -574,7 +585,7 @@
           }
         }
         if (prev_level) {
-          warn(sprintf("%6d %5d %s", trace_num, ++this.trace_line, prev_line));
+          warn(sprintf("%5d %6d %s", ++this.trace_line, trace_num, prev_line));
         }
         this.trace_info = trace_info;
       }
@@ -599,7 +610,7 @@
       var count, level, line, type;
       [type, level, line, count] = this.trace_info;
       if (line) {
-        return warn(sprintf("%6d %5d %s", count, ++this.trace_line, line));
+        return warn(sprintf("%5d %6d %s", ++this.trace_line, count, line));
       }
     }
 

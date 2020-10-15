@@ -21,7 +21,7 @@ global.typeof_ = (value)->
   return 'string' if _.isString value
   return 'function' if _.isFunction value
   return 'array' if _.isArray value
-  return 'object' if _.PlainisObject value
+  return 'object' if _.isPlainObject value
   xxx [value, typeof(value)]
 
 global.stringify = (o)->

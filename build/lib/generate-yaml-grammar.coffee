@@ -164,7 +164,7 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
 
   gen_rep: (rule, min, max)->
     @gen_method_call('rep', @gen_limit(min), @gen_limit(max), @gen(rule))
-      .replace /\(\n  (\d),\n  (\d),/, "($1, $2,"
+      .replace /\(\n  (-?\d+),\n  (-?\d+),/, "($1, $2,"
       .replace /\)\n\)/, '))'
 
   gen_limit: (n)-> n

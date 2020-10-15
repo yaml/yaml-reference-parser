@@ -55,7 +55,10 @@ global.generator_class = \
     "@#{method}(#{sep}#{args}#{sep})"
 
   gen_method_ref: (name)->
-    "@#{name}"
+    if name == 'auto_detect_indent'
+      "[@#{name}, n]"
+    else
+      "@#{name}"
 
   gen_comment_block: (text)->
     text = text

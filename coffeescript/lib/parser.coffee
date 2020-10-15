@@ -44,10 +44,10 @@ global.Parser = class Parser extends Grammar
   state_curr: ->
     @state[@state.length - 1] ||
       name: null
+      doc: false
       lvl: 0
       beg: 0
       end: 0
-      ind: -1
       m: null
       t: null
 
@@ -55,25 +55,23 @@ global.Parser = class Parser extends Grammar
     @state[@state.length - 2]
 
   state_push: (name)->
-    prev = @state_curr()
+    curr = @state_curr()
 
     @state.push
       name: name
-      lvl: prev.lvl + 1
+      doc: curr.doc
+      lvl: curr.lvl + 1
       beg: @pos
       end: null
-      ind: prev.ind
-      m: prev.m
-      t: prev.t
+      m: curr.m
+      t: curr.t
 
   state_pop: ->
-    prev = @state.pop()
+    child = @state.pop()
     curr = @state_curr()
     return unless curr?
-    curr.beg = prev.beg
+    curr.beg = child.beg
     curr.end = @pos
-    curr.m = prev.m
-    curr.t = prev.t
 
   call: (func, type='boolean')->
     args = []
@@ -90,6 +88,9 @@ global.Parser = class Parser extends Grammar
 
     @trace_num++
     @trace '?', func.trace, args if TRACE
+
+    if func.name == 'l_bare_document'
+      @state_curr().doc = true
 
     args = args.map (a)=>
       if isArray(a) then @call(a, 'any') else \
@@ -210,11 +211,19 @@ global.Parser = class Parser extends Grammar
     return value if isString value
     return @call value, 'number'
 
+  the_end: ->
+    return (
+      @pos >= @end or (
+        @state_curr().doc and
+        @start_of_line() and
+        @input[@pos..].match /^(?:---|\.\.\.)(?=\s|$)/
+      )
+    )
+
   # Match a single char:
   chr: (char)->
     chr = ->
-      if @pos >= @end
-        return false
+      return false if @the_end()
       if @input[@pos] == char
         @pos++
         return true
@@ -224,8 +233,7 @@ global.Parser = class Parser extends Grammar
   # Match a char in a range:
   rng: (low, high)->
     rng = ->
-      if @pos >= @input.length
-        return false
+      return false if @the_end()
       if low <= @input[@pos] <= high
         @pos++
         return true
@@ -235,6 +243,7 @@ global.Parser = class Parser extends Grammar
   # Must match first rule but none of others:
   but: (funcs...)->
     but = ->
+      return false if @the_end()
       pos1 = @pos
       return false unless @call funcs[0]
       pos2 = @pos
@@ -258,7 +267,9 @@ global.Parser = class Parser extends Grammar
   set: (var_, expr)->
     set = =>
       value = @call expr, 'any'
-      @state_curr()[var_] = value
+      return false if value == -1
+      @state_prev()[var_] = value
+      @state_prev().xxx = value
       true
     name_ 'set', set, "set('#{var_}', #{stringify expr})"
 
@@ -344,13 +355,10 @@ global.Parser = class Parser extends Grammar
 
   empty: -> true
 
-  auto_detect_indent: ->
-    state = @state_curr()
-    m = @input[@pos..].match /^(\ *)/ or die()
-    indent = m[1].length
-    indent += 1 if state.ind == -1
-    state.ind += indent
-    return indent
+  auto_detect_indent: (n)->
+    m = @input[@pos..].match /^(\ *)/
+    indent = m[1].length - n
+    return if indent > 0 then indent else -1
 
 #------------------------------------------------------------------------------
 # Trace debugging
@@ -421,8 +429,8 @@ global.Parser = class Parser extends Grammar
         else
           prev_line = prev_line.replace /\?/, '!'
       if prev_level
-        warn sprintf "%6d %5d %s",
-          trace_num, ++@trace_line, prev_line
+        warn sprintf "%5d %6d %s",
+          ++@trace_line, trace_num, prev_line
 
       @trace_info = trace_info
 
@@ -439,7 +447,7 @@ global.Parser = class Parser extends Grammar
   trace_flush: ->
     [type, level, line, count] = @trace_info
     if line
-      warn sprintf "%6d %5d %s",
-        count, ++@trace_line, line
+      warn sprintf "%5d %6d %s",
+        ++@trace_line, count, line
 
 # vim: sw=2:

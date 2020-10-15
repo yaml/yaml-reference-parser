@@ -76,7 +76,10 @@ global.generator_class = \
     "$self->#{method}(#{sep}#{args}#{sep})"
 
   gen_method_ref: (name)->
-    "$self->func('#{name}')"
+    if name == 'auto_detect_indent'
+      "[$self->func('#{name}'), $n]"
+    else
+      "$self->func('#{name}')"
 
   gen_comment_block: (text)->
     text = text

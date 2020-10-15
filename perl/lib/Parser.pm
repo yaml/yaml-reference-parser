@@ -63,10 +63,10 @@ sub state_curr {
   my ($self) = @_;
   $self->{state}[-1] || {
     name => undef,
+    doc => false,
     lvl => 0,
     beg => 0,
     end => 0,
-    ind => -1,
     m => undef,
     t => undef,
   };
@@ -80,28 +80,26 @@ sub state_prev {
 sub state_push {
   my ($self, $name) = @_;
 
-  my $prev = $self->state_curr;
+  my $curr = $self->state_curr;
 
   push @{$self->{state}}, {
     name => $name,
-    lvl => $prev->{lvl} + 1,
+    doc => $curr->{doc},
+    lvl => $curr->{lvl} + 1,
     beg => $self->{pos},
     end => undef,
-    ind => $prev->{ind},
-    m => $prev->{m},
-    t => $prev->{t},
+    m => $curr->{m},
+    t => $curr->{t},
   };
 }
 
 sub state_pop {
   my ($self) = @_;
-  my $prev = pop @{$self->{state}};
+  my $child = pop @{$self->{state}};
   my $curr = $self->state_curr;
   return unless defined $curr;
-  $curr->{beg} = $prev->{beg};
+  $curr->{beg} = $child->{beg};
   $curr->{end} = $self->{pos};
-  $curr->{m} = $prev->{m};
-  $curr->{t} = $prev->{t};
 }
 
 sub call {
@@ -122,6 +120,10 @@ sub call {
 
   $self->{trace_num}++;
   $self->trace('?', $func->{trace}, $args) if TRACE;
+
+  if ($func->{name} eq 'l_bare_document') {
+    $self->state_curr->{doc} = true;
+  }
 
   @$args = map {
     isArray($_) ? $self->call($_, 'any') :
@@ -276,11 +278,31 @@ sub flip {
 }
 name flip => \&flip;
 
+sub the_end {
+  my ($self) = @_;
+  return (
+    $self->{pos} >= $self->{end} or (
+      $self->state_curr->{doc} and
+      $self->start_of_line and
+      substr($self->{input}, $self->{pos}) =~
+        /^(?:---|\.\.\.)(?=\s|\z)/
+    )
+  );
+}
+
 # Match a single char:
 sub chr {
   my ($self, $char) = @_;
   name chr => sub {
-    if ($self->{pos} >= $self->{end}) {
+    return false if $self->the_end;
+    if (
+      $self->{pos} >= $self->{end} or (
+        $self->state_curr->{doc} and
+        $self->start_of_line and
+        substr($self->{input}, $self->{pos}) =~
+          /^(?:---|\.\.\.)(?=\s|\z)/
+      )
+    ) {
       return false;
     }
     if (substr($self->{input}, $self->{pos}, 1) eq $char) {
@@ -295,9 +317,7 @@ sub chr {
 sub rng {
   my ($self, $low, $high) = @_;
   name rng => sub {
-    if ($self->{pos} >= $self->{end}) {
-      return false;
-    }
+    return false if $self->the_end;
     if (
       $low le substr($self->{input}, $self->{pos}, 1) and
       substr($self->{input}, $self->{pos}, 1) le $high
@@ -313,6 +333,7 @@ sub rng {
 sub but {
   my ($self, @funcs) = @_;
   name but => sub {
+    return false if $self->the_end;
     my $pos1 = $self->{pos};
     return false unless $self->call($funcs[0]);
     my $pos2 = $self->{pos};
@@ -343,7 +364,8 @@ sub set {
   my ($self, $var, $expr) = @_;
   name set => sub {
     my $value = $self->call($expr, 'any');
-    $self->state_curr->{$var} = $value;
+    return false if $value == -1;
+    $self->state_prev->{$var} = $value;
     return true;
   }, "set('$var', ${\ stringify $expr})";
 }
@@ -473,18 +495,10 @@ sub empty { true }
 name 'empty', \&empty;
 
 sub auto_detect_indent {
-  my ($self) = @_;
-  my $state = $self->state_curr;
-  substr($self->{input}, $self->{pos}) =~ /^(\ *)/ or die;
-  my $indent = length $1;
-  $indent++ if $state->{ind} == -1;
-  my $ind = $state->{ind} += $indent;
-#   for (my $i = @{$self->{state}} - 2; $i > 1; $i--) {
-#     my $name = $self->{state}[$i]{name};
-#     last if $name =~ /^\w+_/;
-#     $self->{state}[$i]{ind} = $ind;
-#   }
-  return $indent;
+  my ($self, $n) = @_;
+  substr($self->{input}, $self->{pos}) =~ /^(\ *)/;
+  my $indent = length($1) - $n;
+  return $indent > 0 ? $indent : -1;
 }
 name 'auto_detect_indent', \&auto_detect_indent;
 
@@ -568,8 +582,8 @@ sub trace {
       }
     }
     if ($prev_level) {
-      warn sprintf "%6d %5d %s",
-        $trace_num, ++$self->{trace_line}, $prev_line;
+      warn sprintf "%5d %6d %s",
+        ++$self->{trace_line}, $trace_num, $prev_line;
     }
 
     $self->{trace_info} = $trace_info;
@@ -591,8 +605,8 @@ sub trace_flush {
   my ($self) = @_;
   my ($type, $level, $line, $count) = @{$self->{trace_info}};
   if (my $line = $self->{trace_info}[2]) {
-    warn sprintf "%6d %5d %s",
-      $count, ++$self->{trace_line}, $line;
+    warn sprintf "%5d %6d %s",
+      ++$self->{trace_line}, $count, $line;
   }
 }
 

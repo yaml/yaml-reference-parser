@@ -968,7 +968,7 @@
 
       l_block_sequence(n) {
         debug_rule("l_block_sequence", n);
-        return this.all(this.set('m', this.auto_detect_indent), this.rep(1, -1, this.all([this.s_indent, this.add(n, this.m())], [this.c_l_block_seq_entry, this.add(n, this.m())])));
+        return this.all(this.set('m', [this.auto_detect_indent, n]), this.rep(1, -1, this.all([this.s_indent, this.add(n, this.m())], [this.c_l_block_seq_entry, this.add(n, this.m())])));
       }
 
       c_l_block_seq_entry(n) {
@@ -988,7 +988,7 @@
 
       l_block_mapping(n) {
         debug_rule("l_block_mapping", n);
-        return this.all(this.set('m', this.auto_detect_indent), this.rep(1, -1, this.all([this.s_indent, this.add(n, this.m())], [this.ns_l_block_map_entry, this.add(n, this.m())])));
+        return this.all(this.set('m', [this.auto_detect_indent, n]), this.rep(1, -1, this.all([this.s_indent, this.add(n, this.m())], [this.ns_l_block_map_entry, this.add(n, this.m())])));
       }
 
       ns_l_block_map_entry(n) {

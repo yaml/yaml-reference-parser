@@ -42,7 +42,7 @@
     if (_.isArray(value)) {
       return 'array';
     }
-    if (_.PlainisObject(value)) {
+    if (_.isPlainObject(value)) {
       return 'object';
     }
     return xxx([value, typeof value]);
