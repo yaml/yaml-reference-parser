@@ -37,6 +37,11 @@ global.generator_class = \
     \n\n\n
     """
 
+  gen_rep: (rule, min, max)->
+    @gen_method_call('rep', @gen_limit(min), @gen_limit(max), @gen(rule))
+      .replace /\(\n  (-?\d+),\n  (undef|-?\d+),/, "($1, $2,"
+      .replace /\)\n\)/, '))'
+
   gen_rule_args: (name)->
     rule = @spec[name] or XXX name
     return '($self)' unless _.isPlainObject rule
@@ -45,7 +50,7 @@ global.generator_class = \
     delete rule['(...)']
     @args = args
     args = [ args ] unless _.isArray args
-    args = _.map args, (a)-> "$#{a}"
+    args = _.map args, (a)-> if a? then "$#{a}" else 'undef'
     args.unshift '$self'
     "(#{args.join ', '})"
 
@@ -55,7 +60,7 @@ global.generator_class = \
     args = rule['(...)']
     return '' unless args?
     args = [ args ] unless _.isArray args
-    args = _.map args, (a)-> "$#{a}"
+    args = _.map args, (a)-> if a? then "$#{a}" else 'undef'
     str = ',' + args.join(', ')
       .replace /\ /g, ''
       .replace /^\(\)$/, ''
@@ -65,7 +70,7 @@ global.generator_class = \
   gen_var_value: (var_)-> "$#{var_}"
 
   gen_limit: (n)->
-    if _.isNumber n then n else "$#{n}"
+    if _.isNumber n then n else if n? then "$#{n}" else 'undef'
 
   gen_pair_sep: -> ' => '
 

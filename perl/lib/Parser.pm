@@ -242,18 +242,18 @@ sub rep {
     my $count = 0;
     my $pos = $self->{pos};
     my $pos_start = $pos;
-    while ($max == -1 or $count < $max) {
+    while (not(defined $max) or $count < $max) {
       last unless $self->call($func);
       last if $self->{pos} == $pos;
       $count++;
       $pos = $self->{pos};
     }
-    if ($count >= $min and ($max == -1 or $count <= $max)) {
+    if ($count >= $min and (not(defined $max) or $count <= $max)) {
       return true;
     }
     $self->{pos} = $pos_start;
     return false;
-  }, "rep($min,$max)";
+  }, "rep($min,${\ ($max // 'null')})";
 }
 
 # Call a rule depending on state value:

@@ -183,12 +183,12 @@ global.Parser = class Parser extends Grammar
       count = 0
       pos = @pos
       pos_start = pos
-      while max == -1 or count < max
+      while not(max?) or count < max
         break unless @call func
         break if @pos == pos
         count++
         pos = @pos
-      if count >= min and (max == -1 or count <= max)
+      if count >= min and (not(max?) or count <= max)
         return true
       @pos = pos_start
       return false

@@ -242,7 +242,7 @@
         count = 0;
         pos = this.pos;
         pos_start = pos;
-        while (max === -1 || count < max) {
+        while (!(max != null) || count < max) {
           if (!this.call(func)) {
             break;
           }
@@ -252,7 +252,7 @@
           count++;
           pos = this.pos;
         }
-        if (count >= min && (max === -1 || count <= max)) {
+        if (count >= min && (!(max != null) || count <= max)) {
           return true;
         }
         this.pos = pos_start;

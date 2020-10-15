@@ -92,8 +92,8 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
       when '(all)'  then return @gen_group val, 'all'
       when '(---)'  then return @gen_group val, 'but'
 
-      when '(+++)'  then return @gen_rep val, 1, -1
-      when '(***)'  then return @gen_rep val, 0, -1
+      when '(+++)'  then return @gen_rep val, 1, null
+      when '(***)'  then return @gen_rep val, 0, null
       when '(???)'  then return @gen_rep val, 0, 1
 
       when '(<<<)'  then return @gen_may val
@@ -164,7 +164,7 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
 
   gen_rep: (rule, min, max)->
     @gen_method_call('rep', @gen_limit(min), @gen_limit(max), @gen(rule))
-      .replace /\(\n  (-?\d+),\n  (-?\d+),/, "($1, $2,"
+      .replace /\(\n  (-?\d+),\n  (null|-?\d+),/, "($1, $2,"
       .replace /\)\n\)/, '))'
 
   gen_limit: (n)-> n
@@ -259,9 +259,10 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
           multiline = true
     if multiline
       sep = "\n"
-      args = _.map args, (a)=> @indent(String a)
+      args = _.map args, (a)=> @indent @string a
       args = args.join(",#{sep}")
     else
+      args = _.map args, (a)=> @string a
       args = args.join(", ")
 
     return [args, sep]
@@ -274,6 +275,12 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
 
   out: (text)->
     @grammar += text
+
+  string: (o)->
+    if o?
+      String o
+    else
+      @gen_null()
 
   indent: (text, n=1)->
     text.replace(/^(.)/gm, "#{_.repeat('  ', n)}$1")
