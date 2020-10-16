@@ -38,7 +38,7 @@ global.TestReceiver = class TestReceiver
 
   cache_drop: ->
     events = @cache.pop() or xxxxx @
-    return events[0]
+    return events
 
   cache_get: (type)->
     last = _.last @cache
@@ -103,7 +103,7 @@ global.TestReceiver = class TestReceiver
   try__l_block_sequence: -> @cache_up '+SEQ'
   got__l_block_sequence: -> @cache_down '-SEQ'
   not__l_block_sequence: ->
-    event = @cache_drop()
+    event = @cache_drop()[0]
     @anchor = event.anchor
     @tag = event.tag
 
@@ -132,12 +132,14 @@ global.TestReceiver = class TestReceiver
       .replace(/(?:[\ \t]*\r?\n[\ \t]*)/g, "\n")
       .replace(/(\n)(\n*)/g, (m...)-> if m[2].length then m[2] else ' ')
     @add '=VAL', ":#{text}"
+
   got__c_single_quoted: (o)->
     text = o.text[1...-1]
       .replace(/(?:[\ \t]*\r?\n[\ \t]*)/g, "\n")
       .replace(/(\n)(\n*)/g, (m...)-> if m[2].length then m[2] else ' ')
       .replace(/''/g, "'")
     @add '=VAL', "'#{text}"
+
   got__c_double_quoted: (o)->
     text = o.text[1...-1]
       .replace(/(?:[\ \t]*\r?\n[\ \t]*)/g, "\n")
@@ -149,6 +151,19 @@ global.TestReceiver = class TestReceiver
       .replace(/\\n/g, "\n")
       .replace(/\\\\/g, '\\')
     @add '=VAL', "\"#{text}"
+
+  try__c_l_literal: -> @cache_up()
+  got__l_nb_literal_text: (o)->
+    text = o.text
+    @add null, text
+  not__c_l_literal: -> @cache_drop()
+  got__c_l_literal: ->
+    lines = @cache_drop()
+    lines = lines.map (l)->
+      l.value.replace(/^ */, '') + "\n"
+    text = lines.join ''
+    @add('=VAL', "|#{text}")
+
   got__e_scalar: -> @add '=VAL', ':'
 
   got__c_ns_anchor_property: (o)-> @anchor = o.text

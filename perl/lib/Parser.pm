@@ -109,7 +109,7 @@ sub call {
   my $args = [];
   ($func, @$args) = @$func if isArray $func;
 
-  return $func if isNumber $func;
+  return $func if isNumber $func or isString $func;
 
   xxxxx "Bad call type '${\ typeof $func}' for '$func'"
     unless isFunction $func;
@@ -238,6 +238,8 @@ sub may {
 # Repeat a rule a certain number of times:
 sub rep {
   my ($self, $min, $max, $func) = @_;
+  xxxxx "rep max is < 0 '$max'"
+    if defined $max and $max < 0;
   name rep => sub {
     my $count = 0;
     my $pos = $self->{pos};
@@ -365,7 +367,18 @@ sub set {
   name set => sub {
     my $value = $self->call($expr, 'any');
     return false if $value == -1;
-    $self->state_prev->{$var} = $value;
+    $value = $self->auto_detect if $value eq 'auto-detect';
+    my $state = $self->state_prev;
+    $state->{$var} = $value;
+    if ($state->{name} ne 'all') {
+      my $size = @{$self->{state}};
+      for (my $i = 3; $i < $size; $i++) {
+        xxxxx $self if $i > $size - 2;
+        $state = $self->{state}[0 - $i];
+        $state->{$var} = $value;
+        last if $state->{name} eq 's_l_block_scalar';
+      }
+    }
     return true;
   }, "set('$var', ${\ stringify $expr})";
 }
@@ -388,6 +401,8 @@ sub add {
   my ($self, $x, $y) = @_;
   name add => sub {
     $y = $self->call($y, 'number') if isFunction $y;
+    xxxxx "y is '${\ stringify $y}', not number in 'add'"
+      unless isNumber $y;
     return $x + $y;
   }, "add($x,${\ stringify $y})";
 }
@@ -426,7 +441,7 @@ sub len {
 sub ord {
   my ($self, $str) = @_;
   name ord => sub {
-    return ord $str;
+    return ord($str) - 48;
   };
 }
 
@@ -434,8 +449,11 @@ sub if {
   my ($self, $test, $do_if_true) = @_;
   name if => sub {
     $test = $self->call($test, 'boolean') unless isBoolean $test;
-    return $self->call($do_if_true) if $test;
-    return undef;
+    if ($test) {
+      $self->call($do_if_true);
+      return true;
+    }
+    return false;
   };
 }
 
@@ -467,7 +485,6 @@ sub m {
 sub t {
   my ($self) = @_;
   name t => sub {
-    xxxxx $self;
     $self->state_curr->{t};
   };
 }
@@ -501,6 +518,12 @@ sub auto_detect_indent {
   return $indent > 0 ? $indent : -1;
 }
 name 'auto_detect_indent', \&auto_detect_indent;
+
+sub auto_detect {
+  my ($self, $n) = @_;
+  return 3;
+}
+name 'auto_detect', \&auto_detect;
 
 #------------------------------------------------------------------------------
 # Trace debugging

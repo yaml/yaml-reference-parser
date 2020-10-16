@@ -2552,17 +2552,17 @@ global.Grammar = class Grammar
   #   s-b-comment
 
   @::c_b_block_header.num = 162
-  c_b_block_header: (m, t)->
-    debug_rule("c_b_block_header",m,t)
+  c_b_block_header: (n)->
+    debug_rule("c_b_block_header",n)
     @all(
       @any(
         @all(
-          [ @c_indentation_indicator, m ],
-          [ @c_chomping_indicator, t ]
+          [ @c_indentation_indicator, n ],
+          @c_chomping_indicator
         ),
         @all(
-          [ @c_chomping_indicator, t ],
-          [ @c_indentation_indicator, m ]
+          @c_chomping_indicator,
+          [ @c_indentation_indicator, n ]
         )
       ),
       @s_b_comment
@@ -2576,11 +2576,11 @@ global.Grammar = class Grammar
   #   ( <empty> => m = auto-detect() )
 
   @::c_indentation_indicator.num = 163
-  c_indentation_indicator: (m)->
-    debug_rule("c_indentation_indicator",m)
+  c_indentation_indicator: (n)->
+    debug_rule("c_indentation_indicator",n)
     @any(
       @if(@ns_dec_digit, @set('m', @ord(@match))),
-      @if(@empty, @set('m', "auto-detect"))
+      @if(@empty, @set('m', [ @auto_detect, n ]))
     )
 
 
@@ -2592,8 +2592,8 @@ global.Grammar = class Grammar
   #   ( <empty> => t = clip )
 
   @::c_chomping_indicator.num = 164
-  c_chomping_indicator: (t)->
-    debug_rule("c_chomping_indicator",t)
+  c_chomping_indicator: ->
+    debug_rule("c_chomping_indicator")
     @any(
       @if(@chr('-'), @set('t', "strip")),
       @if(@chr('+'), @set('t', "keep")),
@@ -2704,7 +2704,7 @@ global.Grammar = class Grammar
     debug_rule("c_l_literal",n)
     @all(
       @chr('|'),
-      [ @c_b_block_header, @m(), @t() ],
+      [ @c_b_block_header, n ],
       [ @l_literal_content, @add(n, @m()), @t() ]
     )
 
@@ -2773,7 +2773,7 @@ global.Grammar = class Grammar
     debug_rule("c_l_folded",n)
     @all(
       @chr('>'),
-      [ @c_b_block_header, @m(), @t() ],
+      [ @c_b_block_header, n ],
       [ @l_folded_content, @add(n, @m()), @t() ]
     )
 
@@ -3430,10 +3430,10 @@ global.Grammar = class Grammar
 
   # [211]
   # l-yaml-stream ::=
-  #   l-document-prefix l-any-document?
-  #   ( ( l-document-suffix+ l-document-prefix
+  #   l-document-prefix* l-any-document?
+  #   ( ( l-document-suffix+ l-document-prefix*
   #   l-any-document? )
-  #   | ( l-document-prefix l-explicit-document? ) )*
+  #   | ( l-document-prefix* l-explicit-document? ) )*
 
   @::l_yaml_stream.num = 211
   l_yaml_stream: ->

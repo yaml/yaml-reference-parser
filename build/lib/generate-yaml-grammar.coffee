@@ -87,6 +87,9 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
     if m = key.match /^(([bcls]|n[bs]|in|seq)[-+][-+a-z]+)$/
       return @gen_call key, val
 
+    if key == 'auto-detect'
+      return @gen_call key, val
+
     switch key
       when '(any)'  then return @gen_group val, 'any'
       when '(all)'  then return @gen_group val, 'all'
@@ -115,7 +118,7 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
       when '(len)'  then return @gen_len val
       when '(exclude)' then return @gen_exclude val
 
-      else xxx "[#{@num}] unknown hash rule", rule, @num
+      else XXX "[#{@num}] unknown hash rule", rule, @num
 
   gen_from_array: (rule)->
     if rule.length == 2 and rule[0].match /^x/

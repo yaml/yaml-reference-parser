@@ -56,7 +56,7 @@ sub cache_down {
 sub cache_drop {
   my ($self) = @_;
   my $events = pop @{$self->{cache}} or xxxxx @_;
-  return $events->[0];
+  return $events;
 }
 
 sub cache_get {
@@ -146,7 +146,7 @@ sub try__l_block_sequence { $_[0]->cache_up('+SEQ') }
 sub got__l_block_sequence { $_[0]->cache_down('-SEQ') }
 sub not__l_block_sequence {
   my ($self) = @_;
-  my $event = $_[0]->cache_drop;
+  my $event = $_[0]->cache_drop->[0];
   $self->{anchor} = $event->{anchor};
   $self->{tag} = $event->{tag};
 }
@@ -178,6 +178,7 @@ sub got__ns_plain {
   $text =~ s/(\n)(\n*)/length($2) ? $2 : ' '/ge;
   $self->add('=VAL', qq<:$text>);
 }
+
 sub got__c_single_quoted {
   my ($self, $o) = @_;
   my $text = substr($o->{text}, 1, -1);
@@ -186,6 +187,7 @@ sub got__c_single_quoted {
   $text =~ s/''/'/g;
   $self->add('=VAL', qq<'$text>);
 }
+
 sub got__c_double_quoted {
   my ($self, $o) = @_;
   my $text = substr($o->{text}, 1, -1);
@@ -199,6 +201,25 @@ sub got__c_double_quoted {
   $text =~ s/\\\\/\\/g;
   $self->add('=VAL', qq<"$text>);
 }
+
+sub try__c_l_literal { $_[0]->cache_up }
+sub got__l_nb_literal_text {
+  my ($self, $o) = @_;
+  my $text = $o->{text};
+  $self->add(undef, $text);
+}
+sub not__c_l_literal { $_[0]->cache_drop }
+sub got__c_l_literal {
+  my ($self) = @_;
+  my $lines = $self->cache_drop;
+  my $text = join '', map {
+    $_ = $_->{value};
+    s/^ *//;
+    "$_\n";
+  } @$lines;
+  $self->add('=VAL', qq<|$text>);
+}
+
 sub got__e_scalar { $_[0]->add('=VAL', ':') }
 
 sub got__c_ns_anchor_property { $_[0]->{anchor} = $_[1]->{text} }

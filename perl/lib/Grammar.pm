@@ -2720,17 +2720,17 @@ rule '161', ns_flow_node => sub {
 #   s-b-comment
 
 rule '162', c_b_block_header => sub {
-  my ($self, $m, $t) = @_;
-  debug_rule("c_b_block_header",$m,$t) if DEBUG;
+  my ($self, $n) = @_;
+  debug_rule("c_b_block_header",$n) if DEBUG;
   $self->all(
     $self->any(
       $self->all(
-        [ $self->func('c_indentation_indicator'), $m ],
-        [ $self->func('c_chomping_indicator'), $t ]
+        [ $self->func('c_indentation_indicator'), $n ],
+        $self->func('c_chomping_indicator')
       ),
       $self->all(
-        [ $self->func('c_chomping_indicator'), $t ],
-        [ $self->func('c_indentation_indicator'), $m ]
+        $self->func('c_chomping_indicator'),
+        [ $self->func('c_indentation_indicator'), $n ]
       )
     ),
     $self->func('s_b_comment')
@@ -2745,11 +2745,11 @@ rule '162', c_b_block_header => sub {
 #   ( <empty> => m = auto-detect() )
 
 rule '163', c_indentation_indicator => sub {
-  my ($self, $m) = @_;
-  debug_rule("c_indentation_indicator",$m) if DEBUG;
+  my ($self, $n) = @_;
+  debug_rule("c_indentation_indicator",$n) if DEBUG;
   $self->any(
     $self->if($self->func('ns_dec_digit'), $self->set('m', $self->ord($self->func('match')))),
-    $self->if($self->func('empty'), $self->set('m', "auto-detect"))
+    $self->if($self->func('empty'), $self->set('m', [ $self->func('auto_detect'), $n ]))
   );
 };
 
@@ -2762,8 +2762,8 @@ rule '163', c_indentation_indicator => sub {
 #   ( <empty> => t = clip )
 
 rule '164', c_chomping_indicator => sub {
-  my ($self, $t) = @_;
-  debug_rule("c_chomping_indicator",$t) if DEBUG;
+  my ($self) = @_;
+  debug_rule("c_chomping_indicator") if DEBUG;
   $self->any(
     $self->if($self->chr('-'), $self->set('t', "strip")),
     $self->if($self->chr('+'), $self->set('t', "keep")),
@@ -2880,7 +2880,7 @@ rule '170', c_l_literal => sub {
   debug_rule("c_l_literal",$n) if DEBUG;
   $self->all(
     $self->chr('|'),
-    [ $self->func('c_b_block_header'), $self->m(), $self->t() ],
+    [ $self->func('c_b_block_header'), $n ],
     [ $self->func('l_literal_content'), $self->add($n, $self->m()), $self->t() ]
   );
 };
@@ -2953,7 +2953,7 @@ rule '174', c_l_folded => sub {
   debug_rule("c_l_folded",$n) if DEBUG;
   $self->all(
     $self->chr('>'),
-    [ $self->func('c_b_block_header'), $self->m(), $self->t() ],
+    [ $self->func('c_b_block_header'), $n ],
     [ $self->func('l_folded_content'), $self->add($n, $self->m()), $self->t() ]
   );
 };
@@ -3647,10 +3647,10 @@ rule '210', l_any_document => sub {
 
 # [211]
 # l-yaml-stream ::=
-#   l-document-prefix l-any-document?
-#   ( ( l-document-suffix+ l-document-prefix
+#   l-document-prefix* l-any-document?
+#   ( ( l-document-suffix+ l-document-prefix*
 #   l-any-document? )
-#   | ( l-document-prefix l-explicit-document? ) )*
+#   | ( l-document-prefix* l-explicit-document? ) )*
 
 rule '211', l_yaml_stream => sub {
   my ($self) = @_;

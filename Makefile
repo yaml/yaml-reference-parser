@@ -49,6 +49,6 @@ node_modules:
 	git worktree add -f $@ $@
 
 $(SPEC_YAML):
-	cp $(ROOT)/../yaml-grammar/$@ $@ || \
+	cp $(ROOT)/../yaml-grammar/$(@:build/%=%) $@ || \
 	wget https://raw.githubusercontent.com/yaml/yaml-grammar/master/$@ || \
 	curl -O https://raw.githubusercontent.com/yaml/yaml-grammar/master/$@

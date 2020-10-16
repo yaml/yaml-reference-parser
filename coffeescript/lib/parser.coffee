@@ -77,7 +77,8 @@ global.Parser = class Parser extends Grammar
     args = []
     [func, args...] = func if isArray func
 
-    return func if isNumber func
+    if isNumber(func) or isString(func)
+      return func
 
     xxxxx "Bad call type '#{typeof_ func}' for '#{func}'" \
       unless isFunction func
@@ -179,6 +180,8 @@ global.Parser = class Parser extends Grammar
 
   # Repeat a rule a certain number of times:
   rep: (min, max, func)->
+    xxxxx "rep max is < 0 '#{max}'" \
+      if max? and max < 0
     rep = ->
       count = 0
       pos = @pos
@@ -268,28 +271,40 @@ global.Parser = class Parser extends Grammar
     set = =>
       value = @call expr, 'any'
       return false if value == -1
-      @state_prev()[var_] = value
-      @state_prev().xxx = value
-      true
+      value = @auto_detect() if value == 'auto-detect'
+      state = @state_prev()
+      state[var_] = value
+      if state.name != 'all'
+        size = @state.length
+        i = 3
+        while i < size
+          xxxxx @ if i > size - 2
+          state = @state[size - i - 1]
+          state[var_] = value
+          break if state.name == 's_l_block_scalar'
+          i++
+      return true
     name_ 'set', set, "set('#{var_}', #{stringify expr})"
 
   max: (max)->
     max = ->
-      true
+      return true
 
   exclude: (rule)->
     exclude = ->
-      true
+      return true
 
   add: (x, y)->
     add = =>
       y = @call y, 'number' if isFunction y
-      x + y
+      xxxxx "y is '#{stringify y}', not number in 'add'" \
+        unless isNumber y
+      return x + y
     name_ 'add', add, "add(#{x},#{stringify y})"
 
   sub: (x, y)->
     sub = ->
-      x - y
+      return x - y
 
   # This method does not need to return a function since it is never
   # called in the grammar.
@@ -310,13 +325,15 @@ global.Parser = class Parser extends Grammar
 
   ord: (str)->
     ord = ->
-      return str.charCodeAt(0)
+      return str.charCodeAt(0) - 48
 
   if: (test, do_if_true)->
     if_ = ->
       test = @call test, 'boolean' unless isBoolean test
-      @call do_if_true if test
-      return test
+      if test
+        @call do_if_true
+        return true
+      return false
     name_ 'if', if_
 
   lt: (x, y)->
@@ -335,23 +352,22 @@ global.Parser = class Parser extends Grammar
 
   m: ->
     m = =>
-      @state_curr().m
+      return @state_curr().m
 
   t: ->
     t = =>
-      xxxxx @
-      @state_curr().t
+      return @state_curr().t
 
 #------------------------------------------------------------------------------
 # Special grammar rules
 #------------------------------------------------------------------------------
   start_of_line: ->
-    @pos == 0 or
+    return @pos == 0 or
       @pos >= @end or
       @input[@pos - 1] == "\n"
 
   end_of_stream: ->
-    @pos >= @end
+    return @pos >= @end
 
   empty: -> true
 
@@ -359,6 +375,9 @@ global.Parser = class Parser extends Grammar
     m = @input[@pos..].match /^(\ *)/
     indent = m[1].length - n
     return if indent > 0 then indent else -1
+
+  auto_detect: (n)->
+    return 3
 
 #------------------------------------------------------------------------------
 # Trace debugging

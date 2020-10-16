@@ -64,7 +64,7 @@
     cache_drop() {
       var events;
       events = this.cache.pop() || xxxxx(this);
-      return events[0];
+      return events;
     }
 
     cache_get(type) {
@@ -172,7 +172,7 @@
 
     not__l_block_sequence() {
       var event;
-      event = this.cache_drop();
+      event = this.cache_drop()[0];
       this.anchor = event.anchor;
       return this.tag = event.tag;
     }
@@ -271,6 +271,30 @@
         }
       }).replace(/\\(["\/])/g, "$1").replace(/\\ /g, ' ').replace(/\\t/g, "\t").replace(/\\n/g, "\n").replace(/\\\\/g, '\\');
       return this.add('=VAL', `\"${text}`);
+    }
+
+    try__c_l_literal() {
+      return this.cache_up();
+    }
+
+    got__l_nb_literal_text(o) {
+      var text;
+      text = o.text;
+      return this.add(null, text);
+    }
+
+    not__c_l_literal() {
+      return this.cache_drop();
+    }
+
+    got__c_l_literal() {
+      var lines, text;
+      lines = this.cache_drop();
+      lines = lines.map(function(l) {
+        return l.value.replace(/^ */, '') + "\n";
+      });
+      text = lines.join('');
+      return this.add('=VAL', `|${text}`);
     }
 
     got__e_scalar() {

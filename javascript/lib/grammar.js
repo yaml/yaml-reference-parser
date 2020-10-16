@@ -853,18 +853,18 @@
         return this.any(this.c_ns_alias_node, [this.ns_flow_content, n, c], this.all([this.c_ns_properties, n, c], this.any(this.all([this.s_separate, n, c], [this.ns_flow_content, n, c]), this.e_scalar)));
       }
 
-      c_b_block_header(m, t) {
-        debug_rule("c_b_block_header", m, t);
-        return this.all(this.any(this.all([this.c_indentation_indicator, m], [this.c_chomping_indicator, t]), this.all([this.c_chomping_indicator, t], [this.c_indentation_indicator, m])), this.s_b_comment);
+      c_b_block_header(n) {
+        debug_rule("c_b_block_header", n);
+        return this.all(this.any(this.all([this.c_indentation_indicator, n], this.c_chomping_indicator), this.all(this.c_chomping_indicator, [this.c_indentation_indicator, n])), this.s_b_comment);
       }
 
-      c_indentation_indicator(m) {
-        debug_rule("c_indentation_indicator", m);
-        return this.any(this.if(this.ns_dec_digit, this.set('m', this.ord(this.match))), this.if(this.empty, this.set('m', "auto-detect")));
+      c_indentation_indicator(n) {
+        debug_rule("c_indentation_indicator", n);
+        return this.any(this.if(this.ns_dec_digit, this.set('m', this.ord(this.match))), this.if(this.empty, this.set('m', [this.auto_detect, n])));
       }
 
-      c_chomping_indicator(t) {
-        debug_rule("c_chomping_indicator", t);
+      c_chomping_indicator() {
+        debug_rule("c_chomping_indicator");
         return this.any(this.if(this.chr('-'), this.set('t', "strip")), this.if(this.chr('+'), this.set('t', "keep")), this.if(this.empty, this.set('t', "clip")));
       }
 
@@ -903,7 +903,7 @@
 
       c_l_literal(n) {
         debug_rule("c_l_literal", n);
-        return this.all(this.chr('|'), [this.c_b_block_header, this.m(), this.t()], [this.l_literal_content, this.add(n, this.m()), this.t()]);
+        return this.all(this.chr('|'), [this.c_b_block_header, n], [this.l_literal_content, this.add(n, this.m()), this.t()]);
       }
 
       l_nb_literal_text(n) {
@@ -923,7 +923,7 @@
 
       c_l_folded(n) {
         debug_rule("c_l_folded", n);
-        return this.all(this.chr('>'), [this.c_b_block_header, this.m(), this.t()], [this.l_folded_content, this.add(n, this.m()), this.t()]);
+        return this.all(this.chr('>'), [this.c_b_block_header, n], [this.l_folded_content, this.add(n, this.m()), this.t()]);
       }
 
       s_nb_folded_text(n) {
@@ -2372,10 +2372,10 @@
 
     // [211]
     // l-yaml-stream ::=
-    //   l-document-prefix l-any-document?
-    //   ( ( l-document-suffix+ l-document-prefix
+    //   l-document-prefix* l-any-document?
+    //   ( ( l-document-suffix+ l-document-prefix*
     //   l-any-document? )
-    //   | ( l-document-prefix l-explicit-document? ) )*
+    //   | ( l-document-prefix* l-explicit-document? ) )*
     Grammar.prototype.l_yaml_stream.num = 211;
 
     return Grammar;

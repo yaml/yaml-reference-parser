@@ -68,14 +68,14 @@ foo
 
 
 === Top level literal scalar
---- SKIP
 --- yaml(<)
     --- |
       foo
+      bar
 --- events
 +STR
-+DOC
-=VAL |foo\n
++DOC ---
+=VAL |foo\nbar\n
 -DOC
 -STR
 

@@ -99,7 +99,7 @@
       if (isArray(func)) {
         [func, ...args] = func;
       }
-      if (isNumber(func)) {
+      if (isNumber(func) || isString(func)) {
         return func;
       }
       if (!isFunction(func)) {
@@ -237,6 +237,9 @@
     // Repeat a rule a certain number of times:
     rep(min, max, func) {
       var rep;
+      if ((max != null) && max < 0) {
+        xxxxx(`rep max is < 0 '${max}'`);
+      }
       rep = function() {
         var count, pos, pos_start;
         count = 0;
@@ -370,13 +373,31 @@
     set(var_, expr) {
       var set;
       set = () => {
-        var value;
+        var i, size, state, value;
         value = this.call(expr, 'any');
         if (value === -1) {
           return false;
         }
-        this.state_prev()[var_] = value;
-        this.state_prev().xxx = value;
+        if (value === 'auto-detect') {
+          value = this.auto_detect();
+        }
+        state = this.state_prev();
+        state[var_] = value;
+        if (state.name !== 'all') {
+          size = this.state.length;
+          i = 3;
+          while (i < size) {
+            if (i > size - 2) {
+              xxxxx(this);
+            }
+            state = this.state[size - i - 1];
+            state[var_] = value;
+            if (state.name === 's_l_block_scalar') {
+              break;
+            }
+            i++;
+          }
+        }
         return true;
       };
       return name_('set', set, `set('${var_}', ${stringify(expr)})`);
@@ -400,6 +421,9 @@
       add = () => {
         if (isFunction(y)) {
           y = this.call(y, 'number');
+        }
+        if (!isNumber(y)) {
+          xxxxx(`y is '${stringify(y)}', not number in 'add'`);
         }
         return x + y;
       };
@@ -442,7 +466,7 @@
     ord(str) {
       var ord;
       return ord = function() {
-        return str.charCodeAt(0);
+        return str.charCodeAt(0) - 48;
       };
     }
 
@@ -454,8 +478,9 @@
         }
         if (test) {
           this.call(do_if_true);
+          return true;
         }
-        return test;
+        return false;
       };
       return name_('if', if_);
     }
@@ -498,7 +523,6 @@
     t() {
       var t;
       return t = () => {
-        xxxxx(this);
         return this.state_curr().t;
       };
     }
@@ -527,6 +551,10 @@
       } else {
         return -1;
       }
+    }
+
+    auto_detect(n) {
+      return 3;
     }
 
     //------------------------------------------------------------------------------
