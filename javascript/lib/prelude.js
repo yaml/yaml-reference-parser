@@ -5,7 +5,21 @@
   global.ENV = process.env;
 
   global.name_ = function(name, func, trace) {
+    var f;
     func.trace = trace || name;
+    if (ENV.DEBUGXXX) { // Not working yet
+      f = function(n, ...args) {
+        args = args.map(function(a) {
+          return stringify(a);
+        });
+        args = args.join('');
+        debug(`${name}(${args})`);
+        return func.apply(func);
+      };
+      f.name = name;
+      f.trace = trace || name;
+      return f;
+    }
     return func;
   };
 

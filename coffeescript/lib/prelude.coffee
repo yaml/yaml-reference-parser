@@ -4,6 +4,16 @@ global.ENV = process.env
 
 global.name_ = (name, func, trace)->
   func.trace = trace || name
+  if ENV.DEBUGXXX   # Not working yet
+    f = (n, args...)->
+      args = args.map (a)-> stringify(a)
+      args = args.join ''
+      debug "#{name}(#{args})"
+      func.apply func
+    f.name = name
+    f.trace = trace || name
+    return f
+
   func
 
 global.isNull = _.isNull

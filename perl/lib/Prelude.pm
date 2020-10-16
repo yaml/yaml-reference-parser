@@ -26,6 +26,8 @@ use Time::HiRes qw< gettimeofday tv_interval >;
 use YAML::PP::Perl;
 use XXX;
 
+use constant DEBUG => $ENV{DEBUG};
+
 our @EXPORT;
 sub export { push @EXPORT, @_ }
 
@@ -47,9 +49,15 @@ sub rule {
 export 'name';
 sub name {
   my ($name, $func, $trace) = (@_, '');
-  my $f = $ENV{DEBUG}
-    ? sub { debug($name); goto $func }
-    : $func;
+  my $f = $func;
+  if (DEBUG) {
+    $f = sub {
+      my ($n, @args) = @_;
+      my $args = join ',', map stringify($_), @args;
+      debug("$name($args)");
+      goto $func;
+    }
+  }
   return Func->new($f, $name, $trace);
 }
 
@@ -136,7 +144,6 @@ sub debug {
 
 export 'debug_rule';
 sub debug_rule {
-  return unless $ENV{DEBUG};
   my ($name, @args) = @_;
   my $args = join ',', map stringify($_), @args;
   debug "$name($args)";

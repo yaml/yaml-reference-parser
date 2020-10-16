@@ -534,6 +534,7 @@ sub trace_start {
 }
 
 sub trace_quiet {
+  return [] if $ENV{DEBUG};
   [
     split(',', ($ENV{TRACE_QUIET} || '')),
     'c_directives_end',
@@ -580,6 +581,12 @@ sub trace {
     $self->{pos},
     $input,
   );
+
+  if ($ENV{DEBUG}) {
+    warn sprintf "%6d %s",
+      $self->{trace_num}, $line;
+    return;
+  }
 
   my $trace_info = undef;
   $level = "${level}_$call";

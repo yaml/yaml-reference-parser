@@ -163,7 +163,6 @@
       if (!receiver) {
         return;
       }
-      // warn receiver.name
       return receiver.call(this.receiver, {
         text: this.input.slice(pos, this.pos),
         state: this.state_curr(),
@@ -563,6 +562,9 @@
     }
 
     trace_quiet() {
+      if (ENV.DEBUG) {
+        return [];
+      }
       return ['c_directives_end', 'c_l_folded', 'c_l_literal', 'c_ns_alias_node', 'c_ns_anchor_property', 'c_ns_tag_property', 'l_directive_document', 'l_document_prefix', 'ns_flow_content', 'ns_plain', 's_l_comments', 's_separate'].concat((ENV.TRACE_QUIET || '').split(','));
     }
 
@@ -589,6 +591,10 @@
       }
       input = input.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
       line = sprintf("%s%s %-40s  %4d '%s'", indent, type, this.trace_format_call(call, args), this.pos, input);
+      if (ENV.DEBUG) {
+        warn(sprintf("%6d %s", this.trace_num, line));
+        return;
+      }
       trace_info = null;
       level = `${level}_${call}`;
       if (type === '?' && this.trace_off === 0) {

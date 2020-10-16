@@ -385,6 +385,7 @@ global.Parser = class Parser extends Grammar
     '' || ENV.TRACE_START
 
   trace_quiet: ->
+    return [] if ENV.DEBUG
     [
       'c_directives_end',
       'c_l_folded',
@@ -427,6 +428,11 @@ global.Parser = class Parser extends Grammar
       @pos,
       input,
     )
+
+    if ENV.DEBUG
+      warn sprintf "%6d %s",
+        @trace_num, line
+      return
 
     trace_info = null
     level = "#{level}_#{call}"
