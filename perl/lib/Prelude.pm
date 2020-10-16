@@ -47,7 +47,10 @@ sub rule {
 export 'name';
 sub name {
   my ($name, $func, $trace) = (@_, '');
-  return Func->new($func, $name, $trace);
+  my $f = $ENV{DEBUG}
+    ? sub { debug($name); goto $func }
+    : $func;
+  return Func->new($f, $name, $trace);
 }
 
 export qw<isNull isBoolean isNumber isString isFunction isArray isObject>;

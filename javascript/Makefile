@@ -5,7 +5,6 @@ GRAMMAR :=
 
 ALL_JS := \
     bin/yaml-parser \
-    lib/debug-parser.js \
     lib/grammar.js \
     lib/parser.js \
     lib/prelude.js \

@@ -2,15 +2,11 @@
 
 require '../lib/prelude'
 require '../lib/parser'
-require '../lib/debug-parser'
 require '../lib/test-receiver'
 
 main = (yaml=file_read('-'))->
 
-  if process.env.DEBUG
-    parser = new DebugParser(new TestReceiver)
-  else
-    parser = new Parser(new TestReceiver)
+  parser = new Parser(new TestReceiver)
 
   pass = true
   start = timer()

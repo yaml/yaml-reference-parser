@@ -8,17 +8,11 @@
 
   require('../lib/parser');
 
-  require('../lib/debug-parser');
-
   require('../lib/test-receiver');
 
   main = function(yaml = file_read('-')) {
     var e, n, parser, pass, start, time;
-    if (process.env.DEBUG) {
-      parser = new DebugParser(new TestReceiver());
-    } else {
-      parser = new Parser(new TestReceiver());
-    }
+    parser = new Parser(new TestReceiver());
     pass = true;
     start = timer();
     try {

@@ -9,20 +9,13 @@ BEGIN { -d "$FindBin::Bin/../ext" || `cd $FindBin::Bin/.. && make ext/perl 2>&1`
 
 use Prelude;
 use Parser;
-use DebugParser;
 use TestReceiver;
 
 sub main {
   my ($yaml) = @_;
   $yaml //= file_read '-';
 
-  my $parser;
-  if ($ENV{DEBUG}) {
-    $parser = DebugParser->new(TestReceiver->new);
-  }
-  else {
-    $parser = Parser->new(TestReceiver->new);
-  }
+  my $parser = Parser->new(TestReceiver->new);
 
   my $pass = true;
   my $start = timer;
