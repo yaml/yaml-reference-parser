@@ -94,7 +94,7 @@
     }
 
     call(func, type = 'boolean') {
-      var args, pos, value;
+      var args, pos, trace, value;
       args = [];
       if (isArray(func)) {
         [func, ...args] = func;
@@ -105,13 +105,11 @@
       if (!isFunction(func)) {
         FAIL(`Bad call type '${typeof_(func)}' for '${func}'`);
       }
-      if (func.trace == null) {
-        func.trace = func.name;
-      }
-      this.state_push(func.trace);
+      trace = func.trace != null ? func.trace : func.trace = func.name;
+      this.state_push(trace);
       this.trace_num++;
       if (TRACE) {
-        this.trace('?', func.trace, args);
+        this.trace('?', trace, args);
       }
       if (func.name === 'l_bare_document') {
         this.state_curr().doc = true;
@@ -132,7 +130,7 @@
         value = this.call(value);
       }
       if (type !== 'any' && typeof_(value) !== type) {
-        FAIL(`Calling '${func.trace}' returned '${typeof_(value)}' instead of '${type}'`);
+        FAIL(`Calling '${trace}' returned '${typeof_(value)}' instead of '${type}'`);
       }
       this.trace_num++;
       if (type !== 'boolean') {
@@ -142,12 +140,12 @@
       } else {
         if (value) {
           if (TRACE) {
-            this.trace('+', func.trace);
+            this.trace('+', trace);
           }
           this.receive(func, 'got', pos);
         } else {
           if (TRACE) {
-            this.trace('x', func.trace);
+            this.trace('x', trace);
           }
           this.receive(func, 'not', pos);
         }

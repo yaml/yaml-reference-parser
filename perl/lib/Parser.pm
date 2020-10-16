@@ -114,12 +114,12 @@ sub call {
   FAIL "Bad call type '${\ typeof $func}' for '$func'"
     unless isFunction $func;
 
-  $func->{trace} //= $func->{name};
+  my $trace = $func->{trace} //= $func->{name};
 
-  $self->state_push($func->{trace});
+  $self->state_push($trace);
 
   $self->{trace_num}++;
-  $self->trace('?', $func->{trace}, $args) if TRACE;
+  $self->trace('?', $trace, $args) if TRACE;
 
   if ($func->{name} eq 'l_bare_document') {
     $self->state_curr->{doc} = true;
@@ -139,7 +139,7 @@ sub call {
     $value = $self->call($value);
   }
 
-  FAIL "Calling '$func->{trace}' returned '${\ typeof($value)}' instead of '$type'"
+  FAIL "Calling '$trace' returned '${\ typeof($value)}' instead of '$type'"
     if $type ne 'any' and typeof($value) ne $type;
 
   $self->{trace_num}++;
@@ -148,11 +148,11 @@ sub call {
   }
   else {
     if ($value) {
-      $self->trace('+', $func->{trace}) if TRACE;
+      $self->trace('+', $trace) if TRACE;
       $self->receive($func, 'got', $pos);
     }
     else {
-      $self->trace('x', $func->{trace}) if TRACE;
+      $self->trace('x', $trace) if TRACE;
       $self->receive($func, 'not', $pos);
     }
   }

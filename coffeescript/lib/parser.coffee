@@ -83,12 +83,12 @@ global.Parser = class Parser extends Grammar
     FAIL "Bad call type '#{typeof_ func}' for '#{func}'" \
       unless isFunction func
 
-    func.trace ?= func.name
+    trace = func.trace ?= func.name
 
-    @state_push(func.trace)
+    @state_push(trace)
 
     @trace_num++
-    @trace '?', func.trace, args if TRACE
+    @trace '?', trace, args if TRACE
 
     if func.name == 'l_bare_document'
       @state_curr().doc = true
@@ -105,7 +105,7 @@ global.Parser = class Parser extends Grammar
     while isFunction(value) or isArray(value)
       value = @call value
 
-    FAIL "Calling '#{func.trace}' returned '#{typeof_ value}' instead of '#{type}'" \
+    FAIL "Calling '#{trace}' returned '#{typeof_ value}' instead of '#{type}'" \
       if type != 'any' and typeof_(value) != type
 
     @trace_num++
@@ -113,10 +113,10 @@ global.Parser = class Parser extends Grammar
       @trace '>', value if TRACE
     else
       if value
-        @trace '+', func.trace if TRACE
+        @trace '+', trace if TRACE
         @receive func, 'got', pos
       else
-        @trace 'x', func.trace if TRACE
+        @trace 'x', trace if TRACE
         @receive func, 'not', pos
 
     @state_pop()
@@ -126,8 +126,6 @@ global.Parser = class Parser extends Grammar
     func.receivers ?= @make_receivers()
     receiver = func.receivers[type]
     return unless receiver
-
-    # warn receiver.name
 
     receiver.call @receiver,
       text: @input[pos...@pos]
