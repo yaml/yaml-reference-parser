@@ -111,7 +111,7 @@ sub call {
 
   return $func if isNumber $func or isString $func;
 
-  xxxxx "Bad call type '${\ typeof $func}' for '$func'"
+  FAIL "Bad call type '${\ typeof $func}' for '$func'"
     unless isFunction $func;
 
   $func->{trace} //= $func->{name};
@@ -139,7 +139,7 @@ sub call {
     $value = $self->call($value);
   }
 
-  xxxxx "Calling '$func->{trace}' returned '${\ typeof($value)}' instead of '$type'"
+  FAIL "Calling '$func->{trace}' returned '${\ typeof($value)}' instead of '$type'"
     if $type ne 'any' and typeof($value) ne $type;
 
   $self->{trace_num}++;
@@ -201,7 +201,7 @@ sub all {
   name all => sub {
     my $pos = $self->{pos};
     for my $func (@funcs) {
-      xxxxx '*** Missing function in @all group:', \@funcs
+      FAIL '*** Missing function in @all group:', \@funcs
         unless defined $func;
 
       if (not $self->call($func)) {
@@ -238,7 +238,7 @@ sub may {
 # Repeat a rule a certain number of times:
 sub rep {
   my ($self, $min, $max, $func) = @_;
-  xxxxx "rep max is < 0 '$max'"
+  FAIL "rep max is < 0 '$max'"
     if defined $max and $max < 0;
   name rep => sub {
     my $count = 0;
@@ -264,7 +264,7 @@ sub case {
   name case => sub {
     my $rule = $map->{$var};
     defined $rule or
-      xxxxx "Can't find '$var' in:", $map;
+      FAIL "Can't find '$var' in:", $map;
     $self->call($rule);
   }, "case($var,${\ stringify $map})";
 }
@@ -274,7 +274,7 @@ sub flip {
   my ($self, $var, $map) = @_;
   my $value = $map->{$var};
   defined $value or
-    xxxxx "Can't find '$var' in:", $map;
+    FAIL "Can't find '$var' in:", $map;
   return $value if not ref $value;
   return $self->call($value, 'number');
 }
@@ -373,7 +373,8 @@ sub set {
     if ($state->{name} ne 'all') {
       my $size = @{$self->{state}};
       for (my $i = 3; $i < $size; $i++) {
-        xxxxx $self if $i > $size - 2;
+        FAIL "failed to traverse state stack in 'set'"
+          if $i > $size - 2;
         $state = $self->{state}[0 - $i];
         $state->{$var} = $value;
         last if $state->{name} eq 's_l_block_scalar';
@@ -401,7 +402,7 @@ sub add {
   my ($self, $x, $y) = @_;
   name add => sub {
     $y = $self->call($y, 'number') if isFunction $y;
-    xxxxx "y is '${\ stringify $y}', not number in 'add'"
+    FAIL "y is '${\ stringify $y}', not number in 'add'"
       unless isNumber $y;
     return $x + $y;
   }, "add($x,${\ stringify $y})";
@@ -421,7 +422,7 @@ sub match {
   my $state = $self->{state};
   my $i = @$state - 1;
   while ($i > 0 && not defined $state->[$i]{end}) {
-    xxxxx "Can't find match" if $i == 1;
+    FAIL "Can't find match" if $i == 1;
     $i--;
   }
 

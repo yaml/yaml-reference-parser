@@ -80,7 +80,7 @@ global.Parser = class Parser extends Grammar
     if isNumber(func) or isString(func)
       return func
 
-    xxxxx "Bad call type '#{typeof_ func}' for '#{func}'" \
+    FAIL "Bad call type '#{typeof_ func}' for '#{func}'" \
       unless isFunction func
 
     func.trace ?= func.name
@@ -105,7 +105,7 @@ global.Parser = class Parser extends Grammar
     while isFunction(value) or isArray(value)
       value = @call value
 
-    xxxxx "Calling '#{func.trace}' returned '#{typeof_ value}' instead of '#{type}'" \
+    FAIL "Calling '#{func.trace}' returned '#{typeof_ value}' instead of '#{type}'" \
       if type != 'any' and typeof_(value) != type
 
     @trace_num++
@@ -155,7 +155,7 @@ global.Parser = class Parser extends Grammar
     all = ->
       pos = @pos
       for func in funcs
-        xxxxx '*** Missing function in @all group:', funcs \
+        FAIL '*** Missing function in @all group:', funcs \
           unless func?
 
         if not @call func
@@ -180,7 +180,7 @@ global.Parser = class Parser extends Grammar
 
   # Repeat a rule a certain number of times:
   rep: (min, max, func)->
-    xxxxx "rep max is < 0 '#{max}'" \
+    FAIL "rep max is < 0 '#{max}'" \
       if max? and max < 0
     rep = ->
       count = 0
@@ -202,7 +202,7 @@ global.Parser = class Parser extends Grammar
     case_ = ->
       rule = map[var_]
       rule? or
-        xxxxx "Can't find '#{var_}' in:", map
+        FAIL "Can't find '#{var_}' in:", map
       @call rule
     name_ 'case', case_, "case(#{var_},#{stringify map})"
 
@@ -210,7 +210,7 @@ global.Parser = class Parser extends Grammar
   flip: (var_, map)->
     value = map[var_]
     value? or
-      xxxxx "Can't find '#{var_}' in:", map
+      FAIL "Can't find '#{var_}' in:", map
     return value if isString value
     return @call value, 'number'
 
@@ -278,7 +278,8 @@ global.Parser = class Parser extends Grammar
         size = @state.length
         i = 3
         while i < size
-          xxxxx @ if i > size - 2
+          FAIL "failed to traverse state stack in 'set'" \
+            if i > size - 2
           state = @state[size - i - 1]
           state[var_] = value
           break if state.name == 's_l_block_scalar'
@@ -297,7 +298,7 @@ global.Parser = class Parser extends Grammar
   add: (x, y)->
     add = =>
       y = @call y, 'number' if isFunction y
-      xxxxx "y is '#{stringify y}', not number in 'add'" \
+      FAIL "y is '#{stringify y}', not number in 'add'" \
         unless isNumber y
       return x + y
     name_ 'add', add, "add(#{x},#{stringify y})"
@@ -312,7 +313,7 @@ global.Parser = class Parser extends Grammar
     state = @state
     i = state.length - 1
     while i > 0 && not state[i].end?
-      xxxxx "Can't find match" if i == 1
+      FAIL "Can't find match" if i == 1
       i--
 
     {beg, end} = state[i]

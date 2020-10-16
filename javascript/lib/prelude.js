@@ -92,9 +92,9 @@
     return require('yaml').stringify(o);
   };
 
-  global.xxxxx = function(...o) {
+  global.FAIL = function(...o) {
     WWW(o);
-    return die(`xxxxx '${o[0] || '???'}'`);
+    return die(`FAIL '${o[0] || '???'}'`);
   };
 
   global.timer = function(start = null) {

@@ -51,7 +51,7 @@
 
     cache_down(event = null) {
       var e, events, i, len;
-      events = this.cache.pop() || xxxxx(this);
+      events = this.cache.pop() || FAIL('cache_down');
       for (i = 0, len = events.length; i < len; i++) {
         e = events[i];
         this.push(e);
@@ -63,7 +63,7 @@
 
     cache_drop() {
       var events;
-      events = this.cache.pop() || xxxxx(this);
+      events = this.cache.pop() || FAIL('cache_drop');
       return events;
     }
 
@@ -230,7 +230,7 @@
     }
 
     got__c_ns_flow_map_empty_key_entry() {
-      return xxxxx(this);
+      return FAIL('got__c_ns_flow_map_empty_key_entry');
     }
 
     not__c_ns_flow_map_empty_key_entry() {

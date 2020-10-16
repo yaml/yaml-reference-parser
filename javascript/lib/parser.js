@@ -103,7 +103,7 @@
         return func;
       }
       if (!isFunction(func)) {
-        xxxxx(`Bad call type '${typeof_(func)}' for '${func}'`);
+        FAIL(`Bad call type '${typeof_(func)}' for '${func}'`);
       }
       if (func.trace == null) {
         func.trace = func.name;
@@ -132,7 +132,7 @@
         value = this.call(value);
       }
       if (type !== 'any' && typeof_(value) !== type) {
-        xxxxx(`Calling '${func.trace}' returned '${typeof_(value)}' instead of '${type}'`);
+        FAIL(`Calling '${func.trace}' returned '${typeof_(value)}' instead of '${type}'`);
       }
       this.trace_num++;
       if (type !== 'boolean') {
@@ -200,7 +200,7 @@
         for (j = 0, len1 = funcs.length; j < len1; j++) {
           func = funcs[j];
           if (func == null) {
-            xxxxx('*** Missing function in @all group:', funcs);
+            FAIL('*** Missing function in @all group:', funcs);
           }
           if (!this.call(func)) {
             this.pos = pos;
@@ -238,7 +238,7 @@
     rep(min, max, func) {
       var rep;
       if ((max != null) && max < 0) {
-        xxxxx(`rep max is < 0 '${max}'`);
+        FAIL(`rep max is < 0 '${max}'`);
       }
       rep = function() {
         var count, pos, pos_start;
@@ -270,7 +270,7 @@
       case_ = function() {
         var rule;
         rule = map[var_];
-        (rule != null) || xxxxx(`Can't find '${var_}' in:`, map);
+        (rule != null) || FAIL(`Can't find '${var_}' in:`, map);
         return this.call(rule);
       };
       return name_('case', case_, `case(${var_},${stringify(map)})`);
@@ -280,7 +280,7 @@
     flip(var_, map) {
       var value;
       value = map[var_];
-      (value != null) || xxxxx(`Can't find '${var_}' in:`, map);
+      (value != null) || FAIL(`Can't find '${var_}' in:`, map);
       if (isString(value)) {
         return value;
       }
@@ -388,7 +388,7 @@
           i = 3;
           while (i < size) {
             if (i > size - 2) {
-              xxxxx(this);
+              FAIL("failed to traverse state stack in 'set'");
             }
             state = this.state[size - i - 1];
             state[var_] = value;
@@ -423,7 +423,7 @@
           y = this.call(y, 'number');
         }
         if (!isNumber(y)) {
-          xxxxx(`y is '${stringify(y)}', not number in 'add'`);
+          FAIL(`y is '${stringify(y)}', not number in 'add'`);
         }
         return x + y;
       };
@@ -445,7 +445,7 @@
       i = state.length - 1;
       while (i > 0 && (state[i].end == null)) {
         if (i === 1) {
-          xxxxx("Can't find match");
+          FAIL("Can't find match");
         }
         i--;
       }

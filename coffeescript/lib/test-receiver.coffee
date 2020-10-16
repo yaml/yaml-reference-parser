@@ -32,12 +32,12 @@ global.TestReceiver = class TestReceiver
     @add event if event?
 
   cache_down: (event=null)->
-    events = @cache.pop() or xxxxx @
+    events = @cache.pop() or FAIL 'cache_down'
     @push e for e in events
     @add event if event?
 
   cache_drop: ->
-    events = @cache.pop() or xxxxx @
+    events = @cache.pop() or FAIL 'cache_drop'
     return events
 
   cache_get: (type)->
@@ -124,7 +124,7 @@ global.TestReceiver = class TestReceiver
   not__c_l_block_map_explicit_entry: -> @cache_drop()
 
   try__c_ns_flow_map_empty_key_entry: -> @cache_up()
-  got__c_ns_flow_map_empty_key_entry: -> xxxxx @
+  got__c_ns_flow_map_empty_key_entry: -> FAIL 'got__c_ns_flow_map_empty_key_entry'
   not__c_ns_flow_map_empty_key_entry: -> @cache_drop()
 
   got__ns_plain: (o)->

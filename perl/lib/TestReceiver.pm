@@ -48,14 +48,14 @@ sub cache_up {
 
 sub cache_down {
   my ($self, $event) = @_;
-  my $events = pop @{$self->{cache}} or xxxxx @_;
+  my $events = pop @{$self->{cache}} or FAIL 'cache_down';
   $self->push($_) for @$events;
   $self->add($event) if $event;
 }
 
 sub cache_drop {
   my ($self) = @_;
-  my $events = pop @{$self->{cache}} or xxxxx @_;
+  my $events = pop @{$self->{cache}} or FAIL 'cache_drop';
   return $events;
 }
 
@@ -168,7 +168,7 @@ sub got__c_l_block_map_explicit_entry{ $_[0]->cache_down }
 sub not__c_l_block_map_explicit_entry{ $_[0]->cache_drop }
 
 sub try__c_ns_flow_map_empty_key_entry { $_[0]->cache_up }
-sub got__c_ns_flow_map_empty_key_entry { xxxxx @_ }
+sub got__c_ns_flow_map_empty_key_entry { FAIL 'got__c_ns_flow_map_empty_key_entry' }
 sub not__c_ns_flow_map_empty_key_entry { $_[0]->cache_drop }
 
 sub got__ns_plain {

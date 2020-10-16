@@ -150,10 +150,10 @@ sub dump {
   YAML::PP::Perl->new->dump(@_);
 }
 
-export 'xxxxx';
-sub xxxxx {
+export 'FAIL';
+sub FAIL {
   WWW [@_];
-  confess "xxxxx '${\ $_[0] // '???'}'";
+  confess "FAIL '${\ $_[0] // '???'}'";
 }
 
 export 'timer';

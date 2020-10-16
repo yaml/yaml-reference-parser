@@ -54,9 +54,9 @@ global.debug_rule = (name, args...)->
 global.dump = (o)->
   require('yaml').stringify o
 
-global.xxxxx = (o...)->
+global.FAIL = (o...)->
   WWW o
-  die "xxxxx '#{o[0] || '???'}'"
+  die "FAIL '#{o[0] || '???'}'"
 
 global.timer = (start=null)->
   if start?
