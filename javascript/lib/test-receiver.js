@@ -50,9 +50,9 @@
     }
 
     cache_down(event = null) {
-      var e, events, i, len;
+      var e, events, i, len1;
       events = this.cache.pop() || FAIL('cache_down');
-      for (i = 0, len = events.length; i < len; i++) {
+      for (i = 0, len1 = events.length; i < len1; i++) {
         e = events[i];
         this.push(e);
       }
@@ -273,13 +273,8 @@
       return this.add('=VAL', `\"${text}`);
     }
 
-    try__c_l_literal() {
-      this.empty = true;
-      return this.cache_up();
-    }
-
     got__l_empty() {
-      if (this.empty) {
+      if (this.in_scalar) {
         return this.add(null, '');
       }
     }
@@ -288,14 +283,14 @@
       return this.add(null, o.text);
     }
 
-    not__c_l_literal() {
-      delete this.empty;
-      return this.cache_drop();
+    try__c_l_literal() {
+      this.in_scalar = true;
+      return this.cache_up();
     }
 
     got__c_l_literal() {
       var lines, t, text;
-      delete this.empty;
+      delete this.in_scalar;
       lines = this.cache_drop();
       lines = lines.map(function(l) {
         return `${l.value}\n`;
@@ -308,6 +303,57 @@
         text = text.replace(/\n+$/, "");
       }
       return this.add('=VAL', `|${text}`);
+    }
+
+    not__c_l_literal() {
+      delete this.in_scalar;
+      return this.cache_drop();
+    }
+
+    got__ns_char(o) {
+      if (this.in_scalar) {
+        return this.ns_char = o.text;
+      }
+    }
+
+    got__s_nb_folded_text__all__rep(o) {
+      return this.add(null, `${this.ns_char}${o.text}`);
+    }
+
+    try__c_l_folded() {
+      this.in_scalar = true;
+      return this.cache_up();
+    }
+
+    got__c_l_folded() {
+      var lines, t, text;
+      delete this.in_scalar;
+      lines = this.cache_drop();
+      lines = lines.map(function(l) {
+        return `${l.value}\n`;
+      });
+      text = lines.join('');
+      text = text.replace(/(\n+)(?=.)/g, function(...m) {
+        var len;
+        len = m[1].length - 1;
+        if (len) {
+          return _.repeat("\n", len);
+        } else {
+          return ' ';
+        }
+      });
+      t = this.parser.state_curr().t;
+      if (t === 'clip') {
+        text = text.replace(/\n+$/, "\n");
+      } else if (t === 'strip') {
+        text = text.replace(/\n+$/, "");
+      }
+      return this.add('=VAL', `>${text}`);
+    }
+
+    not__c_l_folded() {
+      delete this.in_scalar;
+      return this.cache_drop();
     }
 
     got__e_scalar() {

@@ -202,27 +202,22 @@ sub got__c_double_quoted {
   $self->add('=VAL', qq<"$text>);
 }
 
-sub try__c_l_literal {
-  my ($self) = @_;
-  $self->{empty} = true;
-  $self->cache_up;
-}
 sub got__l_empty {
   my ($self) = @_;
-  $self->add(undef, '') if $self->{empty};
+  $self->add(undef, '') if $self->{in_scalar};
 }
 sub got__l_nb_literal_text__all__rep2 {
   my ($self, $o) = @_;
   $self->add(undef, $o->{text});
 }
-sub not__c_l_literal {
+sub try__c_l_literal {
   my ($self) = @_;
-  delete $self->{empty};
-  $_[0]->cache_drop;
+  $self->{in_scalar} = true;
+  $self->cache_up;
 }
 sub got__c_l_literal {
   my ($self) = @_;
-  delete $self->{empty};
+  delete $self->{in_scalar};
   my $lines = $self->cache_drop;
   my $text = join '', map "$_->{value}\n", @$lines;
   my $t = $self->{parser}->state_curr->{t};
@@ -233,6 +228,45 @@ sub got__c_l_literal {
     $text =~ s/\n+\z//;
   }
   $self->add('=VAL', qq<|$text>);
+}
+sub not__c_l_literal {
+  my ($self) = @_;
+  delete $self->{in_scalar};
+  $_[0]->cache_drop;
+}
+
+sub got__ns_char {
+  my ($self, $o) = @_;
+  $self->{ns_char} = $o->{text} if $self->{in_scalar};
+}
+sub got__s_nb_folded_text__all__rep {
+  my ($self, $o) = @_;
+  $self->add(undef, "$self->{ns_char}$o->{text}");
+}
+sub try__c_l_folded {
+  my ($self) = @_;
+  $self->{in_scalar} = true;
+  $self->cache_up;
+}
+sub got__c_l_folded {
+  my ($self) = @_;
+  delete $self->{in_scalar};
+  my $lines = $self->cache_drop;
+  my $text = join '', map "$_->{value}\n", @$lines;
+  $text =~ s/(\n+)(?=.)/("\n" x (length($1) -1)) || ' '/ge;
+  my $t = $self->{parser}->state_curr->{t};
+  if ($t eq 'clip') {
+    $text =~ s/\n+\z/\n/;
+  }
+  elsif ($t eq 'strip') {
+    $text =~ s/\n+\z//;
+  }
+  $self->add('=VAL', qq{>$text});
+}
+sub not__c_l_folded {
+  my ($self) = @_;
+  delete $self->{in_scalar};
+  $_[0]->cache_drop;
 }
 
 sub got__e_scalar { $_[0]->add('=VAL', ':') }

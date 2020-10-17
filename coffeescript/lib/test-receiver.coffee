@@ -152,18 +152,15 @@ global.TestReceiver = class TestReceiver
       .replace(/\\\\/g, '\\')
     @add '=VAL', "\"#{text}"
 
-  try__c_l_literal: ->
-    @empty = true
-    @cache_up()
   got__l_empty: ->
-    @add null, '' if @empty
+    @add null, '' if @in_scalar
   got__l_nb_literal_text__all__rep2: (o)->
     @add null, o.text
-  not__c_l_literal: ->
-    delete @empty
-    @cache_drop()
+  try__c_l_literal: ->
+    @in_scalar = true
+    @cache_up()
   got__c_l_literal: ->
-    delete @empty
+    delete @in_scalar
     lines = @cache_drop()
     lines = lines.map (l)-> "#{l.value}\n"
     text = lines.join ''
@@ -172,7 +169,35 @@ global.TestReceiver = class TestReceiver
       text = text.replace /\n+$/, "\n"
     else if t == 'strip'
       text = text.replace /\n+$/, ""
-    @add('=VAL', "|#{text}")
+    @add '=VAL', "|#{text}"
+  not__c_l_literal: ->
+    delete @in_scalar
+    @cache_drop()
+
+  got__ns_char: (o)->
+    @ns_char = o.text if @in_scalar
+  got__s_nb_folded_text__all__rep: (o)->
+    @add null, "#{@ns_char}#{o.text}"
+  try__c_l_folded: ->
+    @in_scalar = true
+    @cache_up()
+  got__c_l_folded: ->
+    delete @in_scalar
+    lines = @cache_drop()
+    lines = lines.map (l)-> "#{l.value}\n"
+    text = lines.join ''
+    text = text.replace /(\n+)(?=.)/g, (m...)->
+      len = m[1].length - 1
+      return if len then _.repeat("\n", len) else ' '
+    t = @parser.state_curr().t
+    if t == 'clip'
+      text = text.replace /\n+$/, "\n"
+    else if t == 'strip'
+      text = text.replace /\n+$/, ""
+    @add '=VAL', ">#{text}"
+  not__c_l_folded: ->
+    delete @in_scalar
+    @cache_drop()
 
   got__e_scalar: -> @add '=VAL', ':'
 

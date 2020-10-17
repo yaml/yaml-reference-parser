@@ -567,9 +567,9 @@ sub trace_quiet {
   return [] if $ENV{DEBUG};
   [
     split(',', ($ENV{TRACE_QUIET} || '')),
-    # 'b_as_line_feed',
-    # 's_indent',
-    # 'nb_char',
+#     'b_as_line_feed',
+#     's_indent',
+#     'nb_char',
 
     'c_directives_end',
     'c_l_folded',
