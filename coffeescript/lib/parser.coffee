@@ -297,10 +297,9 @@ global.Parser = class Parser extends Grammar
         while i < size
           FAIL "failed to traverse state stack in 'set'" \
             if i > size - 2
-          state = @state[size - i - 1]
+          state = @state[size - i++ - 1]
           state[var_] = value
           break if state.name == 's_l_block_scalar'
-          i++
       return true
     name_ 'set', set, "set('#{var_}', #{stringify expr})"
 
@@ -396,7 +395,11 @@ global.Parser = class Parser extends Grammar
     return if indent > 0 then indent else -1
 
   auto_detect: (n)->
-    return 3
+    m = @input[@pos..].match /^.*\n(\ *)/
+    return 0 unless m
+    m = m[1].length - n
+    return 0 if m < 0
+    return m
 
 #------------------------------------------------------------------------------
 # Trace debugging

@@ -548,7 +548,11 @@ name 'auto_detect_indent', \&auto_detect_indent;
 
 sub auto_detect {
   my ($self, $n) = @_;
-  return 3;
+  substr($self->{input}, $self->{pos}) =~ /^.*\n(\ *)/
+    or return 0;
+  my $m = length($1) - $n;
+  return 0 if $m < 0;
+  return $m;
 }
 name 'auto_detect', \&auto_detect;
 
@@ -563,6 +567,10 @@ sub trace_quiet {
   return [] if $ENV{DEBUG};
   [
     split(',', ($ENV{TRACE_QUIET} || '')),
+    # 'b_as_line_feed',
+    # 's_indent',
+    # 'nb_char',
+
     'c_directives_end',
     'c_l_folded',
     'c_l_literal',

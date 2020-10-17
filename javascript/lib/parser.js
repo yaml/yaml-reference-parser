@@ -418,12 +418,11 @@
             if (i > size - 2) {
               FAIL("failed to traverse state stack in 'set'");
             }
-            state = this.state[size - i - 1];
+            state = this.state[size - i++ - 1];
             state[var_] = value;
             if (state.name === 's_l_block_scalar') {
               break;
             }
-            i++;
           }
         }
         return true;
@@ -585,7 +584,16 @@
     }
 
     auto_detect(n) {
-      return 3;
+      var m;
+      m = this.input.slice(this.pos).match(/^.*\n(\ *)/);
+      if (!m) {
+        return 0;
+      }
+      m = m[1].length - n;
+      if (m < 0) {
+        return 0;
+      }
+      return m;
     }
 
     //------------------------------------------------------------------------------

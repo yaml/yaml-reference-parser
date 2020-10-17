@@ -202,16 +202,36 @@ sub got__c_double_quoted {
   $self->add('=VAL', qq<"$text>);
 }
 
-sub try__c_l_literal { $_[0]->cache_up }
+sub try__c_l_literal {
+  my ($self) = @_;
+  $self->{empty} = true;
+  $self->cache_up;
+}
+sub got__l_empty {
+  my ($self) = @_;
+  $self->add(undef, '') if $self->{empty};
+}
 sub got__l_nb_literal_text__all__rep2 {
   my ($self, $o) = @_;
   $self->add(undef, $o->{text});
 }
-sub not__c_l_literal { $_[0]->cache_drop }
+sub not__c_l_literal {
+  my ($self) = @_;
+  delete $self->{empty};
+  $_[0]->cache_drop;
+}
 sub got__c_l_literal {
   my ($self) = @_;
+  delete $self->{empty};
   my $lines = $self->cache_drop;
   my $text = join '', map "$_->{value}\n", @$lines;
+  my $t = $self->{parser}->state_curr->{t};
+  if ($t eq 'clip') {
+    $text =~ s/\n+\z/\n/;
+  }
+  elsif ($t eq 'strip') {
+    $text =~ s/\n+\z//;
+  }
   $self->add('=VAL', qq<|$text>);
 }
 

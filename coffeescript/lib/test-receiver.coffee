@@ -152,14 +152,26 @@ global.TestReceiver = class TestReceiver
       .replace(/\\\\/g, '\\')
     @add '=VAL', "\"#{text}"
 
-  try__c_l_literal: -> @cache_up()
+  try__c_l_literal: ->
+    @empty = true
+    @cache_up()
+  got__l_empty: ->
+    @add null, '' if @empty
   got__l_nb_literal_text__all__rep2: (o)->
     @add null, o.text
-  not__c_l_literal: -> @cache_drop()
+  not__c_l_literal: ->
+    delete @empty
+    @cache_drop()
   got__c_l_literal: ->
+    delete @empty
     lines = @cache_drop()
     lines = lines.map (l)-> "#{l.value}\n"
     text = lines.join ''
+    t = @parser.state_curr().t
+    if t == 'clip'
+      text = text.replace /\n+$/, "\n"
+    else if t == 'strip'
+      text = text.replace /\n+$/, ""
     @add('=VAL', "|#{text}")
 
   got__e_scalar: -> @add '=VAL', ':'
