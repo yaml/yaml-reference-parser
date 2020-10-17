@@ -153,14 +153,12 @@ global.TestReceiver = class TestReceiver
     @add '=VAL', "\"#{text}"
 
   try__c_l_literal: -> @cache_up()
-  got__l_nb_literal_text: (o)->
-    text = o.text
-    @add null, text
+  got__l_nb_literal_text__all__rep2: (o)->
+    @add null, o.text
   not__c_l_literal: -> @cache_drop()
   got__c_l_literal: ->
     lines = @cache_drop()
-    lines = lines.map (l)->
-      l.value.replace(/^ */, '') + "\n"
+    lines = lines.map (l)-> "#{l.value}\n"
     text = lines.join ''
     @add('=VAL', "|#{text}")
 

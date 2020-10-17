@@ -54,16 +54,16 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
   gen_debug_args: -> @not_implemented('gen_debug_args')
 
   gen: (rule)->
-    if _.isPlainObject rule
+    if isObject rule
       return @gen_from_hash rule
 
-    if _.isArray rule
+    if isArray rule
       return @gen_from_array rule
 
-    if _.isString rule
+    if isString rule
       return @gen_from_string rule
 
-    if _.isNumber rule
+    if isNumber rule
       return "#{rule}"
 
     if rule == null
@@ -159,11 +159,11 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
   gen_var_value: (var_)-> var_
 
   gen_group: (list, kind)->
-    list = _.map list, (item)=> @gen(item)
+    list = list.map (item)=> @gen(item)
     @group = true
     out = @gen_method_call(kind, list...)
     @group = false
-    out
+    @fix_group out
 
   gen_rep: (rule, min, max)->
     @gen_method_call('rep', @gen_limit(min), @gen_limit(max), @gen(rule))
@@ -173,10 +173,10 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
   gen_limit: (n)-> n
 
   gen_call: (call, args)->
-    args = [ args ] unless _.isArray args
+    args = [ args ] unless isArray args
 
-    list = _.map args, (arg)=> @gen_arg arg
-    list = _.join list, ', '
+    list = args.map (arg)=> @gen_arg arg
+    list = list.join ', '
 
     ref = @gen_method_ref @rule_name call
 
@@ -257,15 +257,15 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
     for arg in args
       if @group
         multiline = true
-      else if _.isString(arg)
+      else if isString(arg)
         if arg.match(/\n/)
           multiline = true
     if multiline
       sep = "\n"
-      args = _.map args, (a)=> @indent @string a
+      args = args.map (a)=> @indent @string a
       args = args.join(",#{sep}")
     else
-      args = _.map args, (a)=> @string a
+      args = args.map (a)=> @string a
       args = args.join(", ")
 
     return [args, sep]

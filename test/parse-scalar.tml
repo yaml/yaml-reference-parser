@@ -80,3 +80,18 @@ foo
 -STR
 
 
+=== Literal scalar with indent
+--- yaml(<)
+    - |2
+        foo
+        bar
+--- events
++STR
++DOC
++SEQ
+=VAL |  foo\n  bar\n
+-SEQ
+-DOC
+-STR
+
+

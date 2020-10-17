@@ -203,20 +203,15 @@ sub got__c_double_quoted {
 }
 
 sub try__c_l_literal { $_[0]->cache_up }
-sub got__l_nb_literal_text {
+sub got__l_nb_literal_text__all__rep2 {
   my ($self, $o) = @_;
-  my $text = $o->{text};
-  $self->add(undef, $text);
+  $self->add(undef, $o->{text});
 }
 sub not__c_l_literal { $_[0]->cache_drop }
 sub got__c_l_literal {
   my ($self) = @_;
   my $lines = $self->cache_drop;
-  my $text = join '', map {
-    $_ = $_->{value};
-    s/^ *//;
-    "$_\n";
-  } @$lines;
+  my $text = join '', map "$_->{value}\n", @$lines;
   $self->add('=VAL', qq<|$text>);
 }
 

@@ -455,7 +455,7 @@
 
       ns_yaml_version() {
         debug_rule("ns_yaml_version");
-        return this.all(this.rep(1, null, this.ns_dec_digit), this.chr('.'), this.rep(1, null, this.ns_dec_digit));
+        return this.all(this.rep(1, null, this.ns_dec_digit), this.chr('.'), this.rep2(1, null, this.ns_dec_digit));
       }
 
       ns_tag_directive() {
@@ -585,7 +585,7 @@
 
       s_double_escaped(n) {
         debug_rule("s_double_escaped", n);
-        return this.all(this.rep(0, null, this.s_white), this.chr("\\"), this.b_non_content, this.rep(0, null, [this.l_empty, n, "flow-in"]), [this.s_flow_line_prefix, n]);
+        return this.all(this.rep(0, null, this.s_white), this.chr("\\"), this.b_non_content, this.rep2(0, null, [this.l_empty, n, "flow-in"]), [this.s_flow_line_prefix, n]);
       }
 
       s_double_break(n) {
@@ -730,12 +730,12 @@
 
       c_flow_sequence(n, c) {
         debug_rule("c_flow_sequence", n, c);
-        return this.all(this.chr('['), this.rep(0, 1, [this.s_separate, n, c]), this.rep(0, 1, [this.ns_s_flow_seq_entries, n, [this.in_flow, c]]), this.chr(']'));
+        return this.all(this.chr('['), this.rep(0, 1, [this.s_separate, n, c]), this.rep2(0, 1, [this.ns_s_flow_seq_entries, n, [this.in_flow, c]]), this.chr(']'));
       }
 
       ns_s_flow_seq_entries(n, c) {
         debug_rule("ns_s_flow_seq_entries", n, c);
-        return this.all([this.ns_flow_seq_entry, n, c], this.rep(0, 1, [this.s_separate, n, c]), this.rep(0, 1, this.all(this.chr(','), this.rep(0, 1, [this.s_separate, n, c]), this.rep(0, 1, [this.ns_s_flow_seq_entries, n, c]))));
+        return this.all([this.ns_flow_seq_entry, n, c], this.rep(0, 1, [this.s_separate, n, c]), this.rep2(0, 1, this.all(this.chr(','), this.rep(0, 1, [this.s_separate, n, c]), this.rep2(0, 1, [this.ns_s_flow_seq_entries, n, c]))));
       }
 
       ns_flow_seq_entry(n, c) {
@@ -745,12 +745,12 @@
 
       c_flow_mapping(n, c) {
         debug_rule("c_flow_mapping", n, c);
-        return this.all(this.chr('{'), this.rep(0, 1, [this.s_separate, n, c]), this.rep(0, 1, [this.ns_s_flow_map_entries, n, [this.in_flow, c]]), this.chr('}'));
+        return this.all(this.chr('{'), this.rep(0, 1, [this.s_separate, n, c]), this.rep2(0, 1, [this.ns_s_flow_map_entries, n, [this.in_flow, c]]), this.chr('}'));
       }
 
       ns_s_flow_map_entries(n, c) {
         debug_rule("ns_s_flow_map_entries", n, c);
-        return this.all([this.ns_flow_map_entry, n, c], this.rep(0, 1, [this.s_separate, n, c]), this.rep(0, 1, this.all(this.chr(','), this.rep(0, 1, [this.s_separate, n, c]), this.rep(0, 1, [this.ns_s_flow_map_entries, n, c]))));
+        return this.all([this.ns_flow_map_entry, n, c], this.rep(0, 1, [this.s_separate, n, c]), this.rep2(0, 1, this.all(this.chr(','), this.rep(0, 1, [this.s_separate, n, c]), this.rep2(0, 1, [this.ns_s_flow_map_entries, n, c]))));
       }
 
       ns_flow_map_entry(n, c) {
@@ -888,12 +888,12 @@
 
       l_strip_empty(n) {
         debug_rule("l_strip_empty", n);
-        return this.all(this.rep(0, null, this.all([this.s_indent_le, n], this.b_non_content)), this.rep(0, 1, [this.l_trail_comments, n]));
+        return this.all(this.rep(0, null, this.all([this.s_indent_le, n], this.b_non_content)), this.rep2(0, 1, [this.l_trail_comments, n]));
       }
 
       l_keep_empty(n) {
         debug_rule("l_keep_empty", n);
-        return this.all(this.rep(0, null, [this.l_empty, n, "block-in"]), this.rep(0, 1, [this.l_trail_comments, n]));
+        return this.all(this.rep(0, null, [this.l_empty, n, "block-in"]), this.rep2(0, 1, [this.l_trail_comments, n]));
       }
 
       l_trail_comments(n) {
@@ -908,7 +908,7 @@
 
       l_nb_literal_text(n) {
         debug_rule("l_nb_literal_text", n);
-        return this.all(this.rep(0, null, [this.l_empty, n, "block-in"]), [this.s_indent, n], this.rep(1, null, this.nb_char));
+        return this.all(this.rep(0, null, [this.l_empty, n, "block-in"]), [this.s_indent, n], this.rep2(1, null, this.nb_char));
       }
 
       b_nb_literal_next(n) {
@@ -1066,7 +1066,7 @@
 
       l_document_prefix() {
         debug_rule("l_document_prefix");
-        return this.all(this.rep(0, 1, this.c_byte_order_mark), this.rep(0, null, this.l_comment));
+        return this.all(this.rep(0, 1, this.c_byte_order_mark), this.rep2(0, null, this.l_comment));
       }
 
       c_directives_end() {
@@ -1111,7 +1111,7 @@
 
       l_yaml_stream() {
         debug_rule("l_yaml_stream");
-        return this.all(this.l_document_prefix, this.rep(0, 1, this.l_any_document), this.rep(0, null, this.any(this.all(this.l_document_suffix, this.rep(0, null, this.l_document_prefix), this.rep(0, 1, this.l_any_document)), this.all(this.l_document_prefix, this.rep(0, 1, this.l_explicit_document)))));
+        return this.all(this.l_document_prefix, this.rep(0, 1, this.l_any_document), this.rep2(0, null, this.any(this.all(this.l_document_suffix, this.rep(0, null, this.l_document_prefix), this.rep2(0, 1, this.l_any_document)), this.all(this.l_document_prefix, this.rep(0, 1, this.l_explicit_document)))));
       }
 
     };

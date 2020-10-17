@@ -184,6 +184,9 @@ sub make_receivers {
     if ($n =~ /^chr\((.)\)$/) {
       $n = hex_char $1;
     }
+    else {
+      $n =~ s/\(.*//;
+    }
     unshift @$names, $n;
   }
   my $name = join '__', $n, @$names;
@@ -256,6 +259,27 @@ sub rep {
     $self->{pos} = $pos_start;
     return false;
   }, "rep($min,${\ ($max // 'null')})";
+}
+sub rep2 {
+  my ($self, $min, $max, $func) = @_;
+  FAIL "rep2 max is < 0 '$max'"
+    if defined $max and $max < 0;
+  name rep2 => sub {
+    my $count = 0;
+    my $pos = $self->{pos};
+    my $pos_start = $pos;
+    while (not(defined $max) or $count < $max) {
+      last unless $self->call($func);
+      last if $self->{pos} == $pos;
+      $count++;
+      $pos = $self->{pos};
+    }
+    if ($count >= $min and (not(defined $max) or $count <= $max)) {
+      return true;
+    }
+    $self->{pos} = $pos_start;
+    return false;
+  }, "rep2($min,${\ ($max // 'null')})";
 }
 
 # Call a rule depending on state value:
@@ -442,6 +466,8 @@ sub len {
 sub ord {
   my ($self, $str) = @_;
   name ord => sub {
+    # Should be `$self->call($str, 'string')`, but... Perl
+    $str = $self->call($str, 'number') unless isString($str);
     return ord($str) - 48;
   };
 }

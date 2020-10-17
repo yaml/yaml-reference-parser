@@ -96,4 +96,9 @@ global.generator_class = \
     ###
     """
 
+  fix_group: (text)->
+    i = 0
+    text.replace /^  \$self->rep/mg, (m...)->
+      m[0] + (if i++ then String(i) else '')
+
 # vim: set sw=2:

@@ -1248,7 +1248,7 @@ global.Grammar = class Grammar
     @all(
       @rep(1, null, @ns_dec_digit),
       @chr('.'),
-      @rep(1, null, @ns_dec_digit)
+      @rep2(1, null, @ns_dec_digit)
     )
 
 
@@ -1631,7 +1631,7 @@ global.Grammar = class Grammar
       @rep(0, null, @s_white),
       @chr("\\"),
       @b_non_content,
-      @rep(0, null, [ @l_empty, n, "flow-in" ]),
+      @rep2(0, null, [ @l_empty, n, "flow-in" ]),
       [ @s_flow_line_prefix, n ]
     )
 
@@ -2076,7 +2076,7 @@ global.Grammar = class Grammar
     @all(
       @chr('['),
       @rep(0, 1, [ @s_separate, n, c ]),
-      @rep(0, 1, [ @ns_s_flow_seq_entries, n, [ @in_flow, c ] ]),
+      @rep2(0, 1, [ @ns_s_flow_seq_entries, n, [ @in_flow, c ] ]),
       @chr(']')
     )
 
@@ -2095,11 +2095,11 @@ global.Grammar = class Grammar
     @all(
       [ @ns_flow_seq_entry, n, c ],
       @rep(0, 1, [ @s_separate, n, c ]),
-      @rep(0, 1,
+      @rep2(0, 1,
         @all(
           @chr(','),
           @rep(0, 1, [ @s_separate, n, c ]),
-          @rep(0, 1, [ @ns_s_flow_seq_entries, n, c ])
+          @rep2(0, 1, [ @ns_s_flow_seq_entries, n, c ])
         ))
     )
 
@@ -2130,7 +2130,7 @@ global.Grammar = class Grammar
     @all(
       @chr('{'),
       @rep(0, 1, [ @s_separate, n, c ]),
-      @rep(0, 1, [ @ns_s_flow_map_entries, n, [ @in_flow, c ] ]),
+      @rep2(0, 1, [ @ns_s_flow_map_entries, n, [ @in_flow, c ] ]),
       @chr('}')
     )
 
@@ -2149,11 +2149,11 @@ global.Grammar = class Grammar
     @all(
       [ @ns_flow_map_entry, n, c ],
       @rep(0, 1, [ @s_separate, n, c ]),
-      @rep(0, 1,
+      @rep2(0, 1,
         @all(
           @chr(','),
           @rep(0, 1, [ @s_separate, n, c ]),
-          @rep(0, 1, [ @ns_s_flow_map_entries, n, c ])
+          @rep2(0, 1, [ @ns_s_flow_map_entries, n, c ])
         ))
     )
 
@@ -2656,7 +2656,7 @@ global.Grammar = class Grammar
           [ @s_indent_le, n ],
           @b_non_content
         )),
-      @rep(0, 1, [ @l_trail_comments, n ])
+      @rep2(0, 1, [ @l_trail_comments, n ])
     )
 
 
@@ -2671,7 +2671,7 @@ global.Grammar = class Grammar
     debug_rule("l_keep_empty",n)
     @all(
       @rep(0, null, [ @l_empty, n, "block-in" ]),
-      @rep(0, 1, [ @l_trail_comments, n ])
+      @rep2(0, 1, [ @l_trail_comments, n ])
     )
 
 
@@ -2721,7 +2721,7 @@ global.Grammar = class Grammar
     @all(
       @rep(0, null, [ @l_empty, n, "block-in" ]),
       [ @s_indent, n ],
-      @rep(1, null, @nb_char)
+      @rep2(1, null, @nb_char)
     )
 
 
@@ -3286,7 +3286,7 @@ global.Grammar = class Grammar
     debug_rule("l_document_prefix")
     @all(
       @rep(0, 1, @c_byte_order_mark),
-      @rep(0, null, @l_comment)
+      @rep2(0, null, @l_comment)
     )
 
 
@@ -3441,12 +3441,12 @@ global.Grammar = class Grammar
     @all(
       @l_document_prefix,
       @rep(0, 1, @l_any_document),
-      @rep(0, null,
+      @rep2(0, null,
         @any(
           @all(
             @l_document_suffix,
             @rep(0, null, @l_document_prefix),
-            @rep(0, 1, @l_any_document)
+            @rep2(0, 1, @l_any_document)
           ),
           @all(
             @l_document_prefix,

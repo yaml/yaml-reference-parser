@@ -177,6 +177,8 @@
       while (i > 0 && !((n = this.state[--i].name).match(/_/))) {
         if (m = n.match(/^chr\((.)\)$/)) {
           n = 'x' + hex_char(m[1]);
+        } else {
+          n = n.replace(/\(.*/, '');
         }
         names.unshift(n);
       }
@@ -259,6 +261,35 @@
         return false;
       };
       return name_('rep', rep, `rep(${min},${max})`);
+    }
+
+    rep2(min, max, func) {
+      var rep2;
+      if ((max != null) && max < 0) {
+        FAIL(`rep2 max is < 0 '${max}'`);
+      }
+      rep2 = function() {
+        var count, pos, pos_start;
+        count = 0;
+        pos = this.pos;
+        pos_start = pos;
+        while (!(max != null) || count < max) {
+          if (!this.call(func)) {
+            break;
+          }
+          if (this.pos === pos) {
+            break;
+          }
+          count++;
+          pos = this.pos;
+        }
+        if (count >= min && (!(max != null) || count <= max)) {
+          return true;
+        }
+        this.pos = pos_start;
+        return false;
+      };
+      return name_('rep2', rep2, `rep2(${min},${max})`);
     }
 
     // Call a rule depending on state value:
@@ -463,6 +494,9 @@
     ord(str) {
       var ord;
       return ord = function() {
+        if (!isString(str)) {
+          str = this.call(str, 'string');
+        }
         return str.charCodeAt(0) - 48;
       };
     }

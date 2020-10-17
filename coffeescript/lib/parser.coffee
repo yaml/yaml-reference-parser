@@ -138,6 +138,8 @@ global.Parser = class Parser extends Grammar
     while i > 0 and not((n = @state[--i].name).match /_/)
       if m = n.match /^chr\((.)\)$/
         n = 'x' + hex_char m[1]
+      else
+        n = n.replace /\(.*/, ''
       names.unshift n
     name = [n, names...].join '__'
 
@@ -194,6 +196,23 @@ global.Parser = class Parser extends Grammar
       @pos = pos_start
       return false
     name_ 'rep', rep, "rep(#{min},#{max})"
+  rep2: (min, max, func)->
+    FAIL "rep2 max is < 0 '#{max}'" \
+      if max? and max < 0
+    rep2 = ->
+      count = 0
+      pos = @pos
+      pos_start = pos
+      while not(max?) or count < max
+        break unless @call func
+        break if @pos == pos
+        count++
+        pos = @pos
+      if count >= min and (not(max?) or count <= max)
+        return true
+      @pos = pos_start
+      return false
+    name_ 'rep2', rep2, "rep2(#{min},#{max})"
 
   # Call a rule depending on state value:
   case: (var_, map)->
@@ -324,6 +343,7 @@ global.Parser = class Parser extends Grammar
 
   ord: (str)->
     ord = ->
+      str = @call str, 'string' unless isString str
       return str.charCodeAt(0) - 48
 
   if: (test, do_if_true)->

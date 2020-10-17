@@ -1341,7 +1341,7 @@ rule '087', ns_yaml_version => sub {
   $self->all(
     $self->rep(1, undef, $self->func('ns_dec_digit')),
     $self->chr('.'),
-    $self->rep(1, undef, $self->func('ns_dec_digit'))
+    $self->rep2(1, undef, $self->func('ns_dec_digit'))
   );
 };
 
@@ -1749,7 +1749,7 @@ rule '112', s_double_escaped => sub {
     $self->rep(0, undef, $self->func('s_white')),
     $self->chr("\\"),
     $self->func('b_non_content'),
-    $self->rep(0, undef, [ $self->func('l_empty'), $n, "flow-in" ]),
+    $self->rep2(0, undef, [ $self->func('l_empty'), $n, "flow-in" ]),
     [ $self->func('s_flow_line_prefix'), $n ]
   );
 };
@@ -2219,7 +2219,7 @@ rule '137', c_flow_sequence => sub {
   $self->all(
     $self->chr('['),
     $self->rep(0, 1, [ $self->func('s_separate'), $n, $c ]),
-    $self->rep(0, 1, [ $self->func('ns_s_flow_seq_entries'), $n, [ $self->func('in_flow'), $c ] ]),
+    $self->rep2(0, 1, [ $self->func('ns_s_flow_seq_entries'), $n, [ $self->func('in_flow'), $c ] ]),
     $self->chr(']')
   );
 };
@@ -2239,11 +2239,11 @@ rule '138', ns_s_flow_seq_entries => sub {
   $self->all(
     [ $self->func('ns_flow_seq_entry'), $n, $c ],
     $self->rep(0, 1, [ $self->func('s_separate'), $n, $c ]),
-    $self->rep(0, 1,
+    $self->rep2(0, 1,
       $self->all(
         $self->chr(','),
         $self->rep(0, 1, [ $self->func('s_separate'), $n, $c ]),
-        $self->rep(0, 1, [ $self->func('ns_s_flow_seq_entries'), $n, $c ])
+        $self->rep2(0, 1, [ $self->func('ns_s_flow_seq_entries'), $n, $c ])
       ))
   );
 };
@@ -2276,7 +2276,7 @@ rule '140', c_flow_mapping => sub {
   $self->all(
     $self->chr('{'),
     $self->rep(0, 1, [ $self->func('s_separate'), $n, $c ]),
-    $self->rep(0, 1, [ $self->func('ns_s_flow_map_entries'), $n, [ $self->func('in_flow'), $c ] ]),
+    $self->rep2(0, 1, [ $self->func('ns_s_flow_map_entries'), $n, [ $self->func('in_flow'), $c ] ]),
     $self->chr('}')
   );
 };
@@ -2296,11 +2296,11 @@ rule '141', ns_s_flow_map_entries => sub {
   $self->all(
     [ $self->func('ns_flow_map_entry'), $n, $c ],
     $self->rep(0, 1, [ $self->func('s_separate'), $n, $c ]),
-    $self->rep(0, 1,
+    $self->rep2(0, 1,
       $self->all(
         $self->chr(','),
         $self->rep(0, 1, [ $self->func('s_separate'), $n, $c ]),
-        $self->rep(0, 1, [ $self->func('ns_s_flow_map_entries'), $n, $c ])
+        $self->rep2(0, 1, [ $self->func('ns_s_flow_map_entries'), $n, $c ])
       ))
   );
 };
@@ -2829,7 +2829,7 @@ rule '167', l_strip_empty => sub {
         [ $self->func('s_indent_le'), $n ],
         $self->func('b_non_content')
       )),
-    $self->rep(0, 1, [ $self->func('l_trail_comments'), $n ])
+    $self->rep2(0, 1, [ $self->func('l_trail_comments'), $n ])
   );
 };
 
@@ -2845,7 +2845,7 @@ rule '168', l_keep_empty => sub {
   debug_rule("l_keep_empty",$n) if DEBUG;
   $self->all(
     $self->rep(0, undef, [ $self->func('l_empty'), $n, "block-in" ]),
-    $self->rep(0, 1, [ $self->func('l_trail_comments'), $n ])
+    $self->rep2(0, 1, [ $self->func('l_trail_comments'), $n ])
   );
 };
 
@@ -2898,7 +2898,7 @@ rule '171', l_nb_literal_text => sub {
   $self->all(
     $self->rep(0, undef, [ $self->func('l_empty'), $n, "block-in" ]),
     [ $self->func('s_indent'), $n ],
-    $self->rep(1, undef, $self->func('nb_char'))
+    $self->rep2(1, undef, $self->func('nb_char'))
   );
 };
 
@@ -3494,7 +3494,7 @@ rule '202', l_document_prefix => sub {
   debug_rule("l_document_prefix") if DEBUG;
   $self->all(
     $self->rep(0, 1, $self->func('c_byte_order_mark')),
-    $self->rep(0, undef, $self->func('l_comment'))
+    $self->rep2(0, undef, $self->func('l_comment'))
   );
 };
 
@@ -3658,12 +3658,12 @@ rule '211', l_yaml_stream => sub {
   $self->all(
     $self->func('l_document_prefix'),
     $self->rep(0, 1, $self->func('l_any_document')),
-    $self->rep(0, undef,
+    $self->rep2(0, undef,
       $self->any(
         $self->all(
           $self->func('l_document_suffix'),
           $self->rep(0, undef, $self->func('l_document_prefix')),
-          $self->rep(0, 1, $self->func('l_any_document'))
+          $self->rep2(0, 1, $self->func('l_any_document'))
         ),
         $self->all(
           $self->func('l_document_prefix'),

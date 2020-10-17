@@ -57,7 +57,7 @@
 %Import 6CK3    # Spec Example 6.26. Tag Shorthands
 # %Import 6FWR    # Block Scalar Keep
 %Import 6H3V    # Backslashes in singlequotes
-# %Import 6HB6    # Spec Example 6.1. Indentation Spaces
+%Import 6HB6    # Spec Example 6.1. Indentation Spaces
 %Import 6JQW    # Spec Example 2.13. In literals, newlines are preserved
 %Import 6JWB    # Tags for Block Objects
 %Import 6KGN    # Anchor for empty node

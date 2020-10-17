@@ -277,10 +277,8 @@
       return this.cache_up();
     }
 
-    got__l_nb_literal_text(o) {
-      var text;
-      text = o.text;
-      return this.add(null, text);
+    got__l_nb_literal_text__all__rep2(o) {
+      return this.add(null, o.text);
     }
 
     not__c_l_literal() {
@@ -291,7 +289,7 @@
       var lines, text;
       lines = this.cache_drop();
       lines = lines.map(function(l) {
-        return l.value.replace(/^ */, '') + "\n";
+        return `${l.value}\n`;
       });
       text = lines.join('');
       return this.add('=VAL', `|${text}`);
