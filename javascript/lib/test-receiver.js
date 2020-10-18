@@ -191,6 +191,18 @@
       return this.cache_drop();
     }
 
+    try__ns_l_compact_sequence() {
+      return this.cache_up('+SEQ');
+    }
+
+    got__ns_l_compact_sequence() {
+      return this.cache_down('-SEQ');
+    }
+
+    not__ns_l_compact_sequence() {
+      return this.cache_drop();
+    }
+
     try__ns_flow_pair() {
       return this.cache_up('+MAP {}');
     }

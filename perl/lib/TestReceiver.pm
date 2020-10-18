@@ -157,6 +157,10 @@ sub try__ns_l_compact_mapping { $_[0]->cache_up('+MAP') }
 sub got__ns_l_compact_mapping { $_[0]->cache_down('-MAP') }
 sub not__ns_l_compact_mapping { $_[0]->cache_drop }
 
+sub try__ns_l_compact_sequence { $_[0]->cache_up('+SEQ') }
+sub got__ns_l_compact_sequence { $_[0]->cache_down('-SEQ') }
+sub not__ns_l_compact_sequence { $_[0]->cache_drop }
+
 sub try__ns_flow_pair { $_[0]->cache_up('+MAP {}') }
 sub got__ns_flow_pair { $_[0]->cache_down('-MAP') }
 sub not__ns_flow_pair { $_[0]->cache_drop }

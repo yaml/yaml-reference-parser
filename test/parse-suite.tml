@@ -6,24 +6,24 @@
 
 
 # Close:
-# 3ALJ- 6BCT- 6XDY 6ZKB 7ZZ5- 82AN 9DXL G4RS% HWV9 PUW8 QT73 UT92
+# 6XDY 6ZKB 82AN 9DXL G4RS% HWV9 PUW8 QT73 UT92
 # - Block sequence
 # % Unicode
 
 
 %Import 229Q  # Spec Example 2.4. Sequence of Mappings
-# %Import 26DV    # Whitespace around colon in mappings  XXX anchor on key fails
+# %Import 26DV    # Whitespace around colon in mappings  XXX prop on key
 %Import 27NA    # Spec Example 5.9. Directive Indicator
 %Import 2AUY    # Tags in Block Sequence
 %Import 2EBW    # Allowed characters in keys
 %Import 2JQS    # Block Mapping with Missing Keys
 %Import 2LFX    # Spec Example 6.13. Reserved Directives [1.3]
-# %Import 2SXE    # Anchors With Colon in Name  XXX anchor on key fails
+# %Import 2SXE    # Anchors With Colon in Name  XXX prop on key
 %Import 2XXW    # Spec Example 2.25. Unordered Sets
 %Import 33X3    # Three explicit integers in a block sequence
 %Import 35KP    # Tags for Root Objects
 %Import 36F6    # Multiline plain scalar with empty line
-# %Import 3ALJ    # Block Sequence in Block Sequence  # XXX seq-in-seq
+%Import 3ALJ    # Block Sequence in Block Sequence
 %Import 3GZX    # Spec Example 7.1. Alias Nodes
 %Import 3MYT    # Plain Scalar looking like key, comment, anchor and tag
 %Import 3R3P    # Single block sequence with anchor
@@ -50,9 +50,9 @@
 %Import 5NYZ    # Spec Example 6.9. Separated Comment
 %Import 5T43    # Colon at the beginning of adjacent flow scalar
 %Import 5TYM    # Spec Example 6.21. Local Tag Prefix
-# %Import 5WE3    # Spec Example 8.17. Explicit Block Mapping Entries
+%Import 5WE3    # Spec Example 8.17. Explicit Block Mapping Entries
 %Import 65WH    # Single Entry Block Sequence
-# %Import 6BCT    # Spec Example 6.3. Separation Spaces
+%Import 6BCT    # Spec Example 6.3. Separation Spaces
 %Import 6BFJ    # Mapping, key and flow sequence item anchors
 %Import 6CK3    # Spec Example 6.26. Tag Shorthands
 %Import 6FWR    # Block Scalar Keep
@@ -65,13 +65,13 @@
 %Import 6M2F    # Aliases in Explicit Block Mapping
 %Import 6PBE    # Zero-indented sequences in explicit mapping keys
 %Import 6SLA    # Allowed characters in quoted mapping key
-# %Import 6VJK    # Spec Example 2.15. Folded newlines are preserved for "more indented" and blank lines
+# %Import 6VJK    # Spec Example 2.15. Folded newlines are preserved for "more indented" and blank lines  # XXX Fold indents
 %Import 6WLZ    # Spec Example 6.18. Primary Tag Handle [1.3]
 %Import 6WPF    # Spec Example 6.8. Flow Folding [1.3]
-# %Import 6XDY    # Two document start markers
-# %Import 6ZKB    # Spec Example 9.6. Stream
+# %Import 6XDY    # Two document start markers  # XXX stream headers
+# %Import 6ZKB    # Spec Example 9.6. Stream  # XXX stream stuff
 %Import 735Y    # Spec Example 8.20. Block Node Types
-# %Import 74H7    # Tags in Implicit Mapping
+# %Import 74H7    # Tags in Implicit Mapping  # XXX prop on key
 %Import 753E    # Block Scalar Strip [1.3]
 %Import 7A4E    # Spec Example 7.6. Double Quoted Lines
 # %Import 7BMT    # Node and Mapping Key Anchors [1.3]
@@ -81,7 +81,7 @@
 %Import 7TMG    # Comment in flow sequence before comma
 %Import 7W2P    # Block Mapping with Missing Values
 %Import 7Z25    # Bare document after document end marker
-# %Import 7ZZ5    # Empty flow collections
+%Import 7ZZ5    # Empty flow collections
 # %Import 82AN    # Three dashes and content without space
 %Import 87E4    # Spec Example 7.8. Single Quoted Implicit Keys
 %Import 8CWC    # Plain mapping key ending with colon
@@ -90,7 +90,7 @@
 %Import 8MK2    # Explicit Non-Specific Tag
 %Import 8QBE    # Block Sequence in Block Mapping
 %Import 8UDB    # Spec Example 7.14. Flow Sequence Entries
-# %Import 8XYN    # Anchor with unicode character XXX Not working in js
+# %Import 8XYN    # Anchor with unicode character XXX NOT WORKING IN JS
 # %Import 93JH    # Block Mappings in Block Sequence
 %Import 93WF    # Spec Example 6.6. Line Folding [1.3]
 %Import 96L6    # Spec Example 2.14. In the folded scalars, newlines become spaces
@@ -185,7 +185,7 @@
 %Import LX3P    # Implicit Flow Mapping Key on one line
 %Import M29M    # Literal Block Scalar
 %Import M5C3    # Spec Example 8.21. Block Scalar Nodes
-# %Import M5DY    # Spec Example 2.11. Mapping between Sequences
+%Import M5DY    # Spec Example 2.11. Mapping between Sequences
 # %Import M7A3    # Spec Example 9.3. Bare Documents
 %Import M7NX    # Nested flow collections
 %Import M9B4    # Spec Example 8.7. Literal Scalar
@@ -243,7 +243,7 @@
 # %Import UT92    # Spec Example 9.4. Explicit Documents
 %Import V55R    # Aliases in Block Sequence
 %Import V9D5    # Spec Example 8.19. Compact Block Mappings
-# %Import W42U    # Spec Example 8.15. Block Sequence Entry Types
+%Import W42U    # Spec Example 8.15. Block Sequence Entry Types
 # %Import W4TN    # Spec Example 9.5. Directives Documents
 %Import W5VH    # Allowed characters in alias
 %Import WZ62    # Spec Example 7.2. Empty Content
