@@ -253,7 +253,7 @@ sub got__c_l_folded {
   delete $self->{in_scalar};
   my $lines = $self->cache_drop;
   my $text = join '', map "$_->{value}\n", @$lines;
-  $text =~ s/(\n+)(?=.)/("\n" x (length($1) -1)) || ' '/ge;
+  $text =~ s/([^\n])(\n+)(?=.)/$1 . (("\n" x (length($2) -1)) || ' ')/ge;
   my $t = $self->{parser}->state_curr->{t};
   if ($t eq 'clip') {
     $text =~ s/\n+\z/\n/;

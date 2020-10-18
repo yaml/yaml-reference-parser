@@ -395,7 +395,7 @@ global.Parser = class Parser extends Grammar
     return if indent > 0 then indent else -1
 
   auto_detect: (n)->
-    m = @input[@pos..].match /^.*\n(\ *)/
+    m = @input[@pos..].match /^.*\n(?:\ *\n)*(\ *)/
     return 0 unless m
     m = m[1].length - n
     return 0 if m < 0

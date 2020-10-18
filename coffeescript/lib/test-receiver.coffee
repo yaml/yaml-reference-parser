@@ -186,9 +186,9 @@ global.TestReceiver = class TestReceiver
     lines = @cache_drop()
     lines = lines.map (l)-> "#{l.value}\n"
     text = lines.join ''
-    text = text.replace /(\n+)(?=.)/g, (m...)->
-      len = m[1].length - 1
-      return if len then _.repeat("\n", len) else ' '
+    text = text.replace /([^\n])(\n+)(?=.)/g, (m...)->
+      len = m[2].length - 1
+      return m[1] + (if len then _.repeat("\n", len) else ' ')
     t = @parser.state_curr().t
     if t == 'clip'
       text = text.replace /\n+$/, "\n"

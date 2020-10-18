@@ -548,7 +548,7 @@ name 'auto_detect_indent', \&auto_detect_indent;
 
 sub auto_detect {
   my ($self, $n) = @_;
-  substr($self->{input}, $self->{pos}) =~ /^.*\n(\ *)/
+  substr($self->{input}, $self->{pos}) =~ /^.*\n(?:\ *\n)*(\ *)/
     or return 0;
   my $m = length($1) - $n;
   return 0 if $m < 0;

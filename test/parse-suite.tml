@@ -6,7 +6,7 @@
 
 
 # Close:
-# 3ALJ- 6BCT- 6XDY 6ZKB 7ZZ5- 82AN 9DXL G4RS% HWV9 PUW8 QT73 RTP8 UT92
+# 3ALJ- 6BCT- 6XDY 6ZKB 7ZZ5- 82AN 9DXL G4RS% HWV9 PUW8 QT73 UT92
 # - Block sequence
 # % Unicode
 
@@ -34,7 +34,7 @@
 %Import 4GC6    # Spec Example 7.7. Single Quoted Characters
 %Import 4MUZ    # Flow mapping colon on line after key
 %Import 4Q9F    # Folded Block Scalar [1.3]
-# %Import 4QFQ    # Spec Example 8.2. Block Indentation Indicator [1.3]
+%Import 4QFQ    # Spec Example 8.2. Block Indentation Indicator [1.3]
 %Import 4UYU    # Colon in Double Quoted String
 %Import 4V8U    # Plain scalar with backslashes
 %Import 4ZYM    # Spec Example 6.4. Line Prefixes
@@ -133,7 +133,7 @@
 %Import DFF7    # Spec Example 7.16. Flow Mapping Entries
 %Import DHP8    # Flow Sequence
 %Import DK3J    # Zero indented block scalar with line that looks like a comment
-# %Import DWX9    # Spec Example 8.8. Literal Content
+%Import DWX9    # Spec Example 8.8. Literal Content
 # %Import E76Z    # Aliases in Implicit Block Mapping
 %Import EHF6    # Tags for Flow Objects
 %Import EX5H    # Multiline Scalar at Top Level [1.3]
@@ -228,7 +228,7 @@
 %Import SKE5    # Anchor before zero indented sequence
 %Import SSW6    # Spec Example 7.7. Single Quoted Characters [1.3]
 %Import SYW4    # Spec Example 2.2. Mapping Scalars to Scalars
-# %Import T26H    # Spec Example 8.8. Literal Content [1.3]
+%Import T26H    # Spec Example 8.8. Literal Content [1.3]
 %Import T4YY    # Spec Example 7.9. Single Quoted Lines [1.3]
 %Import T5N4    # Spec Example 8.7. Literal Scalar [1.3]
 %Import TE2A    # Spec Example 8.16. Block Mappings

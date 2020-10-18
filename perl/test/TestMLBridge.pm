@@ -10,10 +10,12 @@ use TestReceiver;
 
 sub parse {
   my ($self, $yaml) = @_;
+# return ">>\n$yaml<<\n";
 
   my $parser = Parser->new(TestReceiver->new);
 
   eval { $parser->parse($yaml) };
+# warn ">>\n$yaml<<\n";
   return $@
     ? do { warn $@; '' }
     : $parser->{receiver}->output;
