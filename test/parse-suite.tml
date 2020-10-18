@@ -76,7 +76,7 @@
 %Import 7A4E    # Spec Example 7.6. Double Quoted Lines
 %Import 7BMT    # Node and Mapping Key Anchors [1.3]
 %Import 7BUB    # Spec Example 2.10. Node for “Sammy Sosa” appears twice in this document
-# %Import 7FWL    # Spec Example 6.24. Verbatim Tags
+%Import 7FWL    # Spec Example 6.24. Verbatim Tags
 # %Import 7T8X    # Spec Example 8.10. Folded Lines - 8.13. Final Empty Lines
 %Import 7TMG    # Comment in flow sequence before comma
 %Import 7W2P    # Block Mapping with Missing Values

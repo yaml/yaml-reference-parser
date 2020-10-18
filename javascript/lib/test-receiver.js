@@ -382,7 +382,9 @@
     got__c_ns_tag_property(o) {
       var m, prefix, tag;
       tag = o.text;
-      if (m = tag.match(/^!!(.*)/)) {
+      if (m = tag.match(/^!<(.*)>$/)) {
+        this.tag = m[1];
+      } else if (m = tag.match(/^!!(.*)/)) {
         prefix = this.tag_map['!!'];
         if (prefix != null) {
           this.tag = prefix + tag.slice(2);

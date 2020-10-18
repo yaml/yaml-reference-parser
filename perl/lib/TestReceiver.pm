@@ -288,7 +288,10 @@ sub got__c_ns_anchor_property { $_[0]->{anchor} = $_[1]->{text} }
 sub got__c_ns_tag_property {
   my ($self, $o) = @_;
   my $tag = $o->{text};
-  if ($tag =~ /^!!(.*)/) {
+  if ($tag =~ /^!<(.*)>$/) {
+    $self->{tag} = $1;
+  }
+  elsif ($tag =~ /^!!(.*)/) {
     if (defined(my $prefix = $self->{tag_map}{'!!'})) {
       $self->{tag} = $prefix . substr($tag, 2);
     }

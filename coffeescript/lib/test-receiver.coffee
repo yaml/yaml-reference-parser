@@ -214,7 +214,9 @@ global.TestReceiver = class TestReceiver
 
   got__c_ns_tag_property: (o)->
     tag = o.text
-    if m = tag.match /^!!(.*)/
+    if m = tag.match /^!<(.*)>$/
+      @tag = m[1]
+    else if m = tag.match /^!!(.*)/
       prefix = @tag_map['!!']
       if prefix?
         @tag = prefix + tag[2..]
