@@ -241,9 +241,8 @@ sub may {
 # Repeat a rule a certain number of times:
 sub rep {
   my ($self, $min, $max, $func) = @_;
-  FAIL "rep max is < 0 '$max'"
-    if defined $max and $max < 0;
   name rep => sub {
+    return false if defined $max and $max < 0;
     my $count = 0;
     my $pos = $self->{pos};
     my $pos_start = $pos;
@@ -262,9 +261,8 @@ sub rep {
 }
 sub rep2 {
   my ($self, $min, $max, $func) = @_;
-  FAIL "rep2 max is < 0 '$max'"
-    if defined $max and $max < 0;
   name rep2 => sub {
+    return false if defined $max and $max < 0;
     my $count = 0;
     my $pos = $self->{pos};
     my $pos_start = $pos;
@@ -550,9 +548,7 @@ sub auto_detect {
   my ($self, $n) = @_;
   substr($self->{input}, $self->{pos}) =~ /^.*\n(?:\ *\n)*(\ *)/
     or return 0;
-  my $m = length($1) - $n;
-  return 0 if $m < 0;
-  return $m;
+  return length($1) - $n;
 }
 name 'auto_detect', \&auto_detect;
 
@@ -564,14 +560,15 @@ sub trace_start {
 }
 
 sub trace_quiet {
-  # return [];
   return [] if $ENV{DEBUG};
-  [
-    split(',', ($ENV{TRACE_QUIET} || '')),
-#     'b_as_line_feed',
-#     's_indent',
-#     'nb_char',
 
+  my @small = (
+    'b_as_line_feed',
+    's_indent',
+    'nb_char',
+  );
+
+  my @noisy = (
     'c_directives_end',
     'c_l_folded',
     'c_l_literal',
@@ -584,6 +581,11 @@ sub trace_quiet {
     'ns_plain',
     's_l_comments',
     's_separate',
+  );
+
+  return [
+    split(',', ($ENV{TRACE_QUIET} || '')),
+    @noisy,
   ];
 }
 

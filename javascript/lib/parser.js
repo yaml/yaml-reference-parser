@@ -236,11 +236,11 @@
     // Repeat a rule a certain number of times:
     rep(min, max, func) {
       var rep;
-      if ((max != null) && max < 0) {
-        FAIL(`rep max is < 0 '${max}'`);
-      }
       rep = function() {
         var count, pos, pos_start;
+        if ((max != null) && max < 0) {
+          return false;
+        }
         count = 0;
         pos = this.pos;
         pos_start = pos;
@@ -265,11 +265,11 @@
 
     rep2(min, max, func) {
       var rep2;
-      if ((max != null) && max < 0) {
-        FAIL(`rep2 max is < 0 '${max}'`);
-      }
       rep2 = function() {
         var count, pos, pos_start;
+        if ((max != null) && max < 0) {
+          return false;
+        }
         count = 0;
         pos = this.pos;
         pos_start = pos;
@@ -589,11 +589,7 @@
       if (!m) {
         return 0;
       }
-      m = m[1].length - n;
-      if (m < 0) {
-        return 0;
-      }
-      return m;
+      return m[1].length - n;
     }
 
     //------------------------------------------------------------------------------
@@ -604,10 +600,13 @@
     }
 
     trace_quiet() {
+      var noisy, small;
       if (ENV.DEBUG) {
         return [];
       }
-      return ['c_directives_end', 'c_l_folded', 'c_l_literal', 'c_ns_alias_node', 'c_ns_anchor_property', 'c_ns_tag_property', 'l_directive_document', 'l_document_prefix', 'ns_flow_content', 'ns_plain', 's_l_comments', 's_separate'].concat((ENV.TRACE_QUIET || '').split(','));
+      small = ['b_as_line_feed', 's_indent', 'nb_char'];
+      noisy = ['c_directives_end', 'c_l_folded', 'c_l_literal', 'c_ns_alias_node', 'c_ns_anchor_property', 'c_ns_tag_property', 'l_directive_document', 'l_document_prefix', 'ns_flow_content', 'ns_plain', 's_l_comments', 's_separate'];
+      return ((ENV.TRACE_QUIET || '').split(',')).concat(noisy);
     }
 
     trace(type, call, args = []) {

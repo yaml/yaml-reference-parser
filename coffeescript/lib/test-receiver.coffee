@@ -128,6 +128,10 @@ global.TestReceiver = class TestReceiver
   got__c_l_block_map_explicit_entry: -> @cache_down()
   not__c_l_block_map_explicit_entry: -> @cache_drop()
 
+  not__s_l_block_collection__all__rep__all: ->
+    delete @anchor
+    delete @tag
+
   try__c_ns_flow_map_empty_key_entry: -> @cache_up()
   got__c_ns_flow_map_empty_key_entry: -> FAIL 'got__c_ns_flow_map_empty_key_entry'
   not__c_ns_flow_map_empty_key_entry: -> @cache_drop()

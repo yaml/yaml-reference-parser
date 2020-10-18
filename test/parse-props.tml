@@ -119,10 +119,17 @@ parse(*yaml) == *events
 
 
 === Anchors on map key
---- SKIP: Fails to parse currently
 --- yaml
 &a1 foo: bar
 --- events
-xxx
++STR
++DOC
++MAP
+=VAL &a1 :foo
+=VAL :bar
+-MAP
+-DOC
+-STR
+
 
 

@@ -180,9 +180,8 @@ global.Parser = class Parser extends Grammar
 
   # Repeat a rule a certain number of times:
   rep: (min, max, func)->
-    FAIL "rep max is < 0 '#{max}'" \
-      if max? and max < 0
     rep = ->
+      return false if max? and max < 0
       count = 0
       pos = @pos
       pos_start = pos
@@ -197,9 +196,8 @@ global.Parser = class Parser extends Grammar
       return false
     name_ 'rep', rep, "rep(#{min},#{max})"
   rep2: (min, max, func)->
-    FAIL "rep2 max is < 0 '#{max}'" \
-      if max? and max < 0
     rep2 = ->
+      return false if max? and max < 0
       count = 0
       pos = @pos
       pos_start = pos
@@ -397,9 +395,7 @@ global.Parser = class Parser extends Grammar
   auto_detect: (n)->
     m = @input[@pos..].match /^.*\n(?:\ *\n)*(\ *)/
     return 0 unless m
-    m = m[1].length - n
-    return 0 if m < 0
-    return m
+    return m[1].length - n
 
 #------------------------------------------------------------------------------
 # Trace debugging
@@ -409,7 +405,14 @@ global.Parser = class Parser extends Grammar
 
   trace_quiet: ->
     return [] if ENV.DEBUG
-    [
+
+    small = [
+      'b_as_line_feed',
+      's_indent',
+      'nb_char',
+    ]
+
+    noisy = [
       'c_directives_end',
       'c_l_folded',
       'c_l_literal',
@@ -422,7 +425,9 @@ global.Parser = class Parser extends Grammar
       'ns_plain',
       's_l_comments',
       's_separate',
-    ].concat((ENV.TRACE_QUIET || '').split ',')
+    ]
+    return ((ENV.TRACE_QUIET || '').split ',')
+      .concat(noisy)
 
   trace: (type, call, args=[])->
     call = String(call) unless isString call  # XXX
