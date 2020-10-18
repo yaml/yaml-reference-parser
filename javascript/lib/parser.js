@@ -585,7 +585,7 @@
 
     auto_detect(n) {
       var m;
-      m = this.input.slice(this.pos).match(/^.*\n(\ *)/);
+      m = this.input.slice(this.pos).match(/^.*\n(?:\ *\n)*(\ *)/);
       if (!m) {
         return 0;
       }

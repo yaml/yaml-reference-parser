@@ -12,18 +12,18 @@
 
 
 %Import 229Q  # Spec Example 2.4. Sequence of Mappings
-# %Import 26DV    # Whitespace around colon in mappings
+# %Import 26DV    # Whitespace around colon in mappings  XXX anchor on key fails
 %Import 27NA    # Spec Example 5.9. Directive Indicator
 %Import 2AUY    # Tags in Block Sequence
 %Import 2EBW    # Allowed characters in keys
 %Import 2JQS    # Block Mapping with Missing Keys
 %Import 2LFX    # Spec Example 6.13. Reserved Directives [1.3]
-# %Import 2SXE    # Anchors With Colon in Name
+# %Import 2SXE    # Anchors With Colon in Name  XXX anchor on key fails
 %Import 2XXW    # Spec Example 2.25. Unordered Sets
 %Import 33X3    # Three explicit integers in a block sequence
 %Import 35KP    # Tags for Root Objects
 %Import 36F6    # Multiline plain scalar with empty line
-# %Import 3ALJ    # Block Sequence in Block Sequence
+# %Import 3ALJ    # Block Sequence in Block Sequence  # XXX seq-in-seq
 %Import 3GZX    # Spec Example 7.1. Alias Nodes
 %Import 3MYT    # Plain Scalar looking like key, comment, anchor and tag
 %Import 3R3P    # Single block sequence with anchor
@@ -40,7 +40,7 @@
 %Import 4ZYM    # Spec Example 6.4. Line Prefixes
 %Import 52DL    # Explicit Non-Specific Tag [1.3]
 %Import 54T7    # Flow Mapping
-# %Import 565N    # Construct Binary
+%Import 565N    # Construct Binary
 %Import 57H4    # Spec Example 8.22. Block Collection Nodes
 %Import 5BVJ    # Spec Example 5.7. Block Scalar Indicators
 %Import 5C5M    # Spec Example 7.15. Flow Mappings
@@ -184,7 +184,7 @@
 %Import LQZ7    # Spec Example 7.4. Double Quoted Implicit Keys
 %Import LX3P    # Implicit Flow Mapping Key on one line
 %Import M29M    # Literal Block Scalar
-# %Import M5C3    # Spec Example 8.21. Block Scalar Nodes
+%Import M5C3    # Spec Example 8.21. Block Scalar Nodes
 # %Import M5DY    # Spec Example 2.11. Mapping between Sequences
 # %Import M7A3    # Spec Example 9.3. Bare Documents
 %Import M7NX    # Nested flow collections
@@ -254,7 +254,7 @@
 # %Import XW4D    # Various Trailing Comments
 %Import Y2GN    # Anchor with colon in the middle
 %Import YD5X    # Spec Example 2.5. Sequence of Sequences
-# %Import Z67P    # Spec Example 8.21. Block Scalar Nodes [1.3]
+%Import Z67P    # Spec Example 8.21. Block Scalar Nodes [1.3]
 %Import Z9M4    # Spec Example 6.22. Global Tag Prefix
 %Import ZF4X    # Spec Example 2.6. Mapping of Mappings
 # %Import ZH7C    # Anchors in Mapping

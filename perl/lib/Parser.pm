@@ -564,6 +564,7 @@ sub trace_start {
 }
 
 sub trace_quiet {
+  # return [];
   return [] if $ENV{DEBUG};
   [
     split(',', ($ENV{TRACE_QUIET} || '')),

@@ -15,17 +15,19 @@
       event = {
         type: type
       };
-      if (this.marker != null) {
-        event.marker = this.marker;
-        delete this.marker;
-      }
-      if (this.anchor != null) {
-        event.anchor = this.anchor;
-        delete this.anchor;
-      }
-      if (this.tag != null) {
-        event.tag = this.tag;
-        delete this.tag;
+      if (type != null) {
+        if (this.marker != null) {
+          event.marker = this.marker;
+          delete this.marker;
+        }
+        if (this.anchor != null) {
+          event.anchor = this.anchor;
+          delete this.anchor;
+        }
+        if (this.tag != null) {
+          event.tag = this.tag;
+          delete this.tag;
+        }
       }
       if (value != null) {
         event.value = value;
@@ -333,14 +335,10 @@
         return `${l.value}\n`;
       });
       text = lines.join('');
-      text = text.replace(/(\n+)(?=.)/g, function(...m) {
+      text = text.replace(/([^\n])(\n+)(?=.)/g, function(...m) {
         var len;
-        len = m[1].length - 1;
-        if (len) {
-          return _.repeat("\n", len);
-        } else {
-          return ' ';
-        }
+        len = m[2].length - 1;
+        return m[1] + (len ? _.repeat("\n", len) : ' ');
       });
       t = this.parser.state_curr().t;
       if (t === 'clip') {

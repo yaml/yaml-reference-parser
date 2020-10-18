@@ -7,15 +7,16 @@ global.TestReceiver = class TestReceiver
 
   add: (type, value)->
     event = type: type
-    if @marker?
-      event.marker = @marker
-      delete @marker
-    if @anchor?
-      event.anchor = @anchor
-      delete @anchor
-    if @tag?
-      event.tag = @tag
-      delete @tag
+    if type?
+      if @marker?
+        event.marker = @marker
+        delete @marker
+      if @anchor?
+        event.anchor = @anchor
+        delete @anchor
+      if @tag?
+        event.tag = @tag
+        delete @tag
     if value?
       event.value = value
     @push event

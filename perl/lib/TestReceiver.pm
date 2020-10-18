@@ -14,14 +14,16 @@ sub new {
 sub add {
   my ($self, $type, $value) = @_;
   my $event = { type => $type };
-  if ($self->{marker}) {
-    $event->{marker} = delete $self->{marker};
-  }
-  if (my $anchor = $self->{anchor}) {
-    $event->{anchor} = delete $self->{anchor};
-  }
-  if (my $tag = $self->{tag}) {
-    $event->{tag} = delete $self->{tag};
+  if (defined $type) {
+    if ($self->{marker}) {
+      $event->{marker} = delete $self->{marker};
+    }
+    if (my $anchor = $self->{anchor}) {
+      $event->{anchor} = delete $self->{anchor};
+    }
+    if (my $tag = $self->{tag}) {
+      $event->{tag} = delete $self->{tag};
+    }
   }
   if (defined $value) {
     $event->{value} = $value;
