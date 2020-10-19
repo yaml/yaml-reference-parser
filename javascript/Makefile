@@ -8,6 +8,7 @@ ALL_JS := \
     lib/grammar.js \
     lib/parser.js \
     lib/prelude.js \
+    lib/receiver.js \
     lib/test-receiver.js \
     test/testml-bridge.js \
 

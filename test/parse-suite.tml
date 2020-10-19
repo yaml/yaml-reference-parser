@@ -12,13 +12,13 @@
 
 
 %Import 229Q    # Spec Example 2.4. Sequence of Mappings
-%Import 26DV    # Whitespace around colon in mappings  XXX prop on key
+%Import 26DV    # Whitespace around colon in mappings
 %Import 27NA    # Spec Example 5.9. Directive Indicator
 %Import 2AUY    # Tags in Block Sequence
 %Import 2EBW    # Allowed characters in keys
 %Import 2JQS    # Block Mapping with Missing Keys
 %Import 2LFX    # Spec Example 6.13. Reserved Directives [1.3]
-%Import 2SXE    # Anchors With Colon in Name  XXX prop on key
+%Import 2SXE    # Anchors With Colon in Name
 %Import 2XXW    # Spec Example 2.25. Unordered Sets
 %Import 33X3    # Three explicit integers in a block sequence
 %Import 35KP    # Tags for Root Objects
@@ -65,13 +65,13 @@
 %Import 6M2F    # Aliases in Explicit Block Mapping
 %Import 6PBE    # Zero-indented sequences in explicit mapping keys
 %Import 6SLA    # Allowed characters in quoted mapping key
-%Import 6VJK    # Spec Example 2.15. Folded newlines are preserved for "more indented" and blank lines  # XXX Fold indents
+%Import 6VJK    # Spec Example 2.15. Folded newlines are preserved for "more indented" and blank lines
 %Import 6WLZ    # Spec Example 6.18. Primary Tag Handle [1.3]
 %Import 6WPF    # Spec Example 6.8. Flow Folding [1.3]
 # %Import 6XDY    # Two document start markers  # XXX stream headers
 # %Import 6ZKB    # Spec Example 9.6. Stream  # XXX stream stuff
 %Import 735Y    # Spec Example 8.20. Block Node Types
-%Import 74H7    # Tags in Implicit Mapping  # XXX prop on key
+%Import 74H7    # Tags in Implicit Mapping
 %Import 753E    # Block Scalar Strip [1.3]
 %Import 7A4E    # Spec Example 7.6. Double Quoted Lines
 %Import 7BMT    # Node and Mapping Key Anchors [1.3]
@@ -173,7 +173,7 @@
 %Import K4SU    # Multiple Entry Block Sequence
 %Import K527    # Spec Example 6.6. Line Folding
 %Import K54U    # Tab after document header
-# %Import K858    # Spec Example 8.6. Empty Scalar Chomping
+# %Import K858    # Spec Example 8.6. Empty Scalar Chomping  # XXX fold
 # %Import KK5P    # Various combinations of explicit block mappings
 %Import KMK3    # Block Submapping
 %Import KSS4    # Scalars on --- line
@@ -189,7 +189,7 @@
 # %Import M7A3    # Spec Example 9.3. Bare Documents
 %Import M7NX    # Nested flow collections
 %Import M9B4    # Spec Example 8.7. Literal Scalar
-# %Import MJS9    # Spec Example 6.7. Block Folding
+# %Import MJS9    # Spec Example 6.7. Block Folding  # XXX fold
 %Import MXS3    # Flow Mapping in Block Sequence
 %Import MYW6    # Block Scalar Strip
 %Import MZX3    # Non-Specific Tags on Scalars
@@ -199,7 +199,7 @@
 %Import NJ66    # Multiline plain flow mapping key
 # %Import NKF9    # Empty keys in block and flow mapping
 %Import NP9H    # Spec Example 7.5. Double Quoted Line Breaks
-# %Import P2AD    # Spec Example 8.1. Block Scalar Header
+# %Import P2AD    # Spec Example 8.1. Block Scalar Header  # XXX fold
 %Import P76L    # Spec Example 6.19. Secondary Tag Handle
 %Import P94K    # Spec Example 6.11. Multi-Line Comments
 %Import PBJ2    # Spec Example 2.3. Mapping Scalars to Sequences
@@ -212,7 +212,7 @@
 %Import Q9WF    # Spec Example 6.12. Separation Spaces
 %Import QF4Y    # Spec Example 7.19. Single Pair Flow Mappings
 # %Import QT73    # Comment and document-end marker
-# %Import R4YG    # Spec Example 8.2. Block Indentation Indicator
+# %Import R4YG    # Spec Example 8.2. Block Indentation Indicator  # XXX fold
 %Import R52L    # Nested flow mapping sequence and mappings
 %Import RLU9    # Sequence Indent
 %Import RR7F    # Mixed Block Mapping (implicit to explicit)
