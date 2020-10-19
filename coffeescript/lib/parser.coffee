@@ -252,7 +252,8 @@ global.Parser = class Parser extends Grammar
   rng: (low, high)->
     rng = ->
       return false if @the_end()
-      if low <= @input[@pos] <= high
+      if @input[@pos..].match(new RegExp "^[#{low}-#{high}]", 'u')
+        @pos++ if @input[@pos..].codePointAt(0) > 65535
         @pos++
         return true
       return false

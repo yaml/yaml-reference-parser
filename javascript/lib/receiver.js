@@ -93,10 +93,6 @@
 
     add(event) {
       if (event.event != null) {
-        if (this.marker != null) {
-          event.explicit = true;
-          delete this.marker;
-        }
         if (this.anchor != null) {
           event.anchor = this.anchor;
           delete this.anchor;
@@ -114,6 +110,9 @@
       if (this.cache.length) {
         return _.last(this.cache).push(event);
       } else {
+        if (event.event.match(/(mapping_start|sequence_start|scalar)/)) {
+          this.check_document_start();
+        }
         return this.send(event);
       }
     }
@@ -149,13 +148,34 @@
       return last && last[0] && last[0].event === type && last[0];
     }
 
+    check_document_start() {
+      if (!this.document_start) {
+        return;
+      }
+      this.send(this.document_start);
+      delete this.document_start;
+      return this.document_end = document_end_event();
+    }
+
+    check_document_end() {
+      if (!this.document_end) {
+        return;
+      }
+      this.send(this.document_end);
+      delete this.document_end;
+      return this.document_start = document_start_event();
+    }
+
     //----------------------------------------------------------------------------
     try__l_yaml_stream() {
       this.add(stream_start_event());
-      return this.tag_map = {};
+      this.tag_map = {};
+      this.document_start = document_start_event();
+      return delete this.document_end;
     }
 
     got__l_yaml_stream() {
+      this.check_document_end();
       return this.add(stream_end_event());
     }
 
@@ -167,34 +187,14 @@
       return this.tag_map[this.tag_handle] = o.text;
     }
 
-    try__l_bare_document() {
-      var parser;
-      parser = this.parser;
-      if (parser.input.slice(parser.pos).match(/^(\s|\#.*\n?)*\S/)) {
-        return this.add(document_start_event());
-      }
-    }
-
-    got__l_bare_document() {
-      return this.cache_up(document_end_event());
-    }
-
     got__c_directives_end() {
-      return this.marker = '---';
+      this.check_document_end();
+      return this.document_start.explicit = true;
     }
 
     got__c_document_end() {
-      var event;
-      if (event = this.cache_get('document_end')) {
-        event.explicit = true;
-        return this.cache_down();
-      }
-    }
-
-    not__c_document_end() {
-      if (this.cache_get('document_end')) {
-        return this.cache_down();
-      }
+      this.document_end.explicit = true;
+      return this.check_document_end();
     }
 
     got__c_flow_mapping__all__x7b() {
@@ -310,7 +310,7 @@
     }
 
     got__c_ns_flow_map_empty_key_entry() {
-      return FAIL('got__c_ns_flow_map_empty_key_entry');
+      return this.cache_down();
     }
 
     not__c_ns_flow_map_empty_key_entry() {

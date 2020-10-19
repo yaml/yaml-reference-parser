@@ -58,10 +58,6 @@ sub send {
 sub add {
   my ($self, $event) = @_;
   if (defined $event->{event}) {
-    if ($self->{marker}) {
-      $event->{explicit} = true;
-      delete $self->{marker};
-    }
     if (my $anchor = $self->{anchor}) {
       $event->{anchor} = delete $self->{anchor};
     }
@@ -79,6 +75,9 @@ sub push {
     push @{$self->{cache}[-1]}, $event;
   }
   else {
+    if ($event->{event} =~ /(mapping_start|sequence_start|scalar)/) {
+      $self->check_document_start;
+    }
     $self->send($event);
   }
 }
@@ -111,13 +110,35 @@ sub cache_get {
     $self->{cache}[-1][0];
 }
 
+sub check_document_start {
+  my ($self) = @_;
+  return unless $self->{document_start};
+  $self->send($self->{document_start});
+  delete $self->{document_start};
+  $self->{document_end} = document_end_event;
+}
+
+sub check_document_end {
+  my ($self) = @_;
+  return unless $self->{document_end};
+  $self->send($self->{document_end});
+  delete $self->{document_end};
+  $self->{document_start} = document_start_event;
+}
+
 #------------------------------------------------------------------------------
 sub try__l_yaml_stream {
   my ($self) = @_;
   $self->add(stream_start_event);
   $self->{tag_map} = {};
+  $self->{document_start} = document_start_event;
+  delete $self->{document_end};
 }
-sub got__l_yaml_stream { $_[0]->add(stream_end_event) }
+sub got__l_yaml_stream {
+  my ($self) = @_;
+  $self->check_document_end;
+  $self->add(stream_end_event);
+}
 
 sub got__c_tag_handle {
   my ($self, $o) = @_;
@@ -128,30 +149,15 @@ sub got__ns_tag_prefix {
   $self->{tag_map}{$self->{tag_handle}} = $o->{text};
 }
 
-sub try__l_bare_document {
+sub got__c_directives_end {
   my ($self) = @_;
-  my $parser = $self->{parser};
-  if (
-    substr($parser->{input}, $parser->{pos}) =~
-      /^(\s|\#.*\n?)*\S/
-  ) {
-    $self->add(document_start_event);
-  }
+  $self->check_document_end;
+  $self->{document_start}{explicit} = true;
 }
-sub got__l_bare_document { $_[0]->cache_up(document_end_event) }
-sub got__c_directives_end { $_[0]->{marker} = '---' }
 sub got__c_document_end {
   my ($self) = @_;
-  if (my $event = $self->cache_get('document_end')) {
-    $event->{explicit} = true;
-    $self->cache_down;
-  }
-}
-sub not__c_document_end {
-  my ($self) = @_;
-  if ($_[0]->cache_get('document_end')) {
-    $_[0]->cache_down;
-  }
+  $self->{document_end}{explicit} = true;
+  $self->check_document_end;
 }
 
 sub got__c_flow_mapping__all__x7b { $_[0]->add(mapping_start_event(true)) }
@@ -200,7 +206,7 @@ sub not__s_l_block_collection__all__rep__all {
 }
 
 sub try__c_ns_flow_map_empty_key_entry { $_[0]->cache_up }
-sub got__c_ns_flow_map_empty_key_entry { FAIL 'got__c_ns_flow_map_empty_key_entry' }
+sub got__c_ns_flow_map_empty_key_entry { $_[0]->cache_down }
 sub not__c_ns_flow_map_empty_key_entry { $_[0]->cache_drop }
 
 sub got__ns_plain {
@@ -314,9 +320,7 @@ sub got__e_scalar { $_[0]->add(scalar_event(plain => '')) }
 
 sub got__c_ns_anchor_property {
   my ($self, $o) = @_;
-  my $name = $o->{text};
-  $name =~ s/^\&//;
-  $self->{anchor} = $name;
+  $self->{anchor} = substr($o->{text}, 1);
 }
 
 sub got__c_ns_tag_property {

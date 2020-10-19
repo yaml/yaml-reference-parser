@@ -339,11 +339,13 @@
     rng(low, high) {
       var rng;
       rng = function() {
-        var ref;
         if (this.the_end()) {
           return false;
         }
-        if ((low <= (ref = this.input[this.pos]) && ref <= high)) {
+        if (this.input.slice(this.pos).match(new RegExp(`^[${low}-${high}]`, 'u'))) {
+          if (this.input.slice(this.pos).codePointAt(0) > 65535) {
+            this.pos++;
+          }
           this.pos++;
           return true;
         }

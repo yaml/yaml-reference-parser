@@ -1,16 +1,34 @@
 require './prelude'
 
-stream_start_event = -> event: 'stream_start'
-stream_end_event = -> event: 'stream_end'
-document_start_event = (explicit=false)-> event: 'document_start', explicit: explicit
-document_end_event = (explicit=false)-> event: 'document_end', explicit: explicit
-mapping_start_event = (flow=false)-> event: 'mapping_start', flow: flow
-mapping_end_event = -> event: 'mapping_end'
-sequence_start_event = (flow=false)-> event: 'sequence_start', flow: flow
-sequence_end_event = -> event: 'sequence_end'
-scalar_event = (style, value)-> event: 'scalar', style: style, value: value
-alias_event = (name)-> event: 'alias', name: name
-cache = (text)-> text: text
+stream_start_event = ->
+  event: 'stream_start'
+stream_end_event = ->
+  event: 'stream_end'
+document_start_event = (explicit=false)->
+  event: 'document_start'
+  explicit: explicit
+document_end_event = (explicit=false)->
+  event: 'document_end'
+  explicit: explicit
+mapping_start_event = (flow=false)->
+  event: 'mapping_start'
+  flow: flow
+mapping_end_event = ->
+  event: 'mapping_end'
+sequence_start_event = (flow=false)->
+  event: 'sequence_start'
+  flow: flow
+sequence_end_event = ->
+  event: 'sequence_end'
+scalar_event = (style, value)->
+  event: 'scalar'
+  style: style
+  value: value
+alias_event = (name)->
+  event: 'alias'
+  name: name
+cache = (text)->
+  text: text
 
 global.Receiver = class Receiver
   constructor: ->
@@ -25,9 +43,6 @@ global.Receiver = class Receiver
 
   add: (event)->
     if event.event?
-      if @marker?
-        event.explicit = true
-        delete @marker
       if @anchor?
         event.anchor = @anchor
         delete @anchor
@@ -37,10 +52,13 @@ global.Receiver = class Receiver
     @push event
     return event
 
+
   push: (event)->
     if @cache.length
       _.last(@cache).push event
     else
+      if event.event.match /(mapping_start|sequence_start|scalar)/
+        @check_document_start()
       @send event
 
   cache_up: (event=null)->
@@ -64,30 +82,39 @@ global.Receiver = class Receiver
       last[0].event == type &&
       last[0]
 
+  check_document_start: ->
+    return unless @document_start
+    @send @document_start
+    delete @document_start
+    @document_end = document_end_event()
+
+  check_document_end: ->
+    return unless @document_end
+    @send @document_end
+    delete @document_end
+    @document_start = document_start_event()
+
   #----------------------------------------------------------------------------
   try__l_yaml_stream: ->
     @add stream_start_event()
     @tag_map = {}
-  got__l_yaml_stream: -> @add stream_end_event()
+    @document_start = document_start_event()
+    delete @document_end
+  got__l_yaml_stream: ->
+    @check_document_end()
+    @add stream_end_event()
 
   got__c_tag_handle: (o)->
     @tag_handle = o.text
   got__ns_tag_prefix: (o)->
     @tag_map[@tag_handle] = o.text
 
-  try__l_bare_document: ->
-    parser = @parser
-    if parser.input[parser.pos..].match /^(\s|\#.*\n?)*\S/
-      @add document_start_event()
-  got__l_bare_document: -> @cache_up document_end_event()
-  got__c_directives_end: -> @marker = '---'
+  got__c_directives_end: ->
+    @check_document_end()
+    @document_start.explicit = true
   got__c_document_end: ->
-    if event = @cache_get 'document_end'
-      event.explicit = true
-      @cache_down()
-  not__c_document_end: ->
-    if @cache_get 'document_end'
-      @cache_down()
+    @document_end.explicit = true
+    @check_document_end()
 
   got__c_flow_mapping__all__x7b: -> @add mapping_start_event true
   got__c_flow_mapping__all__x7d: -> @add mapping_end_event()
@@ -131,7 +158,7 @@ global.Receiver = class Receiver
     delete @tag
 
   try__c_ns_flow_map_empty_key_entry: -> @cache_up()
-  got__c_ns_flow_map_empty_key_entry: -> FAIL 'got__c_ns_flow_map_empty_key_entry'
+  got__c_ns_flow_map_empty_key_entry: -> @cache_down()
   not__c_ns_flow_map_empty_key_entry: -> @cache_drop()
 
   got__ns_plain: (o)->
@@ -211,7 +238,8 @@ global.Receiver = class Receiver
 
   got__e_scalar: -> @add scalar_event 'plain', ''
 
-  got__c_ns_anchor_property: (o)-> @anchor = o.text[1..]
+  got__c_ns_anchor_property: (o)->
+    @anchor = o.text[1..]
 
   got__c_ns_tag_property: (o)->
     tag = o.text
