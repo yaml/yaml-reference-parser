@@ -255,6 +255,10 @@ sub got__s_nb_folded_text__all__rep {
   my ($self, $o) = @_;
   $self->add(undef, "$self->{ns_char}$o->{text}");
 }
+sub got__s_nb_spaced_text__all__rep {
+  my ($self, $o) = @_;
+  $self->add(undef, " $o->{text}");
+}
 sub try__c_l_folded {
   my ($self) = @_;
   $self->{in_scalar} = true;
@@ -263,9 +267,14 @@ sub try__c_l_folded {
 sub got__c_l_folded {
   my ($self) = @_;
   delete $self->{in_scalar};
-  my $lines = $self->cache_drop;
-  my $text = join '', map "$_->{value}\n", @$lines;
-  $text =~ s/([^\n])(\n+)(?=.)/$1 . (("\n" x (length($2) -1)) || ' ')/ge;
+
+  my @lines = map $_->{value}, @{$self->cache_drop};
+  my $text = join "\n", @lines;
+  $text =~ s/^(\S.*)\n(?=\S)/$1 /gm;
+  $text =~ s/^(\S.*)\n(\n+)/$1$2/gm;
+  $text =~ s/^([\ \t]+\S.*)\n(\n+)(?=\S)/$1$2/gm;
+  $text .= "\n";
+
   my $t = $self->{parser}->state_curr->{t};
   if ($t eq 'clip') {
     $text =~ s/\n+\z/\n/;

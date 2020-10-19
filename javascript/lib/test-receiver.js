@@ -52,9 +52,9 @@
     }
 
     cache_down(event = null) {
-      var e, events, i, len1;
+      var e, events, i, len;
       events = this.cache.pop() || FAIL('cache_down');
-      for (i = 0, len1 = events.length; i < len1; i++) {
+      for (i = 0, len = events.length; i < len; i++) {
         e = events[i];
         this.push(e);
       }
@@ -339,6 +339,10 @@
       return this.add(null, `${this.ns_char}${o.text}`);
     }
 
+    got__s_nb_spaced_text__all__rep(o) {
+      return this.add(null, ` ${o.text}`);
+    }
+
     try__c_l_folded() {
       this.in_scalar = true;
       return this.cache_up();
@@ -347,16 +351,14 @@
     got__c_l_folded() {
       var lines, t, text;
       delete this.in_scalar;
-      lines = this.cache_drop();
-      lines = lines.map(function(l) {
-        return `${l.value}\n`;
+      lines = this.cache_drop().map(function(l) {
+        return l.value;
       });
-      text = lines.join('');
-      text = text.replace(/([^\n])(\n+)(?=.)/g, function(...m) {
-        var len;
-        len = m[2].length - 1;
-        return m[1] + (len ? _.repeat("\n", len) : ' ');
-      });
+      text = lines.join("\n");
+      text = text.replace(/^(\S.*)\n(?=\S)/gm, "$1 ");
+      text = text.replace(/^(\S.*)\n(\n+)/gm, "$1$2");
+      text = text.replace(/^([\ \t]+\S.*)\n(\n+)(?=\S)/gm, "$1$2");
+      text += "\n";
       t = this.parser.state_curr().t;
       if (t === 'clip') {
         text = text.replace(/\n+$/, "\n");

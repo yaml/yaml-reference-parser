@@ -187,17 +187,20 @@ global.TestReceiver = class TestReceiver
     @ns_char = o.text if @in_scalar
   got__s_nb_folded_text__all__rep: (o)->
     @add null, "#{@ns_char}#{o.text}"
+  got__s_nb_spaced_text__all__rep: (o)->
+    @add null, " #{o.text}"
   try__c_l_folded: ->
     @in_scalar = true
     @cache_up()
   got__c_l_folded: ->
     delete @in_scalar
-    lines = @cache_drop()
-    lines = lines.map (l)-> "#{l.value}\n"
-    text = lines.join ''
-    text = text.replace /([^\n])(\n+)(?=.)/g, (m...)->
-      len = m[2].length - 1
-      return m[1] + (if len then _.repeat("\n", len) else ' ')
+    lines = @cache_drop().map (l)-> l.value
+    text = lines.join "\n"
+    text = text.replace /^(\S.*)\n(?=\S)/gm, "$1 "
+    text = text.replace /^(\S.*)\n(\n+)/gm, "$1$2"
+    text = text.replace /^([\ \t]+\S.*)\n(\n+)(?=\S)/gm, "$1$2"
+    text += "\n"
+
     t = @parser.state_curr().t
     if t == 'clip'
       text = text.replace /\n+$/, "\n"
