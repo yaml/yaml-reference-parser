@@ -156,7 +156,8 @@ sub got__c_directives_end {
 }
 sub got__c_document_end {
   my ($self) = @_;
-  $self->{document_end}{explicit} = true;
+  $self->{document_end}{explicit} = true
+    if defined $self->{document_end};
   $self->check_document_end;
 }
 

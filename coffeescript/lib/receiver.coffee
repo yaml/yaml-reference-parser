@@ -113,7 +113,8 @@ global.Receiver = class Receiver
     @check_document_end()
     @document_start.explicit = true
   got__c_document_end: ->
-    @document_end.explicit = true
+    if @document_end?
+      @document_end.explicit = true
     @check_document_end()
 
   got__c_flow_mapping__all__x7b: -> @add mapping_start_event true

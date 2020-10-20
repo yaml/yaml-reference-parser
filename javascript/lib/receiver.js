@@ -193,7 +193,9 @@
     }
 
     got__c_document_end() {
-      this.document_end.explicit = true;
+      if (this.document_end != null) {
+        this.document_end.explicit = true;
+      }
       return this.check_document_end();
     }
 

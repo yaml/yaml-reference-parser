@@ -6,7 +6,7 @@
 
 
 # Close:
-# 82AN G4RS% HWV9 QT73
+# 82AN G4RS%
 # - Block sequence
 # % Unicode
 
@@ -158,7 +158,7 @@
 %Import HMK4    # Spec Example 2.16. Indentation determines scope
 %Import HMQ5    # Spec Example 6.23. Node Properties
 %Import HS5T    # Spec Example 7.12. Plain Lines
-# %Import HWV9    # Document-end marker
+%Import HWV9    # Document-end marker
 %Import J3BT    # Spec Example 5.12. Tabs and Spaces
 %Import J5UC    # Multiple Pair Block Mapping
 %Import J7PZ    # Spec Example 2.26. Ordered Mappings
@@ -186,7 +186,7 @@
 %Import M29M    # Literal Block Scalar
 %Import M5C3    # Spec Example 8.21. Block Scalar Nodes
 %Import M5DY    # Spec Example 2.11. Mapping between Sequences
-# %Import M7A3    # Spec Example 9.3. Bare Documents
+%Import M7A3    # Spec Example 9.3. Bare Documents
 %Import M7NX    # Nested flow collections
 %Import M9B4    # Spec Example 8.7. Literal Scalar
 # %Import MJS9    # Spec Example 6.7. Block Folding  # XXX fold
@@ -211,7 +211,7 @@
 %Import Q8AD    # Spec Example 7.5. Double Quoted Line Breaks [1.3]
 %Import Q9WF    # Spec Example 6.12. Separation Spaces
 %Import QF4Y    # Spec Example 7.19. Single Pair Flow Mappings
-# %Import QT73    # Comment and document-end marker
+%Import QT73    # Comment and document-end marker
 # %Import R4YG    # Spec Example 8.2. Block Indentation Indicator  # XXX fold
 %Import R52L    # Nested flow mapping sequence and mappings
 %Import RLU9    # Sequence Indent

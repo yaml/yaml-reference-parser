@@ -588,7 +588,7 @@
     auto_detect(n) {
       var m;
       m = this.input.slice(this.pos).match(/^.*\n(?:\ *\n)*(\ *)/);
-      if (!m) {
+      if (m == null) {
         return 0;
       }
       return m[1].length - n;

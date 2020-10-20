@@ -395,7 +395,7 @@ global.Parser = class Parser extends Grammar
 
   auto_detect: (n)->
     m = @input[@pos..].match /^.*\n(?:\ *\n)*(\ *)/
-    return 0 unless m
+    return 0 unless m?
     return m[1].length - n
 
 #------------------------------------------------------------------------------
