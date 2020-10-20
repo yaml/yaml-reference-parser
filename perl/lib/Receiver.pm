@@ -257,6 +257,7 @@ sub got__c_l_literal {
   my ($self) = @_;
   delete $self->{in_scalar};
   my $lines = $self->cache_drop;
+  pop @$lines if @$lines and $lines->[-1]{text} eq '';
   my $text = join '', map "$_->{text}\n", @$lines;
   my $t = $self->{parser}->state_curr->{t};
   if ($t eq 'clip') {

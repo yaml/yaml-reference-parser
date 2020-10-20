@@ -196,6 +196,7 @@ global.Receiver = class Receiver
   got__c_l_literal: ->
     delete @in_scalar
     lines = @cache_drop()
+    lines.pop() if lines.length > 0 and lines[lines.length - 1].text == ''
     lines = lines.map (l)-> "#{l.text}\n"
     text = lines.join ''
     t = @parser.state_curr().t

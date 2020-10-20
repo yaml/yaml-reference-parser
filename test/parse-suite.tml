@@ -82,7 +82,7 @@
 %Import 7W2P    # Block Mapping with Missing Values
 %Import 7Z25    # Bare document after document end marker
 %Import 7ZZ5    # Empty flow collections
-# %Import 82AN    # Three dashes and content without space
+# %Import 82AN    # Three dashes and content without space  XXX --- and ... match without lookahead
 %Import 87E4    # Spec Example 7.8. Single Quoted Implicit Keys
 %Import 8CWC    # Plain mapping key ending with colon
 %Import 8G76    # Spec Example 6.10. Comment Lines
@@ -99,7 +99,7 @@
 %Import 9DXL    # Spec Example 9.6. Stream [1.3]
 %Import 9FMG    # Multi-level Mapping Indent
 %Import 9J7A    # Simple Mapping Indent
-# %Import 9KAX    # Various combinations of tags and anchors
+# %Import 9KAX    # Various combinations of tags and anchors  XXX backtracking
 %Import 9MMW    # Single Pair Implicit Entries
 %Import 9SA2    # Multiline double quoted flow mapping key
 %Import 9SHH    # Spec Example 5.8. Quoted Scalar Indicators
@@ -125,7 +125,7 @@
 %Import CPZ3    # Doublequoted scalar starting with a tab
 %Import CT4Q    # Spec Example 7.20. Single Pair Explicit Entry
 %Import CUP7    # Spec Example 5.6. Node Property Indicators
-# %Import D83L    # Block scalar indicator order
+# %Import D83L    # Block scalar indicator order  XXX backtracking on literals
 %Import D88J    # Flow Sequence in Block Mapping
 %Import D9TU    # Single Pair Block Mapping
 %Import DBG4    # Spec Example 7.10. Plain Characters
@@ -141,12 +141,12 @@
 %Import F2C7    # Anchors and Tags
 %Import F3CP    # Nested flow collections on one line
 %Import F6MC    # More indented lines at the beginning of folded block scalars
-# %Import F8F9    # Spec Example 8.5. Chomping Trailing Lines
+%Import F8F9    # Spec Example 8.5. Chomping Trailing Lines
 %Import FBC9    # Allowed characters in plain scalars
 %Import FH7J    # Tags on Empty Scalars
 %Import FP8R    # Zero indented block scalar
 %Import FQ7F    # Spec Example 2.1. Sequence of Scalars
-# %Import FRK4    # Spec Example 7.3. Completely Empty Flow Nodes
+%Import FRK4    # Spec Example 7.3. Completely Empty Flow Nodes
 %Import FTA2    # Single block sequence with anchor and explicit document start
 %Import FUP4    # Flow Sequence in Flow Sequence
 # %Import G4RS    # Spec Example 2.17. Quoted Scalars
@@ -197,9 +197,9 @@
 %Import NB6Z    # Multiline plain value with tabs on empty lines
 %Import NHX8    # Empty Lines at End of Document
 %Import NJ66    # Multiline plain flow mapping key
-# %Import NKF9    # Empty keys in block and flow mapping
+%Import NKF9    # Empty keys in block and flow mapping
 %Import NP9H    # Spec Example 7.5. Double Quoted Line Breaks
-# %Import P2AD    # Spec Example 8.1. Block Scalar Header  # XXX fold
+%Import P2AD    # Spec Example 8.1. Block Scalar Header
 %Import P76L    # Spec Example 6.19. Secondary Tag Handle
 %Import P94K    # Spec Example 6.11. Multi-Line Comments
 %Import PBJ2    # Spec Example 2.3. Mapping Scalars to Sequences

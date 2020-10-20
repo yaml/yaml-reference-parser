@@ -372,6 +372,9 @@
       var lines, t, text;
       delete this.in_scalar;
       lines = this.cache_drop();
+      if (lines.length > 0 && lines[lines.length - 1].text === '') {
+        lines.pop();
+      }
       lines = lines.map(function(l) {
         return `${l.text}\n`;
       });
