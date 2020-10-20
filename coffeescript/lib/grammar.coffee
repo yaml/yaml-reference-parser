@@ -3302,7 +3302,14 @@ global.Grammar = class Grammar
     @all(
       @chr('-'),
       @chr('-'),
-      @chr('-')
+      @chr('-'),
+      @chk(
+        '=',
+        @any(
+          @s_white,
+          @b_break
+        )
+      )
     )
 
 

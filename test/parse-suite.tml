@@ -6,7 +6,7 @@
 
 
 # Close:
-# 82AN G4RS%
+# G4RS%
 # - Block sequence
 # % Unicode
 
@@ -82,7 +82,7 @@
 %Import 7W2P    # Block Mapping with Missing Values
 %Import 7Z25    # Bare document after document end marker
 %Import 7ZZ5    # Empty flow collections
-# %Import 82AN    # Three dashes and content without space  XXX --- and ... match without lookahead
+%Import 82AN    # Three dashes and content without space
 %Import 87E4    # Spec Example 7.8. Single Quoted Implicit Keys
 %Import 8CWC    # Plain mapping key ending with colon
 %Import 8G76    # Spec Example 6.10. Comment Lines

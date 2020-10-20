@@ -3511,7 +3511,14 @@ rule '203', c_directives_end => sub {
   $self->all(
     $self->chr('-'),
     $self->chr('-'),
-    $self->chr('-')
+    $self->chr('-'),
+    $self->chk(
+      '=',
+      $self->any(
+        $self->func('s_white'),
+        $self->func('b_break')
+      )
+    )
   );
 };
 
