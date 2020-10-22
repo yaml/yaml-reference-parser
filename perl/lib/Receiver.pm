@@ -235,8 +235,13 @@ sub got__c_double_quoted {
   $text =~ s/(\n)(\n*)/length($2) ? $2 : ' '/ge;
   $text =~ s/\\(["\/])/$1/g;
   $text =~ s/\\ / /g;
+  $text =~ s/\\b/\b/g;
   $text =~ s/\\t/\t/g;
   $text =~ s/\\n/\n/g;
+  $text =~ s/\\r/\r/g;
+  $text =~ s/\\x([0-9a-fA-F]{2})/chr(hex($1))/eg;
+  $text =~ s/\\u([0-9a-fA-F]{4})/chr(hex($1))/eg;
+  $text =~ s/\\U([0-9a-fA-F]{8})/chr(hex($1))/eg;
   $text =~ s/\\\\/\\/g;
   $self->add(scalar_event(double => $text));
 }

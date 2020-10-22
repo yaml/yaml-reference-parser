@@ -182,9 +182,18 @@ global.Receiver = class Receiver
       .replace(/(\n)(\n*)/g, (m...)-> if m[2].length then m[2] else ' ')
       .replace(/\\(["\/])/g, "$1")
       .replace(/\\ /g, ' ')
+      .replace(/\\b/g, "\b")
       .replace(/\\t/g, "\t")
       .replace(/\\n/g, "\n")
+      .replace(/\\r/g, "\r")
+      .replace /\\x([0-9a-fA-F]{2})/g, (m...)->
+        String.fromCharCode(parseInt(m[1], 16))
+      .replace /\\u([0-9a-fA-F]{4})/g, (m...)->
+        String.fromCharCode(parseInt(m[1], 16))
+      .replace /\\U([0-9a-fA-F]{8})/g, (m...)->
+        String.fromCharCode(parseInt(m[1], 16))
       .replace(/\\\\/g, '\\')
+
     @add scalar_event 'double', text
 
   got__l_empty: ->

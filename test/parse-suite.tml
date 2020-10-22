@@ -5,12 +5,6 @@
   *in-yaml.unescape.parse.fix1 == *test-event
 
 
-# Close:
-# G4RS%
-# - Block sequence
-# % Unicode
-
-
 %Import 229Q    # Spec Example 2.4. Sequence of Mappings
 %Import 26DV    # Whitespace around colon in mappings
 %Import 27NA    # Spec Example 5.9. Directive Indicator
@@ -149,7 +143,7 @@
 %Import FRK4    # Spec Example 7.3. Completely Empty Flow Nodes
 %Import FTA2    # Single block sequence with anchor and explicit document start
 %Import FUP4    # Flow Sequence in Flow Sequence
-# %Import G4RS    # Spec Example 2.17. Quoted Scalars
+%Import G4RS    # Spec Example 2.17. Quoted Scalars
 # %Import G5U8    # Plain dashes in flow sequence
 %Import G992    # Spec Example 8.9. Folded Scalar
 %Import GH63    # Mixed Block Mapping (explicit to implicit)

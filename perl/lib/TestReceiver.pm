@@ -41,9 +41,11 @@ sub output {
       my $style = $style_map->{$_->{style}};
       my $value = $_->{value};
       $value =~ s/\\/\\\\/g;
-      $value =~ s/\n/\\n/g;
+      $value =~ s/\x08/\\b/g;
       $value =~ s/\t/\\t/g;
-      $value =~ s/\ \z/<SPC>/;
+      $value =~ s/\n/\\n/g;
+      $value =~ s/\r/\\r/g;
+      $value =~ s/\x20\z/<SPC>/;
       push @event, "$style$value";
     }
     join(' ', @event) . "\n";
