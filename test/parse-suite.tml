@@ -206,7 +206,7 @@
 %Import Q9WF    # Spec Example 6.12. Separation Spaces
 %Import QF4Y    # Spec Example 7.19. Single Pair Flow Mappings
 %Import QT73    # Comment and document-end marker
-# %Import R4YG    # Spec Example 8.2. Block Indentation Indicator  # XXX fold
+%Import R4YG    # Spec Example 8.2. Block Indentation Indicator
 %Import R52L    # Nested flow mapping sequence and mappings
 %Import RLU9    # Sequence Indent
 %Import RR7F    # Mixed Block Mapping (implicit to explicit)
