@@ -403,20 +403,27 @@
 
     got__ns_char(o) {
       if (this.in_scalar) {
-        return this.ns_char = o.text;
+        return this.first = o.text;
+      }
+    }
+
+    got__s_white(o) {
+      if (this.in_scalar) {
+        return this.first = o.text;
       }
     }
 
     got__s_nb_folded_text__all__rep(o) {
-      return this.add(cache(`${this.ns_char}${o.text}`));
+      return this.add(cache(`${this.first}${o.text}`));
     }
 
     got__s_nb_spaced_text__all__rep(o) {
-      return this.add(cache(` ${o.text}`));
+      return this.add(cache(`${this.first}${o.text}`));
     }
 
     try__c_l_folded() {
       this.in_scalar = true;
+      this.first = '';
       return this.cache_up();
     }
 

@@ -220,13 +220,16 @@ global.Receiver = class Receiver
     @cache_drop()
 
   got__ns_char: (o)->
-    @ns_char = o.text if @in_scalar
+    @first = o.text if @in_scalar
+  got__s_white: (o)->
+    @first = o.text if @in_scalar
   got__s_nb_folded_text__all__rep: (o)->
-    @add cache "#{@ns_char}#{o.text}"
+    @add cache "#{@first}#{o.text}"
   got__s_nb_spaced_text__all__rep: (o)->
-    @add cache " #{o.text}"
+    @add cache "#{@first}#{o.text}"
   try__c_l_folded: ->
     @in_scalar = true
+    @first = ''
     @cache_up()
   got__c_l_folded: ->
     delete @in_scalar

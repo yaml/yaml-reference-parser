@@ -183,7 +183,7 @@
 %Import M7A3    # Spec Example 9.3. Bare Documents
 %Import M7NX    # Nested flow collections
 %Import M9B4    # Spec Example 8.7. Literal Scalar
-# %Import MJS9    # Spec Example 6.7. Block Folding  # XXX fold
+%Import MJS9    # Spec Example 6.7. Block Folding
 %Import MXS3    # Flow Mapping in Block Sequence
 %Import MYW6    # Block Scalar Strip
 %Import MZX3    # Non-Specific Tags on Scalars

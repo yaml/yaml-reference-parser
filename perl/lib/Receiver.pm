@@ -282,19 +282,24 @@ sub not__c_l_literal {
 
 sub got__ns_char {
   my ($self, $o) = @_;
-  $self->{ns_char} = $o->{text} if $self->{in_scalar};
+  $self->{first} = $o->{text} if $self->{in_scalar};
+}
+sub got__s_white {
+  my ($self, $o) = @_;
+  $self->{first} = $o->{text} if $self->{in_scalar};
 }
 sub got__s_nb_folded_text__all__rep {
   my ($self, $o) = @_;
-  $self->add(cache "$self->{ns_char}$o->{text}");
+  $self->add(cache "$self->{first}$o->{text}");
 }
 sub got__s_nb_spaced_text__all__rep {
   my ($self, $o) = @_;
-  $self->add(cache " $o->{text}");
+  $self->add(cache "$self->{first}$o->{text}");
 }
 sub try__c_l_folded {
   my ($self) = @_;
   $self->{in_scalar} = true;
+  $self->{first} = '';
   $self->cache_up;
 }
 sub got__c_l_folded {
