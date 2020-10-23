@@ -141,7 +141,6 @@ parse(*yaml) == *events
 
 
 === Two scalar nodes with header and footer
---- SKIP
 --- yaml(<)
     --- foo
       bar
@@ -161,7 +160,6 @@ parse(*yaml) == *events
 
 
 === Empty stream with footer
---- SKIP
 --- yaml
 ...
 --- events
@@ -169,3 +167,27 @@ parse(*yaml) == *events
 -STR
 
 
+
+=== Empty stream with footer; no final newline
+--- yaml(-)
+...
+--- ^events
+
+
+
+=== Stream with just header
+--- yaml(<)
+    ---
+--- events
++STR
++DOC ---
+=VAL :
+-DOC
+-STR
+
+
+
+=== Stream with just header; no final newline
+--- yaml(<-)
+    ---
+--- ^events

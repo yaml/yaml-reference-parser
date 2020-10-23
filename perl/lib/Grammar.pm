@@ -3515,6 +3515,7 @@ rule '203', c_directives_end => sub {
     $self->chk(
       '=',
       $self->any(
+        $self->func('end_of_stream'),
         $self->func('s_white'),
         $self->func('b_break')
       )

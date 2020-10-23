@@ -1071,7 +1071,7 @@
 
       c_directives_end() {
         debug_rule("c_directives_end");
-        return this.all(this.chr('-'), this.chr('-'), this.chr('-'), this.chk('=', this.any(this.s_white, this.b_break)));
+        return this.all(this.chr('-'), this.chr('-'), this.chr('-'), this.chk('=', this.any(this.end_of_stream, this.s_white, this.b_break)));
       }
 
       c_document_end() {

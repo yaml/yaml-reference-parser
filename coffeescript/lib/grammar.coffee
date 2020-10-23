@@ -3306,6 +3306,7 @@ global.Grammar = class Grammar
       @chk(
         '=',
         @any(
+          @end_of_stream,
           @s_white,
           @b_break
         )

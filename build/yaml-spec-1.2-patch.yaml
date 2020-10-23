@@ -3285,7 +3285,7 @@ c-directives-end:
   - '-'
   - '-'
   - '-'
-  - (===): { (any): [ s-white, b-break ] }
+  - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
 
 
 
