@@ -165,7 +165,6 @@ foo: {bar: 42}
 
 
 === Block seq in seq in seq
---- SKIP
 --- yaml
 - - - foo
 --- events
@@ -182,8 +181,15 @@ foo: {bar: 42}
 -STR
 
 
-=== Block mapping in block mapping
+=== Block seq in seq in seq
 --- SKIP
+--- yaml
+  -   - x
+--- events
+$$$
+
+
+=== Block mapping in block mapping
 --- yaml
 foo:
   bar: 42
@@ -201,8 +207,7 @@ foo:
 -STR
 
 
-=== XXX
---- SKIP
+=== Block map in map in map
 --- yaml
 foo:
   bar:
