@@ -119,7 +119,7 @@
 %Import CPZ3    # Doublequoted scalar starting with a tab
 %Import CT4Q    # Spec Example 7.20. Single Pair Explicit Entry
 %Import CUP7    # Spec Example 5.6. Node Property Indicators
-# %Import D83L    # Block scalar indicator order  XXX backtracking on literals
+%Import D83L    # Block scalar indicator order
 %Import D88J    # Flow Sequence in Block Mapping
 %Import D9TU    # Single Pair Block Mapping
 %Import DBG4    # Spec Example 7.10. Plain Characters

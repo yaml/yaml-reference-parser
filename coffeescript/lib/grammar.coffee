@@ -2574,11 +2574,27 @@ global.Grammar = class Grammar
       @any(
         @all(
           [ @c_indentation_indicator, n ],
-          @c_chomping_indicator
+          @c_chomping_indicator,
+          @chk(
+            '=',
+            @any(
+              @end_of_stream,
+              @s_white,
+              @b_break
+            )
+          )
         ),
         @all(
           @c_chomping_indicator,
-          [ @c_indentation_indicator, n ]
+          [ @c_indentation_indicator, n ],
+          @chk(
+            '=',
+            @any(
+              @end_of_stream,
+              @s_white,
+              @b_break
+            )
+          )
         )
       ),
       @s_b_comment

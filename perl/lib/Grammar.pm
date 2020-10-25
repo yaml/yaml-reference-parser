@@ -2742,11 +2742,27 @@ rule '162', c_b_block_header => sub {
     $self->any(
       $self->all(
         [ $self->func('c_indentation_indicator'), $n ],
-        $self->func('c_chomping_indicator')
+        $self->func('c_chomping_indicator'),
+        $self->chk(
+          '=',
+          $self->any(
+            $self->func('end_of_stream'),
+            $self->func('s_white'),
+            $self->func('b_break')
+          )
+        )
       ),
       $self->all(
         $self->func('c_chomping_indicator'),
-        [ $self->func('c_indentation_indicator'), $n ]
+        [ $self->func('c_indentation_indicator'), $n ],
+        $self->chk(
+          '=',
+          $self->any(
+            $self->func('end_of_stream'),
+            $self->func('s_white'),
+            $self->func('b_break')
+          )
+        )
       )
     ),
     $self->func('s_b_comment')

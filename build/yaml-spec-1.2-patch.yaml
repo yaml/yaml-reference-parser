@@ -2561,9 +2561,11 @@ c-b-block-header:
     - (all):
       - c-indentation-indicator: n
       - c-chomping-indicator
+      - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
     - (all):
       - c-chomping-indicator
       - c-indentation-indicator: n
+      - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
   - s-b-comment
 
 

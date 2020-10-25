@@ -855,7 +855,7 @@
 
       c_b_block_header(n) {
         debug_rule("c_b_block_header", n);
-        return this.all(this.any(this.all([this.c_indentation_indicator, n], this.c_chomping_indicator), this.all(this.c_chomping_indicator, [this.c_indentation_indicator, n])), this.s_b_comment);
+        return this.all(this.any(this.all([this.c_indentation_indicator, n], this.c_chomping_indicator, this.chk('=', this.any(this.end_of_stream, this.s_white, this.b_break))), this.all(this.c_chomping_indicator, [this.c_indentation_indicator, n], this.chk('=', this.any(this.end_of_stream, this.s_white, this.b_break)))), this.s_b_comment);
       }
 
       c_indentation_indicator(n) {
