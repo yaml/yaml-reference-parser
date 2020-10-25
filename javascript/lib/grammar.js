@@ -755,7 +755,7 @@
 
       ns_flow_map_entry(n, c) {
         debug_rule("ns_flow_map_entry", n, c);
-        return this.any(this.all(this.chr('?'), [this.s_separate, n, c], [this.ns_flow_map_explicit_entry, n, c]), [this.ns_flow_map_implicit_entry, n, c]);
+        return this.any(this.all(this.chr('?'), this.chk('=', this.any(this.end_of_stream, this.s_white, this.b_break)), [this.s_separate, n, c], [this.ns_flow_map_explicit_entry, n, c]), [this.ns_flow_map_implicit_entry, n, c]);
       }
 
       ns_flow_map_explicit_entry(n, c) {
@@ -795,7 +795,7 @@
 
       ns_flow_pair(n, c) {
         debug_rule("ns_flow_pair", n, c);
-        return this.any(this.all(this.chr('?'), [this.s_separate, n, c], [this.ns_flow_map_explicit_entry, n, c]), [this.ns_flow_pair_entry, n, c]);
+        return this.any(this.all(this.chr('?'), this.chk('=', this.any(this.end_of_stream, this.s_white, this.b_break)), [this.s_separate, n, c], [this.ns_flow_map_explicit_entry, n, c]), [this.ns_flow_pair_entry, n, c]);
       }
 
       ns_flow_pair_entry(n, c) {
@@ -1013,7 +1013,7 @@
 
       c_l_block_map_explicit_key(n) {
         debug_rule("c_l_block_map_explicit_key", n);
-        return this.all(this.chr('?'), [this.s_l_block_indented, n, "block-out"]);
+        return this.all(this.chr('?'), this.chk('=', this.any(this.end_of_stream, this.s_white, this.b_break)), [this.s_l_block_indented, n, "block-out"]);
       }
 
       l_block_map_explicit_value(n) {

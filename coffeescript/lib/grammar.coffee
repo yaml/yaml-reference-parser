@@ -2171,6 +2171,14 @@ global.Grammar = class Grammar
     @any(
       @all(
         @chr('?'),
+        @chk(
+          '=',
+          @any(
+            @end_of_stream,
+            @s_white,
+            @b_break
+          )
+        ),
         [ @s_separate, n, c ],
         [ @ns_flow_map_explicit_entry, n, c ]
       ),
@@ -2334,6 +2342,14 @@ global.Grammar = class Grammar
     @any(
       @all(
         @chr('?'),
+        @chk(
+          '=',
+          @any(
+            @end_of_stream,
+            @s_white,
+            @b_break
+          )
+        ),
         [ @s_separate, n, c ],
         [ @ns_flow_map_explicit_entry, n, c ]
       ),
@@ -3069,6 +3085,14 @@ global.Grammar = class Grammar
     debug_rule("c_l_block_map_explicit_key",n)
     @all(
       @chr('?'),
+      @chk(
+        '=',
+        @any(
+          @end_of_stream,
+          @s_white,
+          @b_break
+        )
+      ),
       [ @s_l_block_indented, n, "block-out" ]
     )
 

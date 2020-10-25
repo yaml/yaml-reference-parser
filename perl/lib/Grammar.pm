@@ -2319,6 +2319,14 @@ rule '142', ns_flow_map_entry => sub {
   $self->any(
     $self->all(
       $self->chr('?'),
+      $self->chk(
+        '=',
+        $self->any(
+          $self->func('end_of_stream'),
+          $self->func('s_white'),
+          $self->func('b_break')
+        )
+      ),
       [ $self->func('s_separate'), $n, $c ],
       [ $self->func('ns_flow_map_explicit_entry'), $n, $c ]
     ),
@@ -2490,6 +2498,14 @@ rule '150', ns_flow_pair => sub {
   $self->any(
     $self->all(
       $self->chr('?'),
+      $self->chk(
+        '=',
+        $self->any(
+          $self->func('end_of_stream'),
+          $self->func('s_white'),
+          $self->func('b_break')
+        )
+      ),
       [ $self->func('s_separate'), $n, $c ],
       [ $self->func('ns_flow_map_explicit_entry'), $n, $c ]
     ),
@@ -3265,6 +3281,14 @@ rule '190', c_l_block_map_explicit_key => sub {
   debug_rule("c_l_block_map_explicit_key",$n) if DEBUG;
   $self->all(
     $self->chr('?'),
+    $self->chk(
+      '=',
+      $self->any(
+        $self->func('end_of_stream'),
+        $self->func('s_white'),
+        $self->func('b_break')
+      )
+    ),
     [ $self->func('s_l_block_indented'), $n, "block-out" ]
   );
 };

@@ -2189,6 +2189,7 @@ ns-flow-map-entry:
   (any):
   - (all):
     - '?'
+    - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
     - s-separate: [ n, c ]
     - ns-flow-map-explicit-entry: [ n, c ]
   - ns-flow-map-implicit-entry: [ n, c ]
@@ -2326,6 +2327,7 @@ ns-flow-pair:
   (any):
   - (all):
     - '?'
+    - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
     - s-separate: [ n, c ]
     - ns-flow-map-explicit-entry: [ n, c ]
   - ns-flow-pair-entry: [ n, c ]
@@ -3061,6 +3063,7 @@ c-l-block-map-explicit-key:
   (...): n
   (all):
   - '?'
+  - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
   - s-l+block-indented: [ n, "block-out" ]
 
 

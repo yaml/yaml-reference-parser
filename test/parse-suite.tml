@@ -9,7 +9,7 @@
 %Import 26DV    # Whitespace around colon in mappings
 %Import 27NA    # Spec Example 5.9. Directive Indicator
 %Import 2AUY    # Tags in Block Sequence
-# %Import 2EBW    # Allowed characters in keys    XXX Edge case keys
+%Import 2EBW    # Allowed characters in keys
 %Import 2JQS    # Block Mapping with Missing Keys
 %Import 2LFX    # Spec Example 6.13. Reserved Directives [1.3]
 %Import 2SXE    # Anchors With Colon in Name
