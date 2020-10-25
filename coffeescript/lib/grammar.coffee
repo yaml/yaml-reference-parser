@@ -2929,13 +2929,13 @@ global.Grammar = class Grammar
 
   @::l_block_sequence.num = 183
   l_block_sequence: (n)->
+    return false unless m = @call [@auto_detect_indent, n], 'number'
     debug_rule("l_block_sequence",n)
     @all(
-      @set('m', [@auto_detect_indent, n]),
       @rep(1, null,
         @all(
-          [ @s_indent, @add(n, @m()) ],
-          [ @c_l_block_seq_entry, @add(n, @m()) ]
+          [ @s_indent, @add(n, m) ],
+          [ @c_l_block_seq_entry, @add(n, m) ]
         ))
     )
 
@@ -2967,13 +2967,14 @@ global.Grammar = class Grammar
 
   @::s_l_block_indented.num = 185
   s_l_block_indented: (n, c)->
+    m = @call [@auto_detect_indent, n], 'number'
     debug_rule("s_l_block_indented",n,c)
     @any(
       @all(
-        [ @s_indent, @m() ],
+        [ @s_indent, m ],
         @any(
-          [ @ns_l_compact_sequence, @add(n, @add(1, @m())) ],
-          [ @ns_l_compact_mapping, @add(n, @add(1, @m())) ]
+          [ @ns_l_compact_sequence, @add(n, @add(1, m)) ],
+          [ @ns_l_compact_mapping, @add(n, @add(1, m)) ]
         )
       ),
       [ @s_l_block_node, n, c ],
@@ -3012,13 +3013,13 @@ global.Grammar = class Grammar
 
   @::l_block_mapping.num = 187
   l_block_mapping: (n)->
+    return false unless m = @call [@auto_detect_indent, n], 'number'
     debug_rule("l_block_mapping",n)
     @all(
-      @set('m', [@auto_detect_indent, n]),
       @rep(1, null,
         @all(
-          [ @s_indent, @add(n, @m()) ],
-          [ @ns_l_block_map_entry, @add(n, @m()) ]
+          [ @s_indent, @add(n, m) ],
+          [ @ns_l_block_map_entry, @add(n, m) ]
         ))
     )
 

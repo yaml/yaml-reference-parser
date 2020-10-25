@@ -164,6 +164,13 @@ foo: {bar: 42}
 -STR
 
 
+=== Map in block seq, new line
+--- yaml
+-
+  foo: bar
+--- ^events
+
+
 === Block seq in seq in seq
 --- yaml
 - - - foo
@@ -181,12 +188,33 @@ foo: {bar: 42}
 -STR
 
 
-=== Block seq in seq in seq
---- SKIP
+=== Seq tab after -
 --- yaml
-  -   - x
+-	a
 --- events
-$$$
++STR
++DOC
++SEQ
+=VAL :a
+-SEQ
+-DOC
+-STR
+
+
+
+=== Block seq in seq in seq
+--- yaml
+   -  - x
+--- events
++STR
++DOC
++SEQ
++SEQ
+=VAL :x
+-SEQ
+-SEQ
+-DOC
+-STR
 
 
 === Block mapping in block mapping
@@ -229,3 +257,16 @@ foo:
 -STR
 
 
+=== XXX
+--- SKIP
+--- yaml
+a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~: safe
+?foo: safe question mark
+:foo: safe colon
+-foo: safe dash
+this is#not: a comment
+- a: b
+- ? c: d
+  : e: f
+--- events
+$$$

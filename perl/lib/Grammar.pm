@@ -3118,13 +3118,13 @@ rule '182', l_folded_content => sub {
 
 rule '183', l_block_sequence => sub {
   my ($self, $n) = @_;
+  my $m = $self->call([$self->func('auto_detect_indent'), $n], 'number') or return false;
   debug_rule("l_block_sequence",$n) if DEBUG;
   $self->all(
-    $self->set('m', [$self->func('auto_detect_indent'), $n]),
     $self->rep(1, undef,
       $self->all(
-        [ $self->func('s_indent'), $self->add($n, $self->m()) ],
-        [ $self->func('c_l_block_seq_entry'), $self->add($n, $self->m()) ]
+        [ $self->func('s_indent'), $self->add($n, $m) ],
+        [ $self->func('c_l_block_seq_entry'), $self->add($n, $m) ]
       ))
   );
 };
@@ -3158,13 +3158,14 @@ rule '184', c_l_block_seq_entry => sub {
 
 rule '185', s_l_block_indented => sub {
   my ($self, $n, $c) = @_;
+  my $m = $self->call([$self->func('auto_detect_indent'), $n], 'number');
   debug_rule("s_l_block_indented",$n,$c) if DEBUG;
   $self->any(
     $self->all(
-      [ $self->func('s_indent'), $self->m() ],
+      [ $self->func('s_indent'), $m ],
       $self->any(
-        [ $self->func('ns_l_compact_sequence'), $self->add($n, $self->add(1, $self->m())) ],
-        [ $self->func('ns_l_compact_mapping'), $self->add($n, $self->add(1, $self->m())) ]
+        [ $self->func('ns_l_compact_sequence'), $self->add($n, $self->add(1, $m)) ],
+        [ $self->func('ns_l_compact_mapping'), $self->add($n, $self->add(1, $m)) ]
       )
     ),
     [ $self->func('s_l_block_node'), $n, $c ],
@@ -3205,13 +3206,13 @@ rule '186', ns_l_compact_sequence => sub {
 
 rule '187', l_block_mapping => sub {
   my ($self, $n) = @_;
+  my $m = $self->call([$self->func('auto_detect_indent'), $n], 'number') or return false;
   debug_rule("l_block_mapping",$n) if DEBUG;
   $self->all(
-    $self->set('m', [$self->func('auto_detect_indent'), $n]),
     $self->rep(1, undef,
       $self->all(
-        [ $self->func('s_indent'), $self->add($n, $self->m()) ],
-        [ $self->func('ns_l_block_map_entry'), $self->add($n, $self->m()) ]
+        [ $self->func('s_indent'), $self->add($n, $m) ],
+        [ $self->func('ns_l_block_map_entry'), $self->add($n, $m) ]
       ))
   );
 };

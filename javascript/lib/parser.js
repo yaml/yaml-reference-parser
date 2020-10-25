@@ -575,14 +575,23 @@
     }
 
     auto_detect_indent(n) {
-      var indent, m;
-      m = this.input.slice(this.pos).match(/^(\ *)/);
-      indent = m[1].length - n;
-      if (indent > 0) {
-        return indent;
+      var in_seq, m, match, pos, pre;
+      pos = this.pos;
+      in_seq = pos > 0 && this.input[pos - 1].match(/^[\-\?]$/);
+      match = this.input.slice(pos).match(/^((?: *(?:\#.*)?\n)*)( *)/ || FAIL("auto_detect_indent"));
+      pre = match[1];
+      m = match[2].length;
+      if (in_seq && !pre.length) {
+        if (n === -1) {
+          m++;
+        }
       } else {
-        return -1;
+        m -= n;
       }
+      if (m < 0) {
+        m = 0;
+      }
+      return m;
     }
 
     auto_detect(n) {

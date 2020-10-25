@@ -538,9 +538,28 @@ name 'empty', \&empty;
 
 sub auto_detect_indent {
   my ($self, $n) = @_;
-  substr($self->{input}, $self->{pos}) =~ /^(\ *)/;
-  my $indent = length($1) - $n;
-  return $indent > 0 ? $indent : -1;
+  my $pos = $self->{pos};
+  my $in_seq = ($pos > 0 && substr($self->{input}, $pos - 1, 1) =~ /^[\-\?]$/);
+  substr($self->{input}, $pos) =~ /^
+    (
+      (?:
+        \ *
+        (?:\#.*)?
+        \n
+      )*
+    )
+    (\ *)
+  /x or FAIL "auto_detect_indent";
+  my $pre = $1;
+  my $m = length($2);
+  if ($in_seq and not length $pre) {
+    $m++ if $n == -1;
+  }
+  else {
+    $m -= $n;
+  }
+  $m = 0 if $m < 0;
+  return $m;
 }
 name 'auto_detect_indent', \&auto_detect_indent;
 

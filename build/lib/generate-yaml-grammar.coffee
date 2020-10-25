@@ -39,6 +39,13 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
   gen_grammar_tail: => ''
 
   gen_rule: (name)->
+    @setm = ''
+    if @spec[name]['(->m)']
+      delete @spec[name]['(->m)']
+      @setm = @gen_setm false
+    else if @spec[name]['(m>0)']
+      delete @spec[name]['(m>0)']
+      @setm = @gen_setm true
     num = @num = @nums[name][1..]
     comment = @comments[num]
     rule_name = @rule_name name
@@ -142,7 +149,7 @@ global.YamlGrammarGenerator = class YamlGrammarGenerator
         return @gen_method_call 'chr', "\"\\\\\""
       if @arg
         if rule in ['m', 't']
-          if not(rule in @args)
+          if not(rule in @args) and not(@setm)
             return @gen_method_call rule
         return @gen_var_value rule
       return @gen_method_call 'chr', "'#{rule}'"

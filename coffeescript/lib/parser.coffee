@@ -389,9 +389,26 @@ global.Parser = class Parser extends Grammar
   empty: -> true
 
   auto_detect_indent: (n)->
-    m = @input[@pos..].match /^(\ *)/
-    indent = m[1].length - n
-    return if indent > 0 then indent else -1
+    pos = @pos
+    in_seq = (pos > 0 and @input[pos - 1].match /^[\-\?]$/)
+    match = @input[pos..].match ///^
+      (
+        (?:
+          \ *
+          (?:\#.*)?
+          \n
+        )*
+      )
+      (\ *)
+    /// or FAIL "auto_detect_indent"
+    pre = match[1]
+    m = match[2].length
+    if in_seq and not pre.length
+      m++ if n == -1
+    else
+      m -= n
+    m = 0 if m < 0
+    return m
 
   auto_detect: (n)->
     m = @input[@pos..].match /^.*\n(?:\ *\n)*(\ *)/

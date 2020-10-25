@@ -2940,8 +2940,8 @@ l-folded-content:
 
 l+block-sequence:
   (...): n
+  (m>0): <auto-detect-indent>
   (all):
-  - (set): [ m, <auto-detect-indent> ]
   - (+++):
       (all):
       - s-indent: { (+): [ n, m ] }
@@ -2973,6 +2973,7 @@ c-l-block-seq-entry:
 
 s-l+block-indented:
   (...): [ n, c ]
+  (->m): <auto-detect-indent>
   (any):
   - (all):
     - s-indent: m
@@ -3013,8 +3014,8 @@ ns-l-compact-sequence:
 
 l+block-mapping:
   (...): n
+  (m>0): <auto-detect-indent>
   (all):
-  - (set): [ m, <auto-detect-indent> ]
   - (+++):
       (all):
       - s-indent: { (+): [ n, m ] }

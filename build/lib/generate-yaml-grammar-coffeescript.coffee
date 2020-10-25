@@ -14,11 +14,20 @@ global.generator_class = \
     \n\n
     """
 
+  gen_setm: (return_false)->
+    setm = "m = @call [@auto_detect_indent, n], 'number'"
+    if return_false
+      setm = "\n  return false unless " + setm
+    else
+      setm = "\n  " + setm
+    return setm
+
   gen_rule_code: (num, comment, rule_name, debug_args, rule_args, rule_body)->
+
     @indent """\
     #{comment}
     @::#{rule_name}.num = #{Number @num}
-    #{rule_name}: #{rule_args}->
+    #{rule_name}: #{rule_args}->#{@setm}
       debug_rule("#{rule_name}"#{debug_args})
     #{rule_body}
     \n\n\n

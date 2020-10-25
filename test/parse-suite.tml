@@ -9,7 +9,7 @@
 %Import 26DV    # Whitespace around colon in mappings
 %Import 27NA    # Spec Example 5.9. Directive Indicator
 %Import 2AUY    # Tags in Block Sequence
-%Import 2EBW    # Allowed characters in keys
+# %Import 2EBW    # Allowed characters in keys    XXX Edge case keys
 %Import 2JQS    # Block Mapping with Missing Keys
 %Import 2LFX    # Spec Example 6.13. Reserved Directives [1.3]
 %Import 2SXE    # Anchors With Colon in Name
@@ -85,7 +85,7 @@
 %Import 8QBE    # Block Sequence in Block Mapping
 %Import 8UDB    # Spec Example 7.14. Flow Sequence Entries
 %Import 8XYN    # Anchor with unicode character
-# %Import 93JH    # Block Mappings in Block Sequence  XXX indented top level seqs not working
+%Import 93JH    # Block Mappings in Block Sequence
 %Import 93WF    # Spec Example 6.6. Line Folding [1.3]
 %Import 96L6    # Spec Example 2.14. In the folded scalars, newlines become spaces
 %Import 98YD    # Spec Example 5.5. Comment Indicator
@@ -101,7 +101,7 @@
 %Import 9U5K    # Spec Example 2.12. Compact Nested Mapping
 %Import 9WXW    # Spec Example 6.18. Primary Tag Handle
 %Import 9YRD    # Multiline Scalar at Top Level
-# %Import A2M4    # Spec Example 6.2. Indentation Indicators  XXX indentation after : with explicit key
+%Import A2M4    # Spec Example 6.2. Indentation Indicators
 %Import A6F9    # Spec Example 8.4. Chomping Final Line Break
 %Import A984    # Multiline Scalar in Mapping
 %Import AB8U    # Sequence entry that looks like two with wrong indentation
@@ -159,7 +159,7 @@
 %Import J7VC    # Empty Lines Between Mapping Elements
 %Import J9HZ    # Spec Example 2.9. Single Document with Two Comments
 %Import JHB9    # Spec Example 2.7. Two Documents in a Stream
-# %Import JQ4R    # Spec Example 8.14. Block Sequence
+%Import JQ4R    # Spec Example 8.14. Block Sequence
 %Import JR7V    # Question marks in scalars
 %Import JS2J    # Spec Example 6.29. Node Anchors
 %Import JTV5    # Block Mapping with Multiline Scalars
@@ -211,8 +211,8 @@
 %Import RLU9    # Sequence Indent
 %Import RR7F    # Mixed Block Mapping (implicit to explicit)
 %Import RTP8    # Spec Example 9.2. Document Markers
-# %Import RZP5    # Various Trailing Comments [1.3]
-# %Import RZT7    # Spec Example 2.28. Log File
+%Import RZP5    # Various Trailing Comments [1.3]
+%Import RZT7    # Spec Example 2.28. Log File
 %Import S3PD    # Spec Example 8.18. Implicit Block Mapping Entries
 %Import S4JQ    # Spec Example 6.28. Non-Specific Tags
 %Import S4T7    # Document with footer
@@ -233,10 +233,10 @@
 %Import U9NS    # Spec Example 2.8. Play by Play Feed from a Game
 %Import UDM2    # Plain URL in flow mapping
 %Import UDR7    # Spec Example 5.4. Flow Collection Indicators
-# %Import UGM3    # Spec Example 2.27. Invoice
+%Import UGM3    # Spec Example 2.27. Invoice
 %Import UT92    # Spec Example 9.4. Explicit Documents
 %Import V55R    # Aliases in Block Sequence
-%Import V9D5    # Spec Example 8.19. Compact Block Mappings
+# %Import V9D5    # Spec Example 8.19. Compact Block Mappings  XXX explicit key
 %Import W42U    # Spec Example 8.15. Block Sequence Entry Types
 %Import W4TN    # Spec Example 9.5. Directives Documents
 %Import W5VH    # Allowed characters in alias
@@ -245,7 +245,7 @@
 %Import X8DW    # Explicit key and value seperated by comment
 %Import XLQ9    # Multiline scalar that looks like a YAML directive
 %Import XV9V    # Spec Example 6.5. Empty Lines [1.3]
-# %Import XW4D    # Various Trailing Comments
+%Import XW4D    # Various Trailing Comments
 %Import Y2GN    # Anchor with colon in the middle
 %Import YD5X    # Spec Example 2.5. Sequence of Sequences
 %Import Z67P    # Spec Example 8.21. Block Scalar Nodes [1.3]

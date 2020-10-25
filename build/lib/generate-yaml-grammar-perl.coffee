@@ -26,11 +26,17 @@ global.generator_class = \
     1;
     """
 
+  gen_setm: (return_false)->
+    setm = "\n  my $m = $self->call([$self->func('auto_detect_indent'), $n], 'number');"
+    if return_false
+      setm = setm.replace /;/, " or return false;"
+    return setm
+
   gen_rule_code: (num, comment, rule_name, debug_args, rule_args, rule_body)->
     """\
     #{comment}
     rule '#{num}', #{rule_name} => sub {
-      my #{rule_args} = @_;
+      my #{rule_args} = @_;#{@setm}
       debug_rule("#{rule_name}"#{debug_args}) if DEBUG;
     #{rule_body};
     };

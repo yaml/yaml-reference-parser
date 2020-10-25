@@ -967,8 +967,12 @@
       }
 
       l_block_sequence(n) {
+        var m;
+        if (!(m = this.call([this.auto_detect_indent, n], 'number'))) {
+          return false;
+        }
         debug_rule("l_block_sequence", n);
-        return this.all(this.set('m', [this.auto_detect_indent, n]), this.rep(1, null, this.all([this.s_indent, this.add(n, this.m())], [this.c_l_block_seq_entry, this.add(n, this.m())])));
+        return this.all(this.rep(1, null, this.all([this.s_indent, this.add(n, m)], [this.c_l_block_seq_entry, this.add(n, m)])));
       }
 
       c_l_block_seq_entry(n) {
@@ -977,8 +981,10 @@
       }
 
       s_l_block_indented(n, c) {
+        var m;
+        m = this.call([this.auto_detect_indent, n], 'number');
         debug_rule("s_l_block_indented", n, c);
-        return this.any(this.all([this.s_indent, this.m()], this.any([this.ns_l_compact_sequence, this.add(n, this.add(1, this.m()))], [this.ns_l_compact_mapping, this.add(n, this.add(1, this.m()))])), [this.s_l_block_node, n, c], this.all(this.e_node, this.s_l_comments));
+        return this.any(this.all([this.s_indent, m], this.any([this.ns_l_compact_sequence, this.add(n, this.add(1, m))], [this.ns_l_compact_mapping, this.add(n, this.add(1, m))])), [this.s_l_block_node, n, c], this.all(this.e_node, this.s_l_comments));
       }
 
       ns_l_compact_sequence(n) {
@@ -987,8 +993,12 @@
       }
 
       l_block_mapping(n) {
+        var m;
+        if (!(m = this.call([this.auto_detect_indent, n], 'number'))) {
+          return false;
+        }
         debug_rule("l_block_mapping", n);
-        return this.all(this.set('m', [this.auto_detect_indent, n]), this.rep(1, null, this.all([this.s_indent, this.add(n, this.m())], [this.ns_l_block_map_entry, this.add(n, this.m())])));
+        return this.all(this.rep(1, null, this.all([this.s_indent, this.add(n, m)], [this.ns_l_block_map_entry, this.add(n, m)])));
       }
 
       ns_l_block_map_entry(n) {
