@@ -4,7 +4,9 @@ ifeq ($(ROOT),)
     $(error ROOT not defined)
 endif
 
-SPEC_YAML := $(ROOT)/build/yaml-spec-1.2-patch.yaml
+SPEC_PATCHED_YAML := $(ROOT)/build/yaml-spec-1.2-patched.yaml
+SPEC_YAML := $(ROOT)/build/yaml-spec-1.2.yaml
+SPEC_PATCH := $(ROOT)/build/yaml-spec-1.2.patch
 GENERATOR := $(ROOT)/build/bin/generate-yaml-grammar
 GENERATOR_LIB := $(ROOT)/build/lib/generate-yaml-grammar.coffee
 GENERATOR_LANG_LIB := $(ROOT)/build/lib/generate-yaml-grammar-$(LANG).coffee
@@ -36,12 +38,21 @@ test:: build $(TEST_DEPS)
 
 clean::
 
-$(GRAMMAR): $(SPEC_YAML) $(GENERATOR) $(GENERATOR_LIB) $(GENERATOR_LANG_LIB)
+$(GRAMMAR): $(SPEC_PATCHED_YAML) $(GENERATOR) $(GENERATOR_LIB) $(GENERATOR_LANG_LIB)
 	$(GENERATOR) \
 	    --from=$< \
 	    --to=$(LANG) \
 	    --rule=l-yaml-stream \
 	> $@
+
+$(SPEC_PATCHED_YAML): $(SPEC_YAML)
+	cp $< $@
+	patch $@ < $(SPEC_PATCH)
+
+$(SPEC_YAML):
+	cp $(ROOT)/../yaml-grammar/yaml-spec-1.2.yaml $@ || \
+	wget https://raw.githubusercontent.com/yaml/yaml-grammar/master/yaml-spec-1.2.yaml || \
+	curl -O https://raw.githubusercontent.com/yaml/yaml-grammar/master/yaml-spec-1.2.yaml
 
 ../test/testml:
 	git clone https://github.com/testml-lang/testml $@
@@ -51,5 +62,5 @@ $(GRAMMAR): $(SPEC_YAML) $(GENERATOR) $(GENERATOR_LIB) $(GENERATOR_LANG_LIB)
 ../test/suite:
 	git clone https://github.com/yaml/yaml-test-suite $@
 
-$(NODE_MODULES) $(SPEC_YAML):
+$(NODE_MODULES):
 	make -C $(ROOT) $(@:$(ROOT)/%=%)

@@ -1,0 +1,329 @@
+--- yaml-spec-1.2.yaml	2020-10-26 07:46:47.879664318 -0400
++++ yaml-spec-1.2-patch.yaml	2020-10-26 08:03:31.395817340 -0400
+@@ -2183,6 +2183,10 @@
+ 
+ 
+ 
++#===============================================================================
++# This rule was modified to add a whitespace lookahead assertion after '?'.
++#===============================================================================
++
+ :142: ns-flow-map-entry
+ # ns-flow-map-entry(n,c) ::=
+ #   ( '?' s-separate(n,c)
+@@ -2194,6 +2198,7 @@
+   (any):
+   - (all):
+     - '?'
++    - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
+     - s-separate: [ n, c ]
+     - ns-flow-map-explicit-entry: [ n, c ]
+   - ns-flow-map-implicit-entry: [ n, c ]
+@@ -2320,6 +2325,10 @@
+ 
+ 
+ 
++#===============================================================================
++# This rule was modified to add a whitespace lookahead assertion after '?'.
++#===============================================================================
++
+ :150: ns-flow-pair
+ # ns-flow-pair(n,c) ::=
+ #   ( '?' s-separate(n,c)
+@@ -2331,6 +2340,7 @@
+   (any):
+   - (all):
+     - '?'
++    - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
+     - s-separate: [ n, c ]
+     - ns-flow-map-explicit-entry: [ n, c ]
+   - ns-flow-pair-entry: [ n, c ]
+@@ -2530,6 +2540,23 @@
+ #
+ #   m - relative indentation columns or 'auto-detect()'
+ #   t - trailing whitespace indicator
++#
++# This production (162) is misleading. It claims to be called with 2 arguments,
++# `m` and `t`, but it is not called with any arguments. In reality it is
++# supposed to *create* 2 state variables `m` and `t`. To auto-detect `m` it
++# will need the value of `n` (the current indentation).
++#
++# The spec rule 162 should actually be:
++#
++# c-b-block-header(n) ::=
++#   ( ( c-indentation-indicator
++#   c-chomping-indicator )
++#   | ( c-chomping-indicator
++#   c-indentation-indicator(n) ) )
++#   s-b-comment
++#
++# The original from the spec is left intact below, but the generated YAML uses
++# the version above.
+ #===============================================================================
+ 
+ :162: c-b-block-header
+@@ -2541,34 +2568,60 @@
+ #   s-b-comment
+ 
+ c-b-block-header:
+-  (...): [ m, t ]
++  (...): n
+   (all):
+   - (any):
+     - (all):
+-      - c-indentation-indicator: m
+-      - c-chomping-indicator: t
++      - c-indentation-indicator: n
++      - c-chomping-indicator
++      - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
+     - (all):
+-      - c-chomping-indicator: t
+-      - c-indentation-indicator: m
++      - c-chomping-indicator
++      - c-indentation-indicator: n
++      - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
+   - s-b-comment
+ 
+ 
+ 
++#===============================================================================
++# This production should receive the `n` indentation variable. It creates an
++# `m` state variable that indicates the amount of relative indentation for a
++# literal or folded scalar.
++#
++# It should actually be:
++#
++# c-indentation-indicator(n) ::=
++#   ( ns-dec-digit => m = ns-dec-digit - x:30 )
++#   ( <empty> => m = auto-detect(n) )
++#===============================================================================
++
+ :163: c-indentation-indicator
+ # c-indentation-indicator(m) ::=
+ #   ( ns-dec-digit => m = ns-dec-digit - x:30 )
+ #   ( <empty> => m = auto-detect() )
+ 
+ c-indentation-indicator:
+-  (...): m
++  (...): n
+   (any):
+   - (if): ns-dec-digit
+     (set): [ m, { (ord): (match) } ]
+   - (if): <empty>
+-    (set): [ m, "auto-detect" ]
++    (set): [ m, { auto-detect: n } ]
+ 
+ 
+ 
++#===============================================================================
++# This production should not receive any arguments. It creates a variable that
++# indicates how trailing whitespace should be interpreted.
++#
++# It should actually be:
++#
++# c-chomping-indicator ::=
++#   ( '-' => t = strip )
++#   ( '+' => t = keep )
++#   ( <empty> => t = clip )
++#===============================================================================
++
+ :164: c-chomping-indicator
+ # c-chomping-indicator(t) ::=
+ #   ( '-' => t = strip )
+@@ -2576,7 +2629,6 @@
+ #   ( <empty> => t = clip )
+ 
+ c-chomping-indicator:
+-  (...): t
+   (any):
+   - (if): '-'
+     (set): [ t, "strip" ]
+@@ -2667,6 +2719,16 @@
+ ##### 8.1.2. Literal Style
+ 
+ 
++#===============================================================================
++# This production needs to call c-b-block-header with the variable `n`.
++#
++# It should actually be:
++#
++# c-l+literal(n) ::=
++#   '|' c-b-block-header(n)
++#   l-literal-content(n+m,t)
++#===============================================================================
++
+ :170: c-l+literal
+ # c-l+literal(n) ::=
+ #   '|' c-b-block-header(m,t)
+@@ -2676,7 +2738,7 @@
+   (...): n
+   (all):
+   - '|'
+-  - c-b-block-header: [ m, t ]
++  - c-b-block-header: n
+   - l-literal-content: [ { (+): [ n, m ] }, t ]
+ 
+ 
+@@ -2730,6 +2792,16 @@
+ ##### 8.1.3. Folded Style
+ 
+ 
++#===============================================================================
++# This production needs to call c-b-block-header with the variable `n`.
++#
++# It should actually be:
++#
++# c-l+folded(n) ::=
++#   '>' c-b-block-header(n)
++#   l-folded-content(n+m,t)
++#===============================================================================
++
+ :174: c-l+folded
+ # c-l+folded(n) ::=
+ #   '>' c-b-block-header(m,t)
+@@ -2739,7 +2811,7 @@
+   (...): n
+   (all):
+   - '>'
+-  - c-b-block-header: [ m, t ]
++  - c-b-block-header: n
+   - l-folded-content: [ { (+): [ n, m ] }, t ]
+ 
+ 
+@@ -2875,6 +2947,9 @@
+ # The <auto-detect-indent> rule is a "special" rule that finds the new level of
+ # indentation and returns the number of columns. The level must be greater than
+ # 0. It does not consume the indentation.
++#
++# TODO: Rules 183, 185 & 187 have been modified here but should be modified
++# upstream.
+ #===============================================================================
+ 
+ :183: l+block-sequence
+@@ -2885,8 +2960,8 @@
+ 
+ l+block-sequence:
+   (...): n
++  (m>0): <auto-detect-indent>
+   (all):
+-  - (set): [ m, <auto-detect-indent> ]
+   - (+++):
+       (all):
+       - s-indent: { (+): [ n, m ] }
+@@ -2918,6 +2993,7 @@
+ 
+ s-l+block-indented:
+   (...): [ n, c ]
++  (->m): <auto-detect-indent>
+   (any):
+   - (all):
+     - s-indent: m
+@@ -2958,8 +3034,8 @@
+ 
+ l+block-mapping:
+   (...): n
++  (m>0): <auto-detect-indent>
+   (all):
+-  - (set): [ m, <auto-detect-indent> ]
+   - (+++):
+       (all):
+       - s-indent: { (+): [ n, m ] }
+@@ -2996,6 +3072,10 @@
+ 
+ 
+ 
++#===============================================================================
++# This rule was modified to add a whitespace lookahead assertion after '?'.
++#===============================================================================
++
+ :190: c-l-block-map-explicit-key
+ # c-l-block-map-explicit-key(n) ::=
+ #   '?'
+@@ -3005,6 +3085,7 @@
+   (...): n
+   (all):
+   - '?'
++  - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
+   - s-l+block-indented: [ n, "block-out" ]
+ 
+ 
+@@ -3147,6 +3228,23 @@
+ 
+ 
+ 
++#===============================================================================
++# This production tries to match collection properties and a collection. It has
++# a problem where it consumes a property that might be for the key of the first
++# pair of a mapping. To make sure the property applies to the collection itself
++# it should check for a newline after the property (in the same scope as the
++# property check).
++#
++# In other words, it would be more clearly written as this:
++#
++# s-l+block-collection(n,c) ::=
++#   ( s-separate(n+1,c)
++#   c-ns-properties(n+1,c) s-l-comments )?
++#   s-l-comments
++#   ( l+block-sequence(seq-spaces(n,c))
++#   | l+block-mapping(n) )
++#===============================================================================
++
+ :200: s-l+block-collection
+ # s-l+block-collection(n,c) ::=
+ #   ( s-separate(n+1,c)
+@@ -3162,6 +3260,7 @@
+       (all):
+       - s-separate: [ { (+): [ n, 1 ] }, c ]
+       - c-ns-properties: [ { (+): [ n, 1 ] }, c ]
++      - s-l-comments
+   - s-l-comments
+   - (any):
+     - l+block-sequence: { seq-spaces: [ n, c ] }
+@@ -3212,6 +3311,7 @@
+   - '-'
+   - '-'
+   - '-'
++  - (===): { (any): [ <end-of-stream>, s-white, b-break ] }
+ 
+ 
+ 
+@@ -3333,6 +3433,19 @@
+ 
+ 
+ 
++#===============================================================================
++# This production has a bug in the rule quantifers for l-document-prefix. It
++# should only be tried once (not multiple times).
++#
++# It should actually be:
++#
++# l-yaml-stream ::=
++#   l-document-prefix l-any-document?
++#   ( ( l-document-suffix+ l-document-prefix
++#   l-any-document? )
++#   | ( l-document-prefix l-explicit-document? ) )*
++#===============================================================================
++
+ :211: l-yaml-stream
+ # l-yaml-stream ::=
+ #   l-document-prefix* l-any-document?
+@@ -3342,16 +3455,16 @@
+ 
+ l-yaml-stream:
+   (all):
+-  - (***): l-document-prefix
++  - l-document-prefix
+   - (???): l-any-document
+   - (***):
+       (any):
+       - (all):
+-        - (+++): l-document-suffix
++        - l-document-suffix
+         - (***): l-document-prefix
+         - (???): l-any-document
+       - (all):
+-        - (***): l-document-prefix
++        - l-document-prefix
+         - (???): l-explicit-document
+ 
+ # vim: iskeyword=@,+,- sw=2:
