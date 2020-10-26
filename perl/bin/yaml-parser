@@ -42,7 +42,7 @@ sub main {
   }
 
   if ($events) {
-    say $parser->{receiver}->output();
+    print $parser->{receiver}->output();
     return 0;
   }
   elsif ($pass) {
