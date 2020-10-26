@@ -11,6 +11,8 @@ use Prelude;
 use Parser;
 use TestReceiver;
 
+my $events = false;
+
 sub main {
   my ($yaml) = @_;
   $yaml //= file_read '-';
@@ -39,7 +41,11 @@ sub main {
     $yaml =~ s/\n$/\\n/;
   }
 
-  if ($pass) {
+  if ($events) {
+    say $parser->{receiver}->output();
+    return 0;
+  }
+  elsif ($pass) {
     say "PASS - '$n$yaml'";
     say $parser->{receiver}->output();
     say sprintf "Parse time %.5fs", $time;
@@ -51,6 +57,11 @@ sub main {
     say sprintf "Parse time %.5fs", $time;
     return 0;
   }
+}
+
+if (@ARGV and $ARGV[0] eq '--events') {
+  $events = true;
+  shift @ARGV;
 }
 
 if (main @ARGV) {
