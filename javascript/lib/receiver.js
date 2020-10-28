@@ -441,6 +441,9 @@
       t = this.parser.state_curr().t;
       if (t === 'clip') {
         text = text.replace(/\n+$/, "\n");
+        if (text === "\n") {
+          text = '';
+        }
       } else if (t === 'strip') {
         text = text.replace(/\n+$/, "");
       }

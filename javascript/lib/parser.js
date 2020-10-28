@@ -595,12 +595,16 @@
     }
 
     auto_detect(n) {
-      var m;
-      m = this.input.slice(this.pos).match(/^.*\n(?:\ *\n)*(\ *)/);
-      if (m == null) {
-        return 0;
+      var m, match;
+      match = this.input.slice(this.pos).match(/^.*\n(?:\ *\n)*(\ *)/);
+      if (match == null) {
+        return 1;
       }
-      return m[1].length - n;
+      m = match[1].length - n;
+      if (m < 1) {
+        m = 1;
+      }
+      return m;
     }
 
     //------------------------------------------------------------------------------

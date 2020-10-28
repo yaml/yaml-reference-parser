@@ -243,6 +243,7 @@ global.Receiver = class Receiver
     t = @parser.state_curr().t
     if t == 'clip'
       text = text.replace /\n+$/, "\n"
+      text = '' if text == "\n"
     else if t == 'strip'
       text = text.replace /\n+$/, ""
     @add scalar_event 'folded', text

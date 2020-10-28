@@ -316,6 +316,7 @@ sub got__c_l_folded {
   my $t = $self->{parser}->state_curr->{t};
   if ($t eq 'clip') {
     $text =~ s/\n+\z/\n/;
+    $text = '' if $text eq "\n";
   }
   elsif ($t eq 'strip') {
     $text =~ s/\n+\z//;
