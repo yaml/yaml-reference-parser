@@ -93,7 +93,7 @@
 %Import 9DXL    # Spec Example 9.6. Stream [1.3]
 %Import 9FMG    # Multi-level Mapping Indent
 %Import 9J7A    # Simple Mapping Indent
-# %Import 9KAX    # Various combinations of tags and anchors  XXX anchor/tag on mapping and key
+%Import 9KAX    # Various combinations of tags and anchors
 %Import 9MMW    # Single Pair Implicit Entries
 %Import 9SA2    # Multiline double quoted flow mapping key
 %Import 9SHH    # Spec Example 5.8. Quoted Scalar Indicators
