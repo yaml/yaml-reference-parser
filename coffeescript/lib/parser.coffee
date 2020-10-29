@@ -390,7 +390,7 @@ global.Parser = class Parser extends Grammar
 
   auto_detect_indent: (n)->
     pos = @pos
-    in_seq = (pos > 0 and @input[pos - 1].match /^[\-\?]$/)
+    in_seq = (pos > 0 and @input[pos - 1].match /^[\-\?\:]$/)
     match = @input[pos..].match ///^
       (
         (?:

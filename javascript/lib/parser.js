@@ -577,7 +577,7 @@
     auto_detect_indent(n) {
       var in_seq, m, match, pos, pre;
       pos = this.pos;
-      in_seq = pos > 0 && this.input[pos - 1].match(/^[\-\?]$/);
+      in_seq = pos > 0 && this.input[pos - 1].match(/^[\-\?\:]$/);
       match = this.input.slice(pos).match(/^((?: *(?:\#.*)?\n)*)( *)/ || FAIL("auto_detect_indent"));
       pre = match[1];
       m = match[2].length;

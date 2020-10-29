@@ -539,7 +539,7 @@ name 'empty', \&empty;
 sub auto_detect_indent {
   my ($self, $n) = @_;
   my $pos = $self->{pos};
-  my $in_seq = ($pos > 0 && substr($self->{input}, $pos - 1, 1) =~ /^[\-\?]$/);
+  my $in_seq = ($pos > 0 && substr($self->{input}, $pos - 1, 1) =~ /^[\-\?\:]$/);
   substr($self->{input}, $pos) =~ /^
     (
       (?:

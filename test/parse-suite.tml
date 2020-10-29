@@ -167,7 +167,7 @@
 %Import K527    # Spec Example 6.6. Line Folding
 %Import K54U    # Tab after document header
 %Import K858    # Spec Example 8.6. Empty Scalar Chomping
-# %Import KK5P    # Various combinations of explicit block mappings  XXX explicit keys
+%Import KK5P    # Various combinations of explicit block mappings
 %Import KMK3    # Block Submapping
 %Import KSS4    # Scalars on --- line
 %Import L94M    # Tags in Explicit Mapping
@@ -235,7 +235,7 @@
 %Import UGM3    # Spec Example 2.27. Invoice
 %Import UT92    # Spec Example 9.4. Explicit Documents
 %Import V55R    # Aliases in Block Sequence
-# %Import V9D5    # Spec Example 8.19. Compact Block Mappings  XXX explicit key
+%Import V9D5    # Spec Example 8.19. Compact Block Mappings
 %Import W42U    # Spec Example 8.15. Block Sequence Entry Types
 %Import W4TN    # Spec Example 9.5. Directives Documents
 %Import W5VH    # Allowed characters in alias
