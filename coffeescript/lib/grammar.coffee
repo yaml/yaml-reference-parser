@@ -3289,8 +3289,20 @@ global.Grammar = class Grammar
       @rep(0, 1,
         @all(
           [ @s_separate, @add(n, 1), c ],
-          [ @c_ns_properties, @add(n, 1), c ],
-          @s_l_comments
+          @any(
+            @all(
+              [ @c_ns_properties, @add(n, 1), c ],
+              @s_l_comments
+            ),
+            @all(
+              @c_ns_tag_property,
+              @s_l_comments
+            ),
+            @all(
+              @c_ns_anchor_property,
+              @s_l_comments
+            )
+          )
         )),
       @s_l_comments,
       @any(

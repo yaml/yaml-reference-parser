@@ -302,11 +302,6 @@
       return this.cache_drop();
     }
 
-    not__s_l_block_collection__all__rep__all() {
-      delete this.anchor;
-      return delete this.tag;
-    }
-
     try__c_ns_flow_map_empty_key_entry() {
       return this.cache_up();
     }
@@ -457,6 +452,11 @@
 
     got__e_scalar() {
       return this.add(scalar_event('plain', ''));
+    }
+
+    not__s_l_block_collection__all__rep__all__any__all() {
+      delete this.tag;
+      return delete this.anchor;
     }
 
     got__c_ns_anchor_property(o) {

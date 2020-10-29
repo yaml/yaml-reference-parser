@@ -200,12 +200,6 @@ sub try__c_l_block_map_explicit_entry { $_[0]->cache_up }
 sub got__c_l_block_map_explicit_entry { $_[0]->cache_down }
 sub not__c_l_block_map_explicit_entry { $_[0]->cache_drop }
 
-sub not__s_l_block_collection__all__rep__all {
-  my ($self) = @_;
-  delete $self->{anchor};
-  delete $self->{tag};
-}
-
 sub try__c_ns_flow_map_empty_key_entry { $_[0]->cache_up }
 sub got__c_ns_flow_map_empty_key_entry { $_[0]->cache_down }
 sub not__c_ns_flow_map_empty_key_entry { $_[0]->cache_drop }
@@ -330,6 +324,12 @@ sub not__c_l_folded {
 }
 
 sub got__e_scalar { $_[0]->add(scalar_event(plain => '')) }
+
+sub not__s_l_block_collection__all__rep__all__any__all {
+  my ($self) = @_;
+  delete $self->{anchor};
+  delete $self->{tag};
+}
 
 sub got__c_ns_anchor_property {
   my ($self, $o) = @_;

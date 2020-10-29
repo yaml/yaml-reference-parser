@@ -1063,7 +1063,7 @@
 
       s_l_block_collection(n, c) {
         debug_rule("s_l_block_collection", n, c);
-        return this.all(this.rep(0, 1, this.all([this.s_separate, this.add(n, 1), c], [this.c_ns_properties, this.add(n, 1), c], this.s_l_comments)), this.s_l_comments, this.any([this.l_block_sequence, [this.seq_spaces, n, c]], [this.l_block_mapping, n]));
+        return this.all(this.rep(0, 1, this.all([this.s_separate, this.add(n, 1), c], this.any(this.all([this.c_ns_properties, this.add(n, 1), c], this.s_l_comments), this.all(this.c_ns_tag_property, this.s_l_comments), this.all(this.c_ns_anchor_property, this.s_l_comments)))), this.s_l_comments, this.any([this.l_block_sequence, [this.seq_spaces, n, c]], [this.l_block_mapping, n]));
       }
 
       seq_spaces(n, c) {

@@ -257,15 +257,57 @@ foo:
 -STR
 
 
+=== Anchor on map and tag on key
+--- yaml
+&a1
+!t1 a: b
+--- events
++STR
++DOC
++MAP &a1
+=VAL <!t1> :a
+=VAL :b
+-MAP
+-DOC
+-STR
+
+
+=== Tag on map and anchor on key
+--- yaml
+&a1
+!t1 &a2 a: b
+--- events
++STR
++DOC
++MAP &a1
+=VAL &a2 <!t1> :a
+=VAL :b
+-MAP
+-DOC
+-STR
+
+
+=== Anchor on map and tag on key; not top
+--- yaml
+foo: &a1
+  !t1 a: b
+--- events
++STR
++DOC
++MAP
+=VAL :foo
++MAP &a1
+=VAL <!t1> :a
+=VAL :b
+-MAP
+-MAP
+-DOC
+-STR
+
+
 === XXX
 --- SKIP
 --- yaml
-a!"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~: safe
-?foo: safe question mark
-:foo: safe colon
--foo: safe dash
-this is#not: a comment
-- a: b
 - ? c: d
   : e: f
 --- events

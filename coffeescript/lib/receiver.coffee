@@ -154,10 +154,6 @@ global.Receiver = class Receiver
   got__c_l_block_map_explicit_entry: -> @cache_down()
   not__c_l_block_map_explicit_entry: -> @cache_drop()
 
-  not__s_l_block_collection__all__rep__all: ->
-    delete @anchor
-    delete @tag
-
   try__c_ns_flow_map_empty_key_entry: -> @cache_up()
   got__c_ns_flow_map_empty_key_entry: -> @cache_down()
   not__c_ns_flow_map_empty_key_entry: -> @cache_drop()
@@ -252,6 +248,10 @@ global.Receiver = class Receiver
     @cache_drop()
 
   got__e_scalar: -> @add scalar_event 'plain', ''
+
+  not__s_l_block_collection__all__rep__all__any__all: ->
+    delete @tag
+    delete @anchor
 
   got__c_ns_anchor_property: (o)->
     @anchor = o.text[1..]

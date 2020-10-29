@@ -3495,8 +3495,20 @@ rule '200', s_l_block_collection => sub {
     $self->rep(0, 1,
       $self->all(
         [ $self->func('s_separate'), $self->add($n, 1), $c ],
-        [ $self->func('c_ns_properties'), $self->add($n, 1), $c ],
-        $self->func('s_l_comments')
+        $self->any(
+          $self->all(
+            [ $self->func('c_ns_properties'), $self->add($n, 1), $c ],
+            $self->func('s_l_comments')
+          ),
+          $self->all(
+            $self->func('c_ns_tag_property'),
+            $self->func('s_l_comments')
+          ),
+          $self->all(
+            $self->func('c_ns_anchor_property'),
+            $self->func('s_l_comments')
+          )
+        )
       )),
     $self->func('s_l_comments'),
     $self->any(

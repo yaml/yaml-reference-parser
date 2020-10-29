@@ -3235,11 +3235,15 @@ s-l+block-scalar:
 # it should check for a newline after the property (in the same scope as the
 # property check).
 #
-# In other words, it would be more clearly written as this:
+# It needs to be:
 #
 # s-l+block-collection(n,c) ::=
 #   ( s-separate(n+1,c)
-#   c-ns-properties(n+1,c) s-l-comments )?
+#     ( (c-ns-properties(n+1,c) s-l-comments) |
+#       (c-ns-tag-property s-l-comments) |
+#       (c-ns-anchor-property s-l-comments)
+#     )
+#   )?
 #   s-l-comments
 #   ( l+block-sequence(seq-spaces(n,c))
 #   | l+block-mapping(n) )
@@ -3258,9 +3262,17 @@ s-l+block-collection:
   (all):
   - (???):
       (all):
-      - s-separate: [ { (+): [ n, 1 ] }, c ]
-      - c-ns-properties: [ { (+): [ n, 1 ] }, c ]
-      - s-l-comments
+        - s-separate: [ { (+): [ n, 1 ] }, c ]
+        - (any):
+          - (all):
+            - c-ns-properties: [ { (+): [ n, 1 ] }, c ]
+            - s-l-comments
+          - (all):
+            - c-ns-tag-property
+            - s-l-comments
+          - (all):
+            - c-ns-anchor-property
+            - s-l-comments
   - s-l-comments
   - (any):
     - l+block-sequence: { seq-spaces: [ n, c ] }
