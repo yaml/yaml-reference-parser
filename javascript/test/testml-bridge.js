@@ -13,7 +13,7 @@
   require('../lib/test-receiver');
 
   module.exports = TestMLBridge = class TestMLBridge extends TestML.Bridge {
-    parse(yaml) {
+    parse(yaml, expect_error = null) {
       var e, error, parser;
       parser = new Parser(new TestReceiver());
       error = '';
@@ -22,6 +22,13 @@
       } catch (error1) {
         e = error1;
         error = String(e);
+      }
+      if (expect_error != null) {
+        if (error) {
+          return 1;
+        } else {
+          return 0;
+        }
       }
       if (error) {
         return error;

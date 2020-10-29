@@ -7,7 +7,7 @@ require '../lib/test-receiver'
 module.exports =
 class TestMLBridge extends TestML.Bridge
 
-  parse: (yaml)->
+  parse: (yaml, expect_error=null)->
     parser = new Parser(new TestReceiver)
 
     error = ''
@@ -15,6 +15,9 @@ class TestMLBridge extends TestML.Bridge
       parser.parse yaml
     catch e
       error = String e
+
+    if expect_error?
+      return if error then 1 else 0
 
     if error
       error

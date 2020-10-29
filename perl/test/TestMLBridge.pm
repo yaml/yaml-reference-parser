@@ -9,15 +9,19 @@ use Parser;
 use TestReceiver;
 
 sub parse {
-  my ($self, $yaml) = @_;
-# return ">>\n$yaml<<\n";
+  my ($self, $yaml, $expect_error) = @_;
 
   my $parser = Parser->new(TestReceiver->new);
 
   eval { $parser->parse($yaml) };
-# warn ">>\n$yaml<<\n";
-  return $@
-    ? do { warn $@; '' }
+  my $error = $@;
+
+  if (defined $expect_error) {
+    return $error ? 1 : 0;
+  }
+
+  return $error
+    ? do { warn $error; '' }
     : $parser->{receiver}->output;
 }
 
