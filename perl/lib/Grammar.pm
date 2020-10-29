@@ -2666,7 +2666,7 @@ rule '159', ns_flow_yaml_node => sub {
       $self->any(
         $self->all(
           [ $self->func('s_separate'), $n, $c ],
-          [ $self->func('ns_flow_yaml_content'), $n, $c ]
+          [ $self->func('ns_flow_content'), $n, $c ]
         ),
         $self->func('e_scalar')
       )

@@ -2501,7 +2501,7 @@ global.Grammar = class Grammar
         @any(
           @all(
             [ @s_separate, n, c ],
-            [ @ns_flow_yaml_content, n, c ]
+            [ @ns_flow_content, n, c ]
           ),
           @e_scalar
         )

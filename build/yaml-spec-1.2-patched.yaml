@@ -2482,7 +2482,7 @@ ns-flow-yaml-node:
     - (any):
       - (all):
         - s-separate: [ n, c ]
-        - ns-flow-yaml-content: [ n, c ]
+        - ns-flow-content: [ n, c ]
       - e-scalar
 
 

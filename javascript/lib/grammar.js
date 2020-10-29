@@ -840,7 +840,7 @@
 
       ns_flow_yaml_node(n, c) {
         debug_rule("ns_flow_yaml_node", n, c);
-        return this.any(this.c_ns_alias_node, [this.ns_flow_yaml_content, n, c], this.all([this.c_ns_properties, n, c], this.any(this.all([this.s_separate, n, c], [this.ns_flow_yaml_content, n, c]), this.e_scalar)));
+        return this.any(this.c_ns_alias_node, [this.ns_flow_yaml_content, n, c], this.all([this.c_ns_properties, n, c], this.any(this.all([this.s_separate, n, c], [this.ns_flow_content, n, c]), this.e_scalar)));
       }
 
       c_flow_json_node(n, c) {

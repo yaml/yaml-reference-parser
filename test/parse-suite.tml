@@ -240,7 +240,7 @@
 %Import W4TN    # Spec Example 9.5. Directives Documents
 %Import W5VH    # Allowed characters in alias
 %Import WZ62    # Spec Example 7.2. Empty Content
-# %Import X38W    # Aliases in Flow Objects  XXX flow alias on non-plain keys
+%Import X38W    # Aliases in Flow Objects
 %Import X8DW    # Explicit key and value seperated by comment
 %Import XLQ9    # Multiline scalar that looks like a YAML directive
 %Import XV9V    # Spec Example 6.5. Empty Lines [1.3]

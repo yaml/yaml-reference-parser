@@ -1,5 +1,5 @@
---- yaml-spec-1.2.yaml	2020-10-26 07:46:47.879664318 -0400
-+++ yaml-spec-1.2-patch.yaml	2020-10-26 08:03:31.395817340 -0400
+--- yaml-spec-1.2.yaml	2020-10-26 09:11:24.410214588 -0400
++++ yaml-spec-1.2-patched.yaml	2020-10-29 06:59:06.557588059 -0400
 @@ -2183,6 +2183,10 @@
  
  
@@ -38,6 +38,15 @@
      - s-separate: [ n, c ]
      - ns-flow-map-explicit-entry: [ n, c ]
    - ns-flow-pair-entry: [ n, c ]
+@@ -2472,7 +2482,7 @@
+     - (any):
+       - (all):
+         - s-separate: [ n, c ]
+-        - ns-flow-yaml-content: [ n, c ]
++        - ns-flow-content: [ n, c ]
+       - e-scalar
+ 
+ 
 @@ -2530,6 +2540,23 @@
  #
  #   m - relative indentation columns or 'auto-detect()'
@@ -62,7 +71,7 @@
  #===============================================================================
  
  :162: c-b-block-header
-@@ -2541,34 +2568,60 @@
+@@ -2541,33 +2568,59 @@
  #   s-b-comment
  
  c-b-block-header:
@@ -112,7 +121,7 @@
    - (if): <empty>
 -    (set): [ m, "auto-detect" ]
 +    (set): [ m, { auto-detect: n } ]
- 
++
  
  
 +#===============================================================================
@@ -126,10 +135,9 @@
 +#   ( '+' => t = keep )
 +#   ( <empty> => t = clip )
 +#===============================================================================
-+
+ 
  :164: c-chomping-indicator
  # c-chomping-indicator(t) ::=
- #   ( '-' => t = strip )
 @@ -2576,7 +2629,6 @@
  #   ( <empty> => t = clip )
  
