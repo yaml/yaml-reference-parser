@@ -26,13 +26,18 @@ At the moment we have YAML 1.2 reference parsers in these languages:
   * [JavaScript](https://github.com/yaml/yaml-grammar/tree/master/parser/javascript/lib/grammar.js)
   * [Perl](https://github.com/yaml/yaml-grammar/tree/master/parser/perl/lib/Grammar.pm)
 
+The parsers pass 100% of the [YAML Test Suite](https://github.com/yaml/yaml-test-suite/)!
+
 # Next Steps
 
-* Get the generated parser to pass 100% of the [YAML Test Suite](https://github.com/yaml/yaml-test-suite/)
-  * Currently passing 98% of the Test Suite
 * Generate equivalent grammar/parsers in as many modern languages as possible
+  * The logic and primitives are purposefully as simple as possible
+  * Generating a perfect parser in a new language should a day or 2
+  * Contributors welcome!
 * Start refactoring the grammar to be simpler
   * While always passing the tests
+* Generate more optimized / performant parsers
+  * The goal of simplicity and sticking exactly to the spec made slow parsers
 * Create a new YAML 1.3 grammar
   * Start with 1.2 grammar
   * Apply RFCs as they become accepted
