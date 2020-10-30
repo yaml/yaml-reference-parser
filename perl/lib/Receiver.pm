@@ -84,7 +84,7 @@ sub push {
 
 sub cache_up {
   my ($self, $event) = @_;
-  push @{$self->{cache}}, [];
+  CORE::push @{$self->{cache}}, [];
   $self->add($event) if $event;
 }
 
@@ -339,11 +339,12 @@ sub got__c_ns_anchor_property {
 sub got__c_ns_tag_property {
   my ($self, $o) = @_;
   my $tag = $o->{text};
+  my $prefix;
   if ($tag =~ /^!<(.*)>$/) {
     $self->{tag} = $1;
   }
   elsif ($tag =~ /^!!(.*)/) {
-    if (defined(my $prefix = $self->{tag_map}{'!!'})) {
+    if (defined($prefix = $self->{tag_map}{'!!'})) {
       $self->{tag} = $prefix . substr($tag, 2);
     }
     else {
@@ -352,11 +353,11 @@ sub got__c_ns_tag_property {
   }
   elsif (
     $tag =~ /^(!.*?!)/ and
-    defined(my $prefix = $self->{tag_map}{$1})
+    defined($prefix = $self->{tag_map}{$1})
   ) {
     $self->{tag} = $prefix . substr($tag, length($1));
   }
-  elsif (defined(my $prefix = $self->{tag_map}{'!'})) {
+  elsif (defined($prefix = $self->{tag_map}{'!'})) {
     $self->{tag} = $prefix . substr($tag, 1);
   }
   else {
