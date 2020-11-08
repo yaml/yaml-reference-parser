@@ -1,5 +1,5 @@
 ROOT := $(shell cd ..; pwd)
-LANG := perl
+PARSER_LANG := perl
 BIN := perl
 GRAMMAR := lib/Grammar.pm
 
