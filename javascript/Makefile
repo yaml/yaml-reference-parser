@@ -1,5 +1,5 @@
 ROOT := $(shell cd ..; pwd)
-LANG := javascript
+PARSER_LANG := javascript
 BIN := node
 GRAMMAR :=
 
