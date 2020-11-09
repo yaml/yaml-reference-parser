@@ -7,6 +7,7 @@ stream_end_event = ->
 document_start_event = (explicit=false)->
   event: 'document_start'
   explicit: explicit
+  version: null
 document_end_event = (explicit=false)->
   event: 'document_end'
   explicit: explicit
@@ -103,6 +104,11 @@ global.Receiver = class Receiver
   got__l_yaml_stream: ->
     @check_document_end()
     @add stream_end_event()
+
+  got__ns_yaml_version: (o)->
+    die "Multiple %YAML directives not allowed" \
+      if @document_start.version?
+    @document_start.version = o.text
 
   got__c_tag_handle: (o)->
     @tag_handle = o.text

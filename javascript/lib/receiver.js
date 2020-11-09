@@ -19,7 +19,8 @@
   document_start_event = function(explicit = false) {
     return {
       event: 'document_start',
-      explicit: explicit
+      explicit: explicit,
+      version: null
     };
   };
 
@@ -177,6 +178,13 @@
     got__l_yaml_stream() {
       this.check_document_end();
       return this.add(stream_end_event());
+    }
+
+    got__ns_yaml_version(o) {
+      if (this.document_start.version != null) {
+        die("Multiple %YAML directives not allowed");
+      }
+      return this.document_start.version = o.text;
     }
 
     got__c_tag_handle(o) {

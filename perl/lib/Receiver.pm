@@ -9,7 +9,7 @@ sub stream_end_event {
   { event => 'stream_end' };
 }
 sub document_start_event {
-  { event => 'document_start', explicit => (shift || false) };
+  { event => 'document_start', explicit => (shift || false), version => undef };
 }
 sub document_end_event {
   { event => 'document_end', explicit => (shift || false) };
@@ -138,6 +138,13 @@ sub got__l_yaml_stream {
   my ($self) = @_;
   $self->check_document_end;
   $self->add(stream_end_event);
+}
+
+sub got__ns_yaml_version {
+  my ($self, $o) = @_;
+  die "Multiple %YAML directives not allowed"
+    if defined $self->{document_start}{version};
+  $self->{document_start}{version} = $o->{text};
 }
 
 sub got__c_tag_handle {
