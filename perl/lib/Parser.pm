@@ -565,10 +565,14 @@ name 'auto_detect_indent', \&auto_detect_indent;
 
 sub auto_detect {
   my ($self, $n) = @_;
-  substr($self->{input}, $self->{pos}) =~ /^.*\n(?:\ *\n)*(\ *)/
+  substr($self->{input}, $self->{pos}) =~ /^.*\n((?:\ *\n)*)(\ *)/
     or return 1;
-  my $m = length($1) - $n;
+  my $pre = $1;
+  my $m = length($2) - $n;
   $m = 1 if $m < 1;
+  # XXX change 'die' to 'error' for reporting parse errors
+  die "Spaces found after indent in auto-detect (5LLU)"
+    if $pre =~ /^.{$m}./m;
   return $m;
 }
 name 'auto_detect', \&auto_detect;

@@ -411,10 +411,13 @@ global.Parser = class Parser extends Grammar
     return m
 
   auto_detect: (n)->
-    match = @input[@pos..].match /^.*\n(?:\ *\n)*(\ *)/
+    match = @input[@pos..].match /^.*\n((?:\ *\n)*)(\ *)/
     return 1 unless match?
-    m = match[1].length - n
+    pre = match[1]
+    m = match[2].length - n
     m = 1 if m < 1
+    die "Spaces found after indent in auto-detect (5LLU)" \
+      if pre.match ///^.{#{m}}.///m
     return m
 
 #------------------------------------------------------------------------------

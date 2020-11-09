@@ -13,7 +13,7 @@
 %Import 4HVU    # Wrong indendation in Sequence
 %Import 4JVG    # Scalar value with two anchors
 %Import 55WF    # Invalid escape in double quoted string
-# %Import 5LLU    # Block scalar with wrong indented line after spaces only
+%Import 5LLU    # Block scalar with wrong indented line after spaces only
 %Import 5TRB    # Invalid document-start marker in doublequoted tring
 %Import 5U3A    # Sequence on same Line as Mapping Key
 %Import 62EZ    # Invalid block mapping key on same line as previous key
@@ -62,7 +62,7 @@
 %Import RHX7    # YAML directive without document end marker
 %Import RXY3    # Invalid document-end marker in single quoted string
 %Import S4GJ    # Invalid text after block scalar indicator
-# %Import S98Z    # Block scalar with more spaces than first content line
+%Import S98Z    # Block scalar with more spaces than first content line
 # %Import SF5V    # Duplicate YAML directive
 %Import SR86    # Anchor plus Alias
 %Import SU5Z    # Comment without whitespace after doublequoted scalar

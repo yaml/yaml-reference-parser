@@ -595,14 +595,18 @@
     }
 
     auto_detect(n) {
-      var m, match;
-      match = this.input.slice(this.pos).match(/^.*\n(?:\ *\n)*(\ *)/);
+      var m, match, pre;
+      match = this.input.slice(this.pos).match(/^.*\n((?:\ *\n)*)(\ *)/);
       if (match == null) {
         return 1;
       }
-      m = match[1].length - n;
+      pre = match[1];
+      m = match[2].length - n;
       if (m < 1) {
         m = 1;
+      }
+      if (pre.match(RegExp(`^.{${m}}.`, "m"))) {
+        die("Spaces found after indent in auto-detect (5LLU)");
       }
       return m;
     }
