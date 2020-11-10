@@ -123,6 +123,7 @@ sub check_document_end {
   return unless $self->{document_end};
   $self->send($self->{document_end});
   delete $self->{document_end};
+  $self->{tag_map} = {};
   $self->{document_start} = document_start_event;
 }
 
@@ -358,11 +359,14 @@ sub got__c_ns_tag_property {
       $self->{tag} = "tag:yaml.org,2002:$1";
     }
   }
-  elsif (
-    $tag =~ /^(!.*?!)/ and
-    defined($prefix = $self->{tag_map}{$1})
-  ) {
-    $self->{tag} = $prefix . substr($tag, length($1));
+  elsif ($tag =~ /^(!.*?!)/) {
+    $prefix = $self->{tag_map}{$1};
+    if (defined $prefix) {
+      $self->{tag} = $prefix . substr($tag, length($1));
+    }
+    else {
+      die "No %TAG entry for '$prefix'";
+    }
   }
   elsif (defined($prefix = $self->{tag_map}{'!'})) {
     $self->{tag} = $prefix . substr($tag, 1);

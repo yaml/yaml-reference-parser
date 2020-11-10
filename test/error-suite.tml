@@ -58,7 +58,7 @@
 %Import P2EQ    # Invalid sequene item on same line as previous item
 %Import Q4CL    # Trailing content after quoted value
 %Import QB6E    # Wrong indented multiline quoted scalar
-# %Import QLJ7    # Tag shorthand used in documents but only defined in the first
+%Import QLJ7    # Tag shorthand used in documents but only defined in the first
 %Import RHX7    # YAML directive without document end marker
 %Import RXY3    # Invalid document-end marker in single quoted string
 %Import S4GJ    # Invalid text after block scalar indicator

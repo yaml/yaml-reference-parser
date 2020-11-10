@@ -164,6 +164,7 @@
       }
       this.send(this.document_end);
       delete this.document_end;
+      this.tag_map = {};
       return this.document_start = document_start_event();
     }
 
@@ -487,6 +488,8 @@
         prefix = this.tag_map[m[1]];
         if (prefix != null) {
           this.tag = prefix + tag.slice((m[1].length));
+        } else {
+          die(`No %TAG entry for '${prefix}'`);
         }
       } else if ((prefix = this.tag_map['!']) != null) {
         this.tag = prefix + tag.slice(1);

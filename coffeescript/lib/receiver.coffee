@@ -93,6 +93,7 @@ global.Receiver = class Receiver
     return unless @document_end
     @send @document_end
     delete @document_end
+    @tag_map = {}
     @document_start = document_start_event()
 
   #----------------------------------------------------------------------------
@@ -276,6 +277,8 @@ global.Receiver = class Receiver
       prefix = @tag_map[m[1]]
       if prefix?
         @tag = prefix + tag[(m[1].length)..]
+      else
+        die "No %TAG entry for '#{prefix}'"
     else if (prefix = @tag_map['!'])?
       @tag = prefix + tag[1..]
     else
