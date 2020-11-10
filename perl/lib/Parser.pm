@@ -14,6 +14,8 @@ use base 'Grammar';
 
 use constant TRACE => $ENV{TRACE};
 
+sub receiver { $_[0]->{receiver} }
+
 sub new {
   my ($class, $receiver) = @_;
 

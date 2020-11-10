@@ -38,8 +38,9 @@ sub cache {
 }
 
 sub new {
-  my ($class) = @_;
+  my ($class, %self) = @_;
   bless {
+    %self,
     event => [],
     cache => [],
   }, $class;
