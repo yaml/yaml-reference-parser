@@ -6,11 +6,11 @@ my-trace(*yaml) == coffee-trace(*yaml)
 %Bridge bash
 
 my-trace() {
-  TRACE=1 ./bin/yaml-parser "$1" 2>&1 | head -n-1
+  TRACE=1 ./bin/yaml-parser "$1" 2>&1 | grep -v '^Parse time'
 }
 
 coffee-trace() {
-  TRACE=1 ../coffeescript/bin/yaml-parser "$1" 2>&1 | head -n-1
+  TRACE=1 ../coffeescript/bin/yaml-parser "$1" 2>&1 | grep -v '^Parse time'
 }
 
 === Flow sequence
