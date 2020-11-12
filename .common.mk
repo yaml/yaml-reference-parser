@@ -9,7 +9,7 @@ SPEC_YAML := $(ROOT)/build/yaml-spec-1.2.yaml
 SPEC_PATCH := $(ROOT)/build/yaml-spec-1.2.patch
 GENERATOR := $(ROOT)/build/bin/generate-yaml-grammar
 GENERATOR_LIB := $(ROOT)/build/lib/generate-yaml-grammar.coffee
-GENERATOR_LANG_LIB := $(ROOT)/build/lib/generate-yaml-grammar-$(LANG).coffee
+GENERATOR_LANG_LIB := $(ROOT)/build/lib/generate-yaml-grammar-$(PARSER_LANG).coffee
 NODE_MODULES := $(ROOT)/node_modules
 
 PATH := $(NODE_MODULES)/.bin:$(PATH)
@@ -41,7 +41,7 @@ clean::
 $(GRAMMAR): $(SPEC_PATCHED_YAML) $(GENERATOR) $(GENERATOR_LIB) $(GENERATOR_LANG_LIB)
 	$(GENERATOR) \
 	    --from=$< \
-	    --to=$(LANG) \
+	    --to=$(PARSER_LANG) \
 	    --rule=l-yaml-stream \
 	> $@
 

@@ -1,5 +1,5 @@
 ROOT := $(shell cd ..; pwd)
-LANG := coffeescript
+PARSER_LANG := coffeescript
 BIN := coffee
 GRAMMAR := lib/grammar.coffee
 
