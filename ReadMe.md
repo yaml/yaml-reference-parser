@@ -32,7 +32,7 @@ The parsers pass 100% of the [YAML Test Suite](https://github.com/yaml/yaml-test
 
 * Generate equivalent grammar/parsers in as many modern languages as possible
   * The logic and primitives are purposefully as simple as possible
-  * Generating a perfect parser in a new language should a day or 2
+  * Generating a perfect parser in a new language should take a day or 2
   * Contributors welcome!
 * Start refactoring the grammar to be simpler
   * While always passing the tests
