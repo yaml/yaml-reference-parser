@@ -45,7 +45,6 @@ sub output {
       $value =~ s/\t/\\t/g;
       $value =~ s/\n/\\n/g;
       $value =~ s/\r/\\r/g;
-      $value =~ s/\x20\z/<SPC>/;
       push @event, "$style$value";
     }
     join(' ', @event) . "\n";

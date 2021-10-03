@@ -24,11 +24,11 @@ class TestMLBridge extends TestML.Bridge
     else
       parser.receiver.output()
 
-  unescape: (yaml)->
-    yaml.replace(/<SPC>/g, ' ')
+  unescape: (text)->
+    text.replace(/<SPC>/g, ' ')
       .replace(/<TAB>/g, "\t")
 
-  fix1: (events)->
-    return events
+  fix_test_output: (text)->
+    return text
       .replace(/^\+MAP\ \{\}/gm, '+MAP')
       .replace(/^\+SEQ\ \[\]/gm, '+SEQ')

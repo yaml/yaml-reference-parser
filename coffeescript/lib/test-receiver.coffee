@@ -41,7 +41,6 @@ global.TestReceiver = class TestReceiver extends Receiver
           .replace(/\t/g, '\\t')
           .replace(/\n/g, '\\n')
           .replace(/\r/g, '\\r')
-          .replace(/\x20$/g, '<SPC>')
         event.push "#{style}#{value}"
       event.join(' ') + "\n"
     list.join ''

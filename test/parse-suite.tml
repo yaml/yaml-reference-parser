@@ -2,7 +2,7 @@
 
 
 "({*Name}) {*Label} -- '{*in-yaml}'":
-  *in-yaml.unescape.parse.fix1 == *test-event
+  *in-yaml.unescape.parse.fix-test-output == *test-event.unescape
 
 
 %Import 229Q    # Spec Example 2.4. Sequence of Mappings

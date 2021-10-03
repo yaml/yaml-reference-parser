@@ -37,12 +37,12 @@
       }
     }
 
-    unescape(yaml) {
-      return yaml.replace(/<SPC>/g, ' ').replace(/<TAB>/g, "\t");
+    unescape(text) {
+      return text.replace(/<SPC>/g, ' ').replace(/<TAB>/g, "\t");
     }
 
-    fix1(events) {
-      return events.replace(/^\+MAP\ \{\}/gm, '+MAP').replace(/^\+SEQ\ \[\]/gm, '+SEQ');
+    fix_test_output(text) {
+      return text.replace(/^\+MAP\ \{\}/gm, '+MAP').replace(/^\+SEQ\ \[\]/gm, '+SEQ');
     }
 
   };

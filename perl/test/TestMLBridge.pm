@@ -26,17 +26,17 @@ sub parse {
 }
 
 sub unescape {
-  my ($self, $yaml) = @_;
-  $yaml =~ s/<SPC>/ /g;
-  $yaml =~ s/<TAB>/\t/g;
-  return $yaml;
+  my ($self, $text) = @_;
+  $text =~ s/<SPC>/ /g;
+  $text =~ s/<TAB>/\t/g;
+  return $text;
 }
 
-sub fix1 {
-  my ($self, $events) = @_;
-  $events =~ s/^\+MAP\ \{\}/+MAP/gm;
-  $events =~ s/^\+SEQ\ \[\]/+SEQ/gm;
-  return $events;
+sub fix_test_output {
+  my ($self, $text) = @_;
+  $text =~ s/^\+MAP\ \{\}/+MAP/gm;
+  $text =~ s/^\+SEQ\ \[\]/+SEQ/gm;
+  return $text;
 }
 
 1;
