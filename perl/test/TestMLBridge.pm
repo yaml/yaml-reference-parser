@@ -1,6 +1,7 @@
 use v5.12;
 package TestMLBridge;
 use base 'TestML::Bridge';
+use utf8;
 
 use lib 'lib';
 
@@ -27,15 +28,20 @@ sub parse {
 
 sub unescape {
   my ($self, $text) = @_;
-  $text =~ s/<SPC>/ /g;
-  $text =~ s/<TAB>/\t/g;
+
+  $text =~ s/␣/ /g;
+  $text =~ s/—*»/\t/g;
+  $text =~ s/⇔/x{FEFF}/g;
+  $text =~ s/↵//g;
+  $text =~ s/∎\n\z//;
+
+  # $text =~ s/↓/\r/g;
+
   return $text;
 }
 
 sub fix_test_output {
   my ($self, $text) = @_;
-  $text =~ s/^\+MAP\ \{\}/+MAP/gm;
-  $text =~ s/^\+SEQ\ \[\]/+SEQ/gm;
   return $text;
 }
 

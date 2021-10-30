@@ -38,11 +38,13 @@
     }
 
     unescape(text) {
-      return text.replace(/<SPC>/g, ' ').replace(/<TAB>/g, "\t");
+      text = text.replace(/␣/g, ' ').replace(/—*»/g, "\t").replace(/⇔/g, "\uFEFF").replace(/↵/g, '').replace(/∎\n$/, '');
+      // text = text.replace(/↓/g, "\r")
+      return text;
     }
 
     fix_test_output(text) {
-      return text.replace(/^\+MAP\ \{\}/gm, '+MAP').replace(/^\+SEQ\ \[\]/gm, '+SEQ');
+      return text;
     }
 
   };

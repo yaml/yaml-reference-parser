@@ -1,5 +1,7 @@
 SHELL := bash
 
+.PHONY: test
+
 ifeq ($(ROOT),)
     $(error ROOT not defined)
 endif
@@ -60,7 +62,9 @@ $(SPEC_YAML):
 	make -C $@ src/node_modules
 
 ../test/suite:
-	git clone https://github.com/yaml/yaml-test-suite $@
+	git clone --branch=main https://github.com/yaml/yaml-test-suite $@
+	make -C $@ testml
+	ln -s testml $@/test
 
 $(NODE_MODULES):
 	make -C $(ROOT) $(@:$(ROOT)/%=%)
