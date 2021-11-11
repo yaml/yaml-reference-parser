@@ -7,6 +7,7 @@ use v5.12;
 
 package Parser;
 
+use Encode;
 use Prelude;
 use Grammar;
 
@@ -38,6 +39,9 @@ sub new {
 
 sub parse {
   my ($self, $input) = @_;
+
+  $input = decode_utf8($input)
+    unless Encode::is_utf8($input);
   $self->{input} = $input;
 
   $self->{end} = length $self->{input};

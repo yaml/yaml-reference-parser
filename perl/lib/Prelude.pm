@@ -20,6 +20,7 @@ package Prelude;
 
 use boolean;
 use Carp;
+use Encode;
 use Exporter 'import';
 use JSON::PP;
 use Time::HiRes qw< gettimeofday tv_interval >;
@@ -133,7 +134,7 @@ sub func {
 
 export 'file_read';
 sub file_read {
-  do { local $/; <> };
+  decode_utf8(do { local $/; <> });
 }
 
 export 'debug';
