@@ -355,7 +355,7 @@
         } else {
           return ' ';
         }
-      }).replace(/\\(["\/])/g, "$1").replace(/\\ /g, ' ').replace(/\\b/g, "\b").replace(/\\t/g, "\t").replace(/\\n/g, "\n").replace(/\\r/g, "\r").replace(/\\x([0-9a-fA-F]{2})/g, function(...m) {
+      }).replace(/\\(["\/])/g, "$1").replace(/\\ /g, ' ').replace(/\\b/g, "\b").replace(/\\\t/g, "\t").replace(/\\t/g, "\t").replace(/\\n/g, "\n").replace(/\\r/g, "\r").replace(/\\x([0-9a-fA-F]{2})/g, function(...m) {
         return String.fromCharCode(parseInt(m[1], 16));
       }).replace(/\\u([0-9a-fA-F]{4})/g, function(...m) {
         return String.fromCharCode(parseInt(m[1], 16));

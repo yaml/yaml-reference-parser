@@ -186,6 +186,7 @@ global.Receiver = class Receiver
       .replace(/\\(["\/])/g, "$1")
       .replace(/\\ /g, ' ')
       .replace(/\\b/g, "\b")
+      .replace(/\\\t/g, "\t")
       .replace(/\\t/g, "\t")
       .replace(/\\n/g, "\n")
       .replace(/\\r/g, "\r")

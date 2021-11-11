@@ -239,6 +239,7 @@ sub got__c_double_quoted {
   $text =~ s/\\(["\/])/$1/g;
   $text =~ s/\\ / /g;
   $text =~ s/\\b/\b/g;
+  $text =~ s/\\\t/\t/g;
   $text =~ s/\\t/\t/g;
   $text =~ s/\\n/\n/g;
   $text =~ s/\\r/\r/g;
