@@ -233,7 +233,7 @@ sub got__c_single_quoted {
 sub got__c_double_quoted {
   my ($self, $o) = @_;
   my $text = substr($o->{text}, 1, -1);
-  $text =~ s/(?:[\ \t]*\r?\n[\ \t]*)/\n/g;
+  $text =~ s/(?:(?<!\\)[\ \t]*\r?\n[\ \t]*)/\n/g;
   $text =~ s/\\\n[\ \t]*//g;
   $text =~ s/(\n)(\n*)/length($2) ? $2 : ' '/ge;
   $text =~ s/\\(["\/])/$1/g;
