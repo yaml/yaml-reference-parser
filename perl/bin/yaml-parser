@@ -44,7 +44,7 @@ sub main {
 
   if ($events) {
     print encode_utf8($parser->{receiver}->output());
-    return 0;
+    return $pass ? 1 : 0;
   }
   elsif ($pass) {
     say encode_utf8("PASS - '$n$yaml'");
