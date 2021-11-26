@@ -2611,7 +2611,7 @@ global.Grammar = class Grammar
   c_indentation_indicator: (n)->
     debug_rule("c_indentation_indicator",n)
     @any(
-      @if(@ns_dec_digit, @set('m', @ord(@match))),
+      @if(@rng("\u{31}", "\u{39}"), @set('m', @ord(@match))),
       @if(@empty, @set('m', [ @auto_detect, n ]))
     )
 

@@ -860,7 +860,7 @@
 
       c_indentation_indicator(n) {
         debug_rule("c_indentation_indicator", n);
-        return this.any(this.if(this.ns_dec_digit, this.set('m', this.ord(this.match))), this.if(this.empty, this.set('m', [this.auto_detect, n])));
+        return this.any(this.if(this.rng("\u{31}", "\u{39}"), this.set('m', this.ord(this.match))), this.if(this.empty, this.set('m', [this.auto_detect, n])));
       }
 
       c_chomping_indicator() {

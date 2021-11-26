@@ -2780,7 +2780,7 @@ rule '163', c_indentation_indicator => sub {
   my ($self, $n) = @_;
   debug_rule("c_indentation_indicator",$n) if DEBUG;
   $self->any(
-    $self->if($self->func('ns_dec_digit'), $self->set('m', $self->ord($self->func('match')))),
+    $self->if($self->rng("\x{31}", "\x{39}"), $self->set('m', $self->ord($self->func('match')))),
     $self->if($self->func('empty'), $self->set('m', [ $self->func('auto_detect'), $n ]))
   );
 };

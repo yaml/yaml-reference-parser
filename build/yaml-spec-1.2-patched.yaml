@@ -2593,6 +2593,8 @@ c-b-block-header:
 # c-indentation-indicator(n) ::=
 #   ( ns-dec-digit => m = ns-dec-digit - x:30 )
 #   ( <empty> => m = auto-detect(n) )
+#
+# Also change semantic interpretation to look for '1'-'9'.
 #===============================================================================
 
 :163: c-indentation-indicator
@@ -2603,7 +2605,7 @@ c-b-block-header:
 c-indentation-indicator:
   (...): n
   (any):
-  - (if): ns-dec-digit
+  - (if): [ 'x31', 'x39' ]
     (set): [ m, { (ord): (match) } ]
   - (if): <empty>
     (set): [ m, { auto-detect: n } ]
