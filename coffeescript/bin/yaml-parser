@@ -4,6 +4,8 @@ require '../lib/prelude'
 require '../lib/parser'
 require '../lib/test-receiver'
 
+events = false
+
 main = (yaml=file_read('-'))->
 
   parser = new Parser(new TestReceiver)
@@ -25,6 +27,9 @@ main = (yaml=file_read('-'))->
     n = ''
     yaml = yaml.replace /\n$/, '\\n'
 
+  if events
+    out parser.receiver.output()
+    return true
   if pass
     say "PASS - '#{n}#{yaml}'"
     say parser.receiver.output()
@@ -36,7 +41,13 @@ main = (yaml=file_read('-'))->
     say sprintf "Parse time %.5fs", time
     return false
 
-if main process.argv[2..]...
+argv = process.argv[2..]
+
+if argv.length and argv[0] == '--events'
+  events = true
+  argv.shift()
+
+if main argv...
   exit 0
 else
   exit 1
