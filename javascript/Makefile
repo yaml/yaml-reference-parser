@@ -16,26 +16,26 @@ BUILD_DEPS := \
     $(ROOT)/node_modules \
     build-coffee \
     $(ALL_JS) \
-    ../test/testml/src/node/lib \
+    $(ROOT)/test/testml/src/node/lib \
 
 
 include $(ROOT)/.common.mk
 
 
 build-coffee:
-	make -C ../coffeescript build
+	$(MAKE) -C $(ROOT)/coffeescript build
 
-bin/%: ../coffeescript/bin/%
+bin/%: $(ROOT)/coffeescript/bin/%
 	echo '#!/usr/bin/env node' > $@
 	coffee -cp $< >> $@
 	chmod +x $@
 
-lib/%.js: ../coffeescript/lib/%.coffee
+lib/%.js: $(ROOT)/coffeescript/lib/%.coffee
 	coffee -cp $< > $@
 
-test/%.js: ../coffeescript/test/%.coffee
+test/%.js: $(ROOT)/coffeescript/test/%.coffee
 	coffee -cp $< > $@
 	perl -pi -e 's{/coffee/}{/node/}' $@
 
-../test/testml/src/node/lib: ../test/testml
-	make -C $(@:%/lib=%) js-files
+$(ROOT)/test/testml/src/node/lib: $(ROOT)/test/testml
+	$(MAKE) -C $(@:%/lib=%) js-files

@@ -4,4 +4,4 @@ BIN := coffee
 GRAMMAR := lib/grammar.coffee
 
 
-include ../.common.mk
+include $(ROOT)/.common.mk

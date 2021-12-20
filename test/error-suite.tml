@@ -1,80 +1,9 @@
 #!/usr/bin/env testml
 
 
-"({*Name}) {*Label} -- '{*in-yaml}'":
-  *in-yaml.unescape.parse('expect-error') == 1
+<*error> =>
+  "({*Name}) {*Label} -- '{*in-yaml}'":
+    *in-yaml.unescape.parse('expect-error') == 1
 
 
-%Import 236B    # Invalid value after mapping
-%Import 2CMS    # Invalid mapping in plain multiline
-%Import 3HFZ    # Invalid content after document end marker
-%Import 4EJS    # Invalid tabs as indendation in a mapping
-%Import 4H7K    # Flow sequence with invalid extra closing bracket
-%Import 4HVU    # Wrong indendation in Sequence
-%Import 4JVG    # Scalar value with two anchors
-%Import 55WF    # Invalid escape in double quoted string
-%Import 5LLU    # Block scalar with wrong indented line after spaces only
-%Import 5TRB    # Invalid document-start marker in doublequoted tring
-%Import 5U3A    # Sequence on same Line as Mapping Key
-%Import 62EZ    # Invalid block mapping key on same line as previous key
-%Import 6JTT    # Flow sequence without closing bracket
-%Import 6S55    # Invalid scalar at the end of sequence
-%Import 7LBH    # Multiline double quoted implicit keys
-%Import 7MNF    # Missing colon
-%Import 8XDJ    # Comment in plain multiline value
-%Import 9C9N    # Wrong indented flow sequence
-%Import 9CWY    # Invalid scalar at the end of mapping
-%Import 9HCY    # Need document footer before directives
-%Import 9JBA    # Invalid comment after end of flow sequence
-%Import 9KBC    # Mapping starting at --- line
-%Import 9MAG    # Flow sequence with invalid comma at the beginning
-%Import B63P    # Directive without document
-%Import BD7L    # Invalid mapping after sequence
-%Import BF9H    # Trailing comment in multiline plain scalar
-%Import BS4K    # Comment between plain scalar lines
-%Import C2SP    # Flow Mapping Key on two lines
-%Import CML9    # Missing comma in flow
-%Import CQ3W    # Double quoted string without closing quote
-%Import CTN5    # Flow sequence with invalid extra comma
-%Import CVW2    # Invalid comment after comma
-%Import CXX2    # Mapping with anchor on document start line
-%Import D49Q    # Multiline single quoted implicit keys
-%Import DK4H    # Implicit key followed by newline
-%Import DMG6    # Wrong indendation in Map
-%Import EB22    # Missing document-end marker before directive
-%Import EW3V    # Wrong indendation in mapping
-%Import G7JE    # Multiline implicit keys
-%Import G9HC    # Invalid anchor in zero indented sequence
-%Import GDY7    # Comment that looks like a mapping key
-%Import GT5M    # Node anchor in sequence
-%Import H7J7    # Node anchor not indented
-%Import HRE5    # Double quoted scalar with escaped single quote
-%Import HU3P    # Invalid Mapping in plain scalar
-%Import JY7Z    # Trailing content that looks like a mapping
-%Import KS4U    # Invalid item after end of flow sequence
-%Import LHL4    # Invalid tag
-%Import N4JP    # Bad indentation in mapping
-%Import N782    # Invalid document markers in flow style
-%Import P2EQ    # Invalid sequene item on same line as previous item
-%Import Q4CL    # Trailing content after quoted value
-%Import QB6E    # Wrong indented multiline quoted scalar
-%Import QLJ7    # Tag shorthand used in documents but only defined in the first
-%Import RHX7    # YAML directive without document end marker
-%Import RXY3    # Invalid document-end marker in single quoted string
-%Import S4GJ    # Invalid text after block scalar indicator
-%Import S98Z    # Block scalar with more spaces than first content line
-%Import SF5V    # Duplicate YAML directive
-%Import SR86    # Anchor plus Alias
-%Import SU5Z    # Comment without whitespace after doublequoted scalar
-%Import SU74    # Anchor and alias as mapping key
-%Import SY6V    # Anchor before sequence entry on same line
-%Import T833    # Flow mapping missing a separating comma
-%Import TD5N    # Invalid scalar after sequence
-%Import U44R    # Bad indentation in mapping (2)
-%Import U99R    # Invalid comma in tag
-%Import W9L4    # Literal block scalar with more spaces in first line
-%Import X4QW    # Comment without whitespace after block scalar indicator
-%Import ZCZ6    # Invalid mapping in plain single line value
-%Import ZL4Z    # Invalid nested mapping
-%Import ZVH3    # Wrong indented sequence item
-%Import ZXT5    # Implicit key followed by newline and adjacent value
+%Import yaml-test-suite

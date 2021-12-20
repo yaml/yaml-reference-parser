@@ -2,8 +2,15 @@ SHELL := bash
 
 .PHONY: test
 
-ifeq ($(ROOT),)
+ifeq (,$(ROOT))
     $(error ROOT not defined)
+endif
+
+LOCAL_MAKE := $(ROOT)/.git/local.mk
+ifneq (,$(wildcard $(LOCAL_MAKE)))
+    $(info ***** USING LOCAL MAKEFILE OVERRIDES *****)
+    $(info ***** $(LOCAL_MAKE))
+    include $(LOCAL_MAKE)
 endif
 
 SPEC_PATCHED_YAML := $(ROOT)/build/yaml-spec-1.2-patched.yaml
@@ -14,17 +21,22 @@ GENERATOR_LIB := $(ROOT)/build/lib/generate-yaml-grammar.coffee
 GENERATOR_LANG_LIB := $(ROOT)/build/lib/generate-yaml-grammar-$(PARSER_LANG).coffee
 NODE_MODULES := $(ROOT)/node_modules
 
+TESTML_REPO ?= https://github.com/testml-lang/testml
+TESTML_COMMIT ?= master
+YAML_TEST_SUITE_REPO ?= https://github.com/yaml/yaml-test-suite
+YAML_TEST_SUITE_COMMIT ?= main
+
 PATH := $(NODE_MODULES)/.bin:$(PATH)
 PATH := $(ROOT)/test/testml/bin:$(PATH)
 export PATH
 
 export TESTML_RUN := $(BIN)-tap
-export TESTML_LIB := $(ROOT)/test/suite/test:$(TESTML_LIB)
+export TESTML_LIB := $(ROOT)/test:$(ROOT)/test/suite/test:$(TESTML_LIB)
 
-BUILD_DEPS ?= $(ROOT)/node_modules
+BUILD_DEPS ?= $(NODE_MODULES)
 TEST_DEPS ?= \
-    ../test/testml \
-    ../test/suite \
+    $(ROOT)/test/testml \
+    $(ROOT)/test/suite \
 
 test := test/*.tml
 
@@ -56,15 +68,18 @@ $(SPEC_YAML):
 	wget https://raw.githubusercontent.com/yaml/yaml-grammar/master/yaml-spec-1.2.yaml || \
 	curl -O https://raw.githubusercontent.com/yaml/yaml-grammar/master/yaml-spec-1.2.yaml
 
-../test/testml:
-	git clone https://github.com/testml-lang/testml $@
-	make -C $@ ext/perl
-	make -C $@ src/node_modules
-
-../test/suite:
-	git clone --branch=main https://github.com/yaml/yaml-test-suite $@
-	make -C $@ testml
-	ln -s testml $@/test
+$(ROOT)/test/suite \
+$(ROOT)/test/testml: $(ROOT)/test
+	$(MAKE) -C $< all
 
 $(NODE_MODULES):
-	make -C $(ROOT) $(@:$(ROOT)/%=%)
+	$(MAKE) -C $(ROOT) $(@:$(ROOT)/%=%)
+
+
+define git-clone
+mkdir $1
+git -C $1 init --quiet
+git -C $1 remote add origin $2
+git -C $1 fetch origin $3
+git -C $1 reset --hard FETCH_HEAD
+endef

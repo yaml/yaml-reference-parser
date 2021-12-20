@@ -18,21 +18,19 @@ default:
 build: $(ALL_BUILD)
 
 build-%:
-	make -C $(@:build-%=%) build
+	$(MAKE) -C $(@:build-%=%) build
 
 test: $(ALL_TEST)
 
 test-%:
-	make -C $(@:test-%=%) test TRACE=$(TRACE) DEBUG=$(DEBUG)
+	$(MAKE) -C $(@:test-%=%) test TRACE=$(TRACE) DEBUG=$(DEBUG)
 
 clean: $(ALL_CLEAN)
 	rm -fr node_modules
-	rm -fr test/testml
-	rm -fr test/.testml
-	rm -fr test/suite
+	$(MAKE) -C $(ROOT)/test $@
 
 clean-%:
-	make -C $(@:clean-%=%) clean
+	$(MAKE) -C $(@:clean-%=%) clean
 
 docker-build:
 	docker build -t yaml-grammar-test test
@@ -42,7 +40,7 @@ docker-test: docker-build
 	    -v"$(ROOT):/yaml-grammar" \
 	    -u $$(id -u "$$USER"):$$(id -g "$$USER") \
 	    yaml-grammar-test \
-	    make -C /yaml-grammar/parser test
+	    $(MAKE) -C /yaml-grammar/parser test
 
 node_modules:
 	git branch --track $@ origin/$@ 2>/dev/null || true

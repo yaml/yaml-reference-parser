@@ -4,8 +4,8 @@ BIN := perl
 GRAMMAR := lib/Grammar.pm
 
 TEST_DEPS := \
-    ../test/testml \
-    ../test/suite \
+    $(ROOT)/test/testml \
+    $(ROOT)/test/suite \
     ext-perl \
 
 
