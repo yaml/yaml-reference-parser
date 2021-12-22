@@ -19,6 +19,17 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with: {node-version: 14.x}
+
+    - name: Linux deps
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: sudo apt-get install -y cpanminus
+    - name: Linux deps
+      if: ${{ matrix.os == 'macOS-latest' }}
+      run: brew install cpanm
+
+    - name: Install CPAN modules
+      run: sudo cpanm -n YAML::PP
+
     - name: Fetch branches
       run: |
         git config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*
