@@ -29,7 +29,8 @@ main = (yaml=file_read('-'))->
 
   if events
     out parser.receiver.output()
-    return true
+    return pass
+
   if pass
     say "PASS - '#{n}#{yaml}'"
     say parser.receiver.output()

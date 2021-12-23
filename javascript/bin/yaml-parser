@@ -33,7 +33,7 @@
     }
     if (events) {
       out(parser.receiver.output());
-      return true;
+      return pass;
     }
     if (pass) {
       say(`PASS - '${n}${yaml}'`);
