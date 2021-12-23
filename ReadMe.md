@@ -12,10 +12,18 @@ https://github.com/yaml/yaml-reference-parser/actions?query=workflow%3A"Test")
 
 # Synopsis
 
+## Prerequisites
+
+On Debian:
+
+    sudo apt install cpanminus && sudo cpanm YAML::PP
+    sudo apt install nodejs
+
+## Build
+
 You can see all the generated YAML parsers in action by running:
-```
-make test
-```
+
+    make test
 
 # Description
 
