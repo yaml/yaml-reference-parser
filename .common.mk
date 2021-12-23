@@ -69,11 +69,15 @@ $(SPEC_YAML):
 	curl -O https://raw.githubusercontent.com/yaml/yaml-grammar/master/yaml-spec-1.2.yaml
 
 $(ROOT)/test/suite \
-$(ROOT)/test/testml: $(ROOT)/test
+$(ROOT)/test/testml: $(ROOT)/test $(ROOT)/perl/ext-perl
+	$(eval override export PERL5LIB := $(ROOT)/perl/ext-perl/lib/perl5:$(PERL5LIB))
 	$(MAKE) -C $< all
 
 $(NODE_MODULES):
 	$(MAKE) -C $(ROOT) $(@:$(ROOT)/%=%)
+
+$(ROOT)/perl/ext-perl:
+	$(MAKE) -C $(ROOT)/perl ext-perl
 
 
 define git-clone
