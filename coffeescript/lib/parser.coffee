@@ -24,6 +24,10 @@ global.Parser = class Parser extends Grammar
     @trace_info = ['', '', '']
 
   parse: (@input)->
+    @input += "\n" unless \
+      @input.length == 0 or
+      @input.endsWith("\n")
+
     @end = @input.length
 
     @trace_on = not @trace_start() if TRACE
@@ -411,14 +415,25 @@ global.Parser = class Parser extends Grammar
     return m
 
   auto_detect: (n)->
-    match = @input[@pos..].match /^.*\n((?:\ *\n)*)(\ *)/
-    return 1 unless match?
+    match = @input[@pos..].match ///
+      ^.*\n
+      (
+        (?:\ *\n)*
+      )
+      (\ *)
+      (.?)
+    ///
     pre = match[1]
-    m = match[2].length - n
-    m = 1 if m < 1
+    if match[3].length
+      m = match[2].length - n
+    else
+      m = 0
+      while pre.match ///\ {#{m}}///
+        m++
+      m = m - n - 1
     die "Spaces found after indent in auto-detect (5LLU)" \
-      if pre.match ///^.{#{m}}.///m
-    return m
+      if m > 0 && pre.match ///^.{#{m}}\ ///m
+    return if m == 0 then 1 else m
 
 #------------------------------------------------------------------------------
 # Trace debugging

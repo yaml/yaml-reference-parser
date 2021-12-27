@@ -276,6 +276,9 @@ sub got__c_l_literal {
   elsif ($t eq 'strip') {
     $text =~ s/\n+\z//;
   }
+  elsif ($text !~ /\S/) {
+    $text =~ s/\n(\n+)\z/$1/;
+  }
   $self->add(scalar_event(literal => $text));
 }
 sub not__c_l_literal {

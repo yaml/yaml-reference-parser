@@ -218,6 +218,8 @@ global.Receiver = class Receiver
       text = text.replace /\n+$/, "\n"
     else if t == 'strip'
       text = text.replace /\n+$/, ""
+    else if not text.match /\S/
+      text = text.replace /\n(\n+)$/, "$1"
     @add scalar_event 'literal', text
   not__c_l_literal: ->
     delete @in_scalar

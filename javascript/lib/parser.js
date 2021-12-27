@@ -31,6 +31,9 @@
     parse(input1) {
       var err, ok;
       this.input = input1;
+      if (!(this.input.length === 0 || this.input.endsWith("\n"))) {
+        this.input += "\n";
+      }
       this.end = this.input.length;
       if (TRACE) {
         this.trace_on = !this.trace_start();
@@ -596,19 +599,25 @@
 
     auto_detect(n) {
       var m, match, pre;
-      match = this.input.slice(this.pos).match(/^.*\n((?:\ *\n)*)(\ *)/);
-      if (match == null) {
-        return 1;
-      }
+      match = this.input.slice(this.pos).match(/^.*\n((?: *\n)*)( *)(.?)/);
       pre = match[1];
-      m = match[2].length - n;
-      if (m < 1) {
-        m = 1;
+      if (match[3].length) {
+        m = match[2].length - n;
+      } else {
+        m = 0;
+        while (pre.match(RegExp(` {${m}}`))) {
+          m++;
+        }
+        m = m - n - 1;
       }
-      if (pre.match(RegExp(`^.{${m}}.`, "m"))) {
+      if (m > 0 && pre.match(RegExp(`^.{${m}} `, "m"))) {
         die("Spaces found after indent in auto-detect (5LLU)");
       }
-      return m;
+      if (m === 0) {
+        return 1;
+      } else {
+        return m;
+      }
     }
 
     //------------------------------------------------------------------------------
