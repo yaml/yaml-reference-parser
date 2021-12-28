@@ -1,37 +1,42 @@
 use v5.12;
 package Receiver;
 use Prelude;
+use YAML::PP::Common qw(
+    YAML_PLAIN_SCALAR_STYLE
+    YAML_SINGLE_QUOTED_SCALAR_STYLE YAML_DOUBLE_QUOTED_SCALAR_STYLE
+    YAML_LITERAL_SCALAR_STYLE YAML_FOLDED_SCALAR_STYLE
+);
 
 sub stream_start_event {
-  { event => 'stream_start' };
+  { event => 'stream_start_event' };
 }
 sub stream_end_event {
-  { event => 'stream_end' };
+  { event => 'stream_end_event' };
 }
 sub document_start_event {
-  { event => 'document_start', explicit => (shift || false), version => undef };
+  { event => 'document_start_event', explicit => (shift || false), version => undef };
 }
 sub document_end_event {
-  { event => 'document_end', explicit => (shift || false) };
+  { event => 'document_end_event', explicit => (shift || false) };
 }
 sub mapping_start_event {
-  { event => 'mapping_start', flow => (shift || false) };
+  { event => 'mapping_start_event', flow => (shift || false) };
 }
 sub mapping_end_event {
-  { event => 'mapping_end' };
+  { event => 'mapping_end_event' };
 }
 sub sequence_start_event {
-  { event => 'sequence_start', flow => (shift || false) };
+  { event => 'sequence_start_event', flow => (shift || false) };
 }
 sub sequence_end_event {
-  { event => 'sequence_end' };
+  { event => 'sequence_end_event' };
 }
 sub scalar_event {
   my ($style, $value) = @_;
-  { event => 'scalar', style => $style, value => $value };
+  { event => 'scalar_event', style => $style, value => $value };
 }
 sub alias_event {
-  { event => 'alias', name => (shift) };
+  { event => 'alias_event', name => (shift) };
 }
 sub cache {
   { text => (shift) };
@@ -218,7 +223,7 @@ sub got__ns_plain {
   my $text = $o->{text};
   $text =~ s/(?:[\ \t]*\r?\n[\ \t]*)/\n/g;
   $text =~ s/(\n)(\n*)/length($2) ? $2 : ' '/ge;
-  $self->add(scalar_event(plain => $text));
+  $self->add(scalar_event(YAML_PLAIN_SCALAR_STYLE() => $text));
 }
 
 sub got__c_single_quoted {
@@ -227,7 +232,7 @@ sub got__c_single_quoted {
   $text =~ s/(?:[\ \t]*\r?\n[\ \t]*)/\n/g;
   $text =~ s/(\n)(\n*)/length($2) ? $2 : ' '/ge;
   $text =~ s/''/'/g;
-  $self->add(scalar_event(single => $text));
+  $self->add(scalar_event(YAML_SINGLE_QUOTED_SCALAR_STYLE() => $text));
 }
 
 sub got__c_double_quoted {
@@ -247,7 +252,7 @@ sub got__c_double_quoted {
   $text =~ s/\\u([0-9a-fA-F]{4})/chr(hex($1))/eg;
   $text =~ s/\\U([0-9a-fA-F]{8})/chr(hex($1))/eg;
   $text =~ s/\\\\/\\/g;
-  $self->add(scalar_event(double => $text));
+  $self->add(scalar_event(YAML_DOUBLE_QUOTED_SCALAR_STYLE() => $text));
 }
 
 sub got__l_empty {
@@ -279,7 +284,7 @@ sub got__c_l_literal {
   elsif ($text !~ /\S/) {
     $text =~ s/\n(\n+)\z/$1/;
   }
-  $self->add(scalar_event(literal => $text));
+  $self->add(scalar_event(YAML_LITERAL_SCALAR_STYLE() => $text));
 }
 sub not__c_l_literal {
   my ($self) = @_;
@@ -328,7 +333,7 @@ sub got__c_l_folded {
   elsif ($t eq 'strip') {
     $text =~ s/\n+\z//;
   }
-  $self->add(scalar_event(folded => $text));
+  $self->add(scalar_event(YAML_FOLDED_SCALAR_STYLE() => $text));
 }
 sub not__c_l_folded {
   my ($self) = @_;
@@ -336,7 +341,7 @@ sub not__c_l_folded {
   $_[0]->cache_drop;
 }
 
-sub got__e_scalar { $_[0]->add(scalar_event(plain => '')) }
+sub got__e_scalar { $_[0]->add(scalar_event(YAML_PLAIN_SCALAR_STYLE() => '')) }
 
 sub not__s_l_block_collection__all__rep__all__any__all {
   my ($self) = @_;
