@@ -1,0 +1,8 @@
+#!/usr/bin/env testml
+
+
+"({*Name}) {*Label} -- '{*in-yaml}'":
+  *in-yaml.unescape.parse.fix-test-output == *test-event.unescape
+
+
+%Import yaml-test-suite

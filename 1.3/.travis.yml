@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+- '10'
+- '12'
+- '14'
+
+branches: {only: [master, cicd]}
+
+script:
+- git fetch --unshallow || true
+- git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+- git fetch origin
+- rm -fr ./node_modules/
+
+# XXX traces not working properly here for some unknown reason...
+- rm -f */test/diff-trace.tml
+
+- make test

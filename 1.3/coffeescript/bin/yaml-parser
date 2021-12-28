@@ -1,0 +1,63 @@
+#!/usr/bin/env coffee
+
+require '../lib/prelude'
+require '../lib/parser'
+require '../lib/test-receiver'
+
+events = false
+
+main = (yaml=file_read('-'))->
+
+  parser = new Parser(new TestReceiver)
+
+  pass = true
+  start = timer()
+
+  try
+    parser.parse(yaml)
+  catch e
+    warn e
+    pass = false
+
+  time = timer(start)
+
+  if yaml.match /\n./
+    n = "\n"
+  else
+    n = ''
+    yaml = yaml.replace /\n$/, '\\n'
+
+  if events
+    out parser.receiver.output()
+    return true
+
+  if process.env.STATS
+    sorted = {}
+    {calls} = parser.stats
+    for k in Object.keys(calls).sort((a,b)-> calls[a] - calls[b])
+      sorted[k] = calls[k]
+    WWW sorted
+
+  if pass
+    say "PASS - '#{n}#{yaml}'"
+    say parser.receiver.output
+    say sprintf "Parse time %.5fs", time
+    return true
+  else
+    say "FAIL - '#{n}#{yaml}'"
+    say parser.receiver.output
+    say sprintf "Parse time %.5fs", time
+    return false
+
+argv = process.argv[2..]
+
+if argv.length and argv[0] == '--events'
+  events = true
+  argv.shift()
+
+if main argv...
+  exit 0
+else
+  exit 1
+
+# vim: sw=2:
