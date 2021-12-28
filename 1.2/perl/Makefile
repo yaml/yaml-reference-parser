@@ -1,4 +1,5 @@
-ROOT := $(shell cd ..; pwd)
+ROOT := $(shell cd ../..; pwd)
+BASE := $(ROOT)/1.2
 PARSER_LANG := perl
 BIN := perl
 GRAMMAR := lib/Grammar.pm

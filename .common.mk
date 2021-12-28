@@ -5,6 +5,10 @@ SHELL := bash
 ifeq (,$(ROOT))
     $(error ROOT not defined)
 endif
+ifeq (,$(BASE))
+    $(error BASE not defined)
+endif
+BASE12 := $(ROOT)/1.2
 
 LOCAL_MAKE := $(ROOT)/.git/local.mk
 ifneq (,$(wildcard $(LOCAL_MAKE)))
@@ -13,12 +17,12 @@ ifneq (,$(wildcard $(LOCAL_MAKE)))
     include $(LOCAL_MAKE)
 endif
 
-SPEC_PATCHED_YAML := $(ROOT)/build/yaml-spec-1.2-patched.yaml
-SPEC_YAML := $(ROOT)/build/yaml-spec-1.2.yaml
-SPEC_PATCH := $(ROOT)/build/yaml-spec-1.2.patch
-GENERATOR := $(ROOT)/build/bin/generate-yaml-grammar
-GENERATOR_LIB := $(ROOT)/build/lib/generate-yaml-grammar.coffee
-GENERATOR_LANG_LIB := $(ROOT)/build/lib/generate-yaml-grammar-$(PARSER_LANG).coffee
+SPEC_PATCHED_YAML := $(BASE)/build/yaml-spec-1.2-patched.yaml
+SPEC_YAML := $(BASE)/build/yaml-spec-1.2.yaml
+SPEC_PATCH := $(BASE)/build/yaml-spec-1.2.patch
+GENERATOR := $(BASE)/build/bin/generate-yaml-grammar
+GENERATOR_LIB := $(BASE)/build/lib/generate-yaml-grammar.coffee
+GENERATOR_LANG_LIB := $(BASE)/build/lib/generate-yaml-grammar-$(PARSER_LANG).coffee
 NODE_MODULES := $(ROOT)/node_modules
 
 TESTML_REPO ?= https://github.com/testml-lang/testml
@@ -51,7 +55,6 @@ test:: build $(TEST_DEPS)
 	    prove -v $(test)
 
 clean::
-	rm -fr $(ROOT)/perl/ext-perl
 
 $(GRAMMAR): $(SPEC_PATCHED_YAML) $(GENERATOR) $(GENERATOR_LIB) $(GENERATOR_LANG_LIB)
 	$(GENERATOR) \
@@ -70,15 +73,15 @@ $(SPEC_YAML):
 	curl -O https://raw.githubusercontent.com/yaml/yaml-grammar/master/yaml-spec-1.2.yaml
 
 $(ROOT)/test/suite \
-$(ROOT)/test/testml: $(ROOT)/test $(ROOT)/perl/ext-perl
-	$(eval override export PERL5LIB := $(ROOT)/perl/ext-perl/lib/perl5:$(PERL5LIB))
+$(ROOT)/test/testml: $(ROOT)/test $(BASE12)/perl/ext-perl
+	$(eval override export PERL5LIB := $(BASE12)/perl/ext-perl/lib/perl5:$(PERL5LIB))
 	$(MAKE) -C $< all
 
 $(NODE_MODULES):
 	$(MAKE) -C $(ROOT) $(@:$(ROOT)/%=%)
 
-$(ROOT)/perl/ext-perl:
-	$(MAKE) -C $(ROOT)/perl ext-perl
+$(BASE12)/perl/ext-perl:
+	$(MAKE) -C $(BASE12)/perl ext-perl
 
 
 define git-clone

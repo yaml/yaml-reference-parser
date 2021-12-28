@@ -1,4 +1,5 @@
 ROOT := $(shell cd ..; pwd)
+BASE := $(ROOT)/test
 
 include $(ROOT)/.common.mk
 

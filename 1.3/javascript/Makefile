@@ -1,4 +1,5 @@
-ROOT := $(shell cd ..; pwd)
+ROOT := $(shell cd ../..; pwd)
+BASE := $(ROOT)/1.3
 PARSER_LANG := javascript
 BIN := node
 GRAMMAR :=
@@ -14,7 +15,6 @@ ALL_JS := \
 
 BUILD_DEPS := \
     $(ROOT)/node_modules \
-    build-coffee \
     $(ALL_JS) \
     $(ROOT)/test/testml/src/node/lib \
 
@@ -22,18 +22,15 @@ BUILD_DEPS := \
 include $(ROOT)/.common.mk
 
 
-build-coffee:
-	$(MAKE) -C $(ROOT)/coffeescript build
-
-bin/%: $(ROOT)/coffeescript/bin/%
+bin/%: $(BASE)/coffeescript/bin/%
 	echo '#!/usr/bin/env node' > $@
 	coffee -cp $< >> $@
 	chmod +x $@
 
-lib/%.js: $(ROOT)/coffeescript/lib/%.coffee
+lib/%.js: $(BASE)/coffeescript/lib/%.coffee
 	coffee -cp $< > $@
 
-test/%.js: $(ROOT)/coffeescript/test/%.coffee
+test/%.js: $(BASE)/coffeescript/test/%.coffee
 	coffee -cp $< > $@
 	perl -pi -e 's{/coffee/}{/node/}' $@
 
