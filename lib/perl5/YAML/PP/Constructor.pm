@@ -3,11 +3,14 @@ use strict;
 use warnings;
 package YAML::PP::Constructor;
 
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.031'; # VERSION
 
 use YAML::PP;
-use YAML::PP::Common qw/ PRESERVE_ALL PRESERVE_ORDER PRESERVE_SCALAR_STYLE PRESERVE_FLOW_STYLE /;
+use YAML::PP::Common qw/
+    PRESERVE_ORDER PRESERVE_SCALAR_STYLE PRESERVE_FLOW_STYLE PRESERVE_ALIAS
+/;
 use Scalar::Util qw/ reftype /;
+use Carp qw/ croak /;
 
 use constant DEBUG => ($ENV{YAML_PP_LOAD_DEBUG} or $ENV{YAML_PP_LOAD_TRACE}) ? 1 : 0;
 use constant TRACE => $ENV{YAML_PP_LOAD_TRACE} ? 1 : 0;
@@ -18,9 +21,13 @@ sub new {
     my ($class, %args) = @_;
 
     my $default_yaml_version = delete $args{default_yaml_version};
+    my $duplicate_keys = delete $args{duplicate_keys};
+    unless (defined $duplicate_keys) {
+        $duplicate_keys = 0;
+    }
     my $preserve = delete $args{preserve} || 0;
-    if ($preserve == PRESERVE_ALL) {
-        $preserve = PRESERVE_ORDER | PRESERVE_SCALAR_STYLE | PRESERVE_FLOW_STYLE;
+    if ($preserve == 1) {
+        $preserve = PRESERVE_ORDER | PRESERVE_SCALAR_STYLE | PRESERVE_FLOW_STYLE | PRESERVE_ALIAS;
     }
     my $cyclic_refs = delete $args{cyclic_refs} || 'allow';
     die "Invalid value for cyclic_refs: $cyclic_refs"
@@ -36,6 +43,7 @@ sub new {
         schemas => $schemas,
         cyclic_refs => $cyclic_refs,
         preserve => $preserve,
+        duplicate_keys => $duplicate_keys,
     }, $class;
     $self->init;
     return $self;
@@ -79,6 +87,8 @@ sub default_yaml_version { return $_[0]->{default_yaml_version} }
 sub preserve_order { return $_[0]->{preserve} & PRESERVE_ORDER }
 sub preserve_scalar_style { return $_[0]->{preserve} & PRESERVE_SCALAR_STYLE }
 sub preserve_flow_style { return $_[0]->{preserve} & PRESERVE_FLOW_STYLE }
+sub preserve_alias { return $_[0]->{preserve} & PRESERVE_ALIAS }
+sub duplicate_keys { return $_[0]->{duplicate_keys} }
 
 sub document_start_event {
     my ($self, $event) = @_;
@@ -127,7 +137,8 @@ sub mapping_start_event {
 
     my $preserve_order = $self->preserve_order;
     my $preserve_style = $self->preserve_flow_style;
-    if (($preserve_order or $preserve_style) and not tied(%$data)) {
+    my $preserve_alias = $self->preserve_alias;
+    if (($preserve_order or $preserve_style or $preserve_alias) and not tied(%$data)) {
         tie %$data, 'YAML::PP::Preserve::Hash';
     }
     if ($preserve_style) {
@@ -137,6 +148,13 @@ sub mapping_start_event {
 
     push @$stack, $ref;
     if (defined(my $anchor = $event->{anchor})) {
+        if ($preserve_alias) {
+            my $t = tied %$data;
+            unless (exists $self->anchors->{ $anchor }) {
+                # Repeated anchors cannot be preserved
+                $t->{alias} = $anchor;
+            }
+        }
         $self->anchors->{ $anchor } = { data => $ref->{data} };
     }
 }
@@ -185,11 +203,15 @@ sub mapping_end_event {
     }
     my $on_data = $last->{on_data} || sub {
         my ($self, $hash, $items) = @_;
+        my %seen;
         for (my $i = 0; $i < @$items; $i += 2) {
             my ($key, $value) = @$items[ $i, $i + 1 ];
             $key = '' unless defined $key;
             if (ref $key) {
                 $key = $self->stringify_complex($key);
+            }
+            if ($seen{ $key }++ and not $self->duplicate_keys) {
+                croak "Duplicate key '$key'";
             }
             $$hash->{ $key } = $value;
         }
@@ -215,7 +237,8 @@ sub sequence_start_event {
     my $stack = $self->stack;
 
     my $preserve_style = $self->preserve_flow_style;
-    if ($preserve_style and not tied(@$data)) {
+    my $preserve_alias = $self->preserve_alias;
+    if ($preserve_style or $preserve_alias and not tied(@$data)) {
         tie @$data, 'YAML::PP::Preserve::Array', @$data;
         my $t = tied @$data;
         $t->{style} = $event->{style};
@@ -223,6 +246,13 @@ sub sequence_start_event {
 
     push @$stack, $ref;
     if (defined(my $anchor = $event->{anchor})) {
+        if ($preserve_alias) {
+            my $t = tied @$data;
+            unless (exists $self->anchors->{ $anchor }) {
+                # Repeated anchors cannot be preserved
+                $t->{alias} = $anchor;
+            }
+        }
         $self->anchors->{ $anchor } = { data => $ref->{data} };
     }
 }
@@ -255,16 +285,28 @@ sub scalar_event {
     my ($self, $event) = @_;
     DEBUG and warn "CONTENT $event->{value} ($event->{style})\n";
     my $value = $self->schema->load_scalar($self, $event);
-    if (defined (my $name = $event->{anchor})) {
-        $self->anchors->{ $name } = { data => \$value, finished => 1 };
-    }
     my $last = $self->stack->[-1];
-    if ($self->preserve_scalar_style and not ref $value) {
-        $value = YAML::PP::Preserve::Scalar->new(
+    my $preserve_alias = $self->preserve_alias;
+    my $preserve_style = $self->preserve_scalar_style;
+    if (($preserve_style or $preserve_alias) and not ref $value) {
+        my %args = (
             value => $value,
-            style => $event->{style},
             tag => $event->{tag},
         );
+        if ($preserve_style) {
+            $args{style} = $event->{style};
+        }
+        if ($preserve_alias and defined $event->{anchor}) {
+            my $anchor = $event->{anchor};
+            unless (exists $self->anchors->{ $anchor }) {
+                # Repeated anchors cannot be preserved
+                $args{alias} = $event->{anchor};
+            }
+        }
+        $value = YAML::PP::Preserve::Scalar->new( %args );
+    }
+    if (defined (my $name = $event->{anchor})) {
+        $self->anchors->{ $name } = { data => \$value, finished => 1 };
     }
     push @{ $last->{ref} }, $value;
 }
@@ -280,11 +322,11 @@ sub alias_event {
             my $cyclic_refs = $self->cyclic_refs;
             if ($cyclic_refs ne 'allow') {
                 if ($cyclic_refs eq 'fatal') {
-                    die "Found cyclic ref";
+                    die "Found cyclic ref for alias '$name'";
                 }
                 if ($cyclic_refs eq 'warn') {
                     $anchor = { data => \undef };
-                    warn "Found cyclic ref";
+                    warn "Found cyclic ref for alias '$name'";
                 }
                 elsif ($cyclic_refs eq 'ignore') {
                     $anchor = { data => \undef };
@@ -293,13 +335,19 @@ sub alias_event {
         }
         $value = $anchor->{data};
     }
+    else {
+        croak "No anchor defined for alias '$name'";
+    }
     my $last = $self->stack->[-1];
     push @{ $last->{ref} }, $$value;
 }
 
 sub stringify_complex {
     my ($self, $data) = @_;
-    return $data if (ref $data eq 'YAML::PP::Preserve::Scalar' and $self->preserve_scalar_style);
+    return $data if (
+        ref $data eq 'YAML::PP::Preserve::Scalar'
+        and ($self->preserve_scalar_style or $self->preserve_alias)
+    );
     require Data::Dumper;
     local $Data::Dumper::Quotekeys = 0;
     local $Data::Dumper::Terse = 1;

@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package YAML::PP::Schema::Perl;
 
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.031'; # VERSION
 
 use Scalar::Util qw/ blessed reftype /;
 

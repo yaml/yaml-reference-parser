@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package YAML::PP::Emitter;
 
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.031'; # VERSION
 use Data::Dumper;
 
 use YAML::PP::Common qw/
@@ -524,7 +524,7 @@ sub scalar_event {
     }
     $style ||= YAML_PLAIN_SCALAR_STYLE;
 
-    if ($style eq YAML_SINGLE_QUOTED_SCALAR_STYLE) {
+    if ($style == YAML_SINGLE_QUOTED_SCALAR_STYLE) {
         if ($value =~ m/ \n/ or $value =~ m/\n / or $value =~ m/^\n/ or $value =~ m/\n$/) {
             $style = YAML_DOUBLE_QUOTED_SCALAR_STYLE;
         }
@@ -532,7 +532,7 @@ sub scalar_event {
             $style = YAML_DOUBLE_QUOTED_SCALAR_STYLE;
         }
     }
-    elsif ($style eq YAML_LITERAL_SCALAR_STYLE or $style eq YAML_FOLDED_SCALAR_STYLE) {
+    elsif ($style == YAML_LITERAL_SCALAR_STYLE or $style == YAML_FOLDED_SCALAR_STYLE) {
         if ($value eq '') {
             $style = YAML_DOUBLE_QUOTED_SCALAR_STYLE;
         }
@@ -546,7 +546,7 @@ sub scalar_event {
             }
         }
     }
-    elsif ($style eq YAML_PLAIN_SCALAR_STYLE) {
+    elsif ($style == YAML_PLAIN_SCALAR_STYLE) {
         if (not length $value) {
         }
         elsif ($value =~ m/[$escape_re_without_lb]/) {
@@ -591,7 +591,7 @@ sub scalar_event {
             }
         }
     }
-    if ($style eq YAML_SINGLE_QUOTED_SCALAR_STYLE and not $info->{style}) {
+    if ($style == YAML_SINGLE_QUOTED_SCALAR_STYLE and not $info->{style}) {
         if ($value =~ tr/'// and $value !~ tr/"//) {
             $style = YAML_DOUBLE_QUOTED_SCALAR_STYLE;
         }
@@ -599,10 +599,10 @@ sub scalar_event {
 
     my $open_ended = 0;
 
-    if ($style eq YAML_PLAIN_SCALAR_STYLE) {
+    if ($style == YAML_PLAIN_SCALAR_STYLE) {
         $value =~ s/\n/\n\n/g;
     }
-    elsif ($style eq YAML_SINGLE_QUOTED_SCALAR_STYLE) {
+    elsif ($style == YAML_SINGLE_QUOTED_SCALAR_STYLE) {
         my $new_indent = $last->{indent} . (' ' x $self->indent);
         $value =~ s/(\n+)/"\n" x (1 + (length $1))/eg;
         my @lines = split m/\n/, $value, -1;
@@ -616,7 +616,7 @@ sub scalar_event {
         $value =~ s/'/''/g;
         $value = "'" . $value . "'";
     }
-    elsif ($style eq YAML_LITERAL_SCALAR_STYLE) {
+    elsif ($style == YAML_LITERAL_SCALAR_STYLE) {
         DEBUG and warn __PACKAGE__.':'.__LINE__.$".Data::Dumper->Dump([\$value], ['value']);
         my $indicators = '';
         if ($value =~ m/\A\n* +/) {
@@ -634,7 +634,7 @@ sub scalar_event {
         $value =~ s/^(?=.)/$indent/gm;
         $value = "|$indicators\n$value";
     }
-    elsif ($style eq YAML_FOLDED_SCALAR_STYLE) {
+    elsif ($style == YAML_FOLDED_SCALAR_STYLE) {
         DEBUG and warn __PACKAGE__.':'.__LINE__.$".Data::Dumper->Dump([\$value], ['value']);
         my @lines = split /\n/, $value, -1;
         DEBUG and warn __PACKAGE__.':'.__LINE__.$".Data::Dumper->Dump([\@lines], ['lines']);
@@ -676,7 +676,7 @@ sub scalar_event {
     elsif (length $value) {
         $pvalue .= $value;
     }
-    my $multiline = ($style eq YAML_LITERAL_SCALAR_STYLE or $style eq YAML_FOLDED_SCALAR_STYLE);
+    my $multiline = ($style == YAML_LITERAL_SCALAR_STYLE or $style == YAML_FOLDED_SCALAR_STYLE);
     my $newline = 0;
     if ($flow) {
         $indent = 0;
@@ -1052,7 +1052,7 @@ TODO: Currently sequences are always zero-indented.
 =item writer, set_writer
 
 Getter/setter for the writer object. By default L<YAML::PP::Writer>.
-You can pass your own writer if you want to output the resulting YAML yorself.
+You can pass your own writer if you want to output the resulting YAML yourself.
 
 =item init
 

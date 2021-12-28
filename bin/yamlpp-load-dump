@@ -4,9 +4,12 @@ use warnings;
 
 use YAML::PP;
 use YAML::PP::Dumper;
-use YAML::PP::Common qw/ PRESERVE_ORDER PRESERVE_SCALAR_STYLE PRESERVE_FLOW_STYLE /;
+use YAML::PP::Common qw/
+    PRESERVE_ORDER PRESERVE_SCALAR_STYLE PRESERVE_FLOW_STYLE PRESERVE_ALIAS
+/;
 use Encode;
 use Getopt::Long;
+Getopt::Long::Configure('bundling');
 
 GetOptions(
     'help|h' => \my $help,
@@ -19,6 +22,9 @@ GetOptions(
     'perl' => \my $perl,
     'preserve=s' => \my $preserve,
     'module|M=s' => \my $module,
+    'dump-module|D=s' => \my $dump_module,
+    'include' => \my $include,
+    'include-absolute' => \my $include_absolute,
     'yaml-version=s' => \my $yaml_version,
     'version-directive' => \my $version_directive,
 ) or usage(1);
@@ -30,6 +36,7 @@ $boolean ||= 'JSON::PP';
 $footer ||= 0;
 $indent ||= 2;
 $yaml_version ||= 1.2;
+$dump_module ||= $module;
 my @yaml_versions = split m/,/, $yaml_version;
 my @schema = ('+');
 if ($merge) {
@@ -39,14 +46,21 @@ if ($perl) {
     push @schema, 'Perl';
 }
 
+my $preserve_order = 1;
 if (defined $preserve) {
+    $preserve_order = 0;
     my @split = split m/,/, $preserve;
     $preserve = 0;
     for my $split (@split) {
         $preserve |= PRESERVE_ORDER if $split eq 'order';
+        $preserve_order = 1 if $split eq 'order';
         $preserve |= PRESERVE_SCALAR_STYLE if $split eq 'scalar';
         $preserve |= PRESERVE_FLOW_STYLE if $split eq 'flow';
+        $preserve |= PRESERVE_ALIAS if $split eq 'alias';
     }
+}
+elsif ($dump_module =~ m/JSON/) {
+    $preserve = PRESERVE_ORDER;
 }
 else {
     $preserve = 1;
@@ -70,7 +84,7 @@ else {
 }
 $yaml = decode_utf8($yaml) if $decode;
 
-my %codes = (
+my %load_modules = (
     'YAML::PP' => \&yamlpp,
     'YAML::PP::LibYAML' => \&yamlpplibyaml,
     'YAML::XS' => \&yamlxs,
@@ -78,13 +92,36 @@ my %codes = (
     'YAML::Syck' => \&yamlsyck,
     'YAML' => \&yaml,
 );
+my %dump_modules = (
+    'YAML::PP' => \&yamlpp_dump,
+    'YAML::PP::LibYAML' => \&yamlpplibyaml_dump,
+    'YAML::XS' => \&yamlxs_dump,
+    'YAML::Tiny' => \&yamltiny_dump,
+    'YAML::Syck' => \&yamlsyck_dump,
+    'YAML' => \&yaml_dump,
+    'Data::Dumper' => \&data_dumper,
+    'JSON::PP' => \&json_pp_dump,
+    'JSON::XS' => \&json_xs_dump,
+    'Cpanel::JSON::XS' => \&cpanel_json_xs_dump,
+);
 
-my $code = $codes{ $module } or die "Module '$module' not supported";
+my $code = $load_modules{ $module } or die "Module '$module' not supported for loading";
+my $dump_code = $dump_modules{ $dump_module } or die "Module '$dump_module' not supported for dumping";
 
-my $out_yaml = $code->($yaml);
+my $docs = $code->($yaml, $file);
+my $out_yaml = $dump_code->($docs);
 
 sub _yamlpp {
-    my ($class, $yaml) = @_;
+    my ($class, $yaml, $file) = @_;
+    my %args;
+    my $inc;
+    if ($include) {
+        require YAML::PP::Schema::Include;
+        $inc = YAML::PP::Schema::Include->new(
+            $include_absolute ? (allow_absolute => 1) : (),
+        );
+        push @schema, $inc;
+    }
     my $ypp = $class->new(
         schema => \@schema,
         boolean => $boolean,
@@ -96,15 +133,40 @@ sub _yamlpp {
         yaml_version => \@yaml_versions,
         version_directive => $version_directive || 0,
     );
-    my @docs = $ypp->load_string($yaml);
-    return $ypp->dump_string(@docs);
+    if ($inc) {
+        $inc->yp($ypp);
+    }
+    my @docs = $file ? $ypp->load_file($file) : $ypp->load_string($yaml);
+    return \@docs;
 }
 sub yamlpp {
-    _yamlpp('YAML::PP' => $_[0]);
+    _yamlpp('YAML::PP' => @_);
+}
+sub yamlpp_dump {
+    _yamlpp_dump('YAML::PP' => @_);
 }
 sub yamlpplibyaml {
     eval { require YAML::PP::LibYAML };
-    _yamlpp('YAML::PP::LibYAML' => $_[0]);
+    _yamlpp('YAML::PP::LibYAML' => @_);
+}
+sub yamlpplibyaml_dump {
+    eval { require YAML::PP::LibYAML };
+    _yamlpp_dump('YAML::PP::LibYAML' => @_);
+}
+sub _yamlpp_dump {
+    my ($class, $docs) = @_;
+    my $ypp = $class->new(
+        schema => \@schema,
+        boolean => $boolean,
+        preserve => $preserve,
+        indent => $indent,
+        width => $width,
+        header => $header ? 1 : 0,
+        footer => $footer ? 1 : 0,
+        yaml_version => \@yaml_versions,
+        version_directive => $version_directive || 0,
+    );
+    return $ypp->dump_string(@$docs);
 }
 
 sub yamlxs {
@@ -112,36 +174,81 @@ sub yamlxs {
     my ($yaml) = @_;
     no warnings 'once';
     local $YAML::XS::LoadBlessed = $perl;
+    my @docs = YAML::XS::Load($yaml);
+    return \@docs;
+}
+sub yamlxs_dump {
+    my ($docs) = @_;
+    eval { require YAML::XS };
+    no warnings 'once';
     local $YAML::XS::Indent = $indent;
-    my $data = YAML::XS::Load($yaml);
-    return YAML::XS::Dump($data);
+    return YAML::XS::Dump(@$docs);
 }
 sub yamlsyck {
     eval { require YAML::Syck };
     my ($yaml) = @_;
     no warnings 'once';
-    local $YAML::Syck::Headless = 1 unless $header;
     local $YAML::Syck::LoadBlessed = $perl;
     local $YAML::Syck::ImplicitTyping = 1;
     local $YAML::Syck::ImplicitUnicode = 1;
-    my $data = YAML::Syck::Load($yaml);
-    return YAML::Syck::Dump($data);
+    my @docs = YAML::Syck::Load($yaml);
+    return \@docs;
+}
+sub yamlsyck_dump {
+    eval { require YAML::Syck };
+    my ($docs) = @_;
+    no warnings 'once';
+    local $YAML::Syck::Headless = 1 unless $header;
+    local $YAML::Syck::ImplicitTyping = 1;
+    local $YAML::Syck::ImplicitUnicode = 1;
+    return YAML::Syck::Dump(@$docs);
 }
 sub yaml {
     eval { require YAML };
     no warnings 'once';
     local $YAML::LoadBlessed = $perl;
+    my ($yaml) = @_;
+    my @docs = YAML::Load($yaml);
+    return \@docs;
+}
+sub yaml_dump {
+    my ($docs) = @_;
+    eval { require YAML };
+    no warnings 'once';
     local $YAML::UseHeader = $header ? 1 : 0;
     local $YAML::Indent = $indent;
-    my ($yaml) = @_;
-    my $data = YAML::Load($yaml);
-    return YAML::Dump($data);
+    return YAML::Dump(@$docs);
 }
 sub yamltiny {
     eval { require YAML::Tiny };
     my ($yaml) = @_;
-    my $data = YAML::Tiny::Load($yaml);
-    return YAML::Tiny::Dump($data);
+    my @docs = YAML::Tiny::Load($yaml);
+    return \@docs;
+}
+sub yamltiny_dump {
+    eval { require YAML::Tiny };
+    my ($docs) = @_;
+    return YAML::Tiny::Dump(@$docs);
+}
+sub data_dumper {
+    my ($docs) = @_;
+    local $Data::Dumper::Useqq = 1;
+    local $Data::Dumper::Sortkeys = 1 unless $preserve_order;
+    my $out = '';
+    $out .= Data::Dumper->Dump([$docs->[ $_ ]], ["doc$_"]) for 0 ..$#$docs;
+    return $out;
+}
+sub json_pp_dump { require JSON::PP; _json_dump('JSON::PP', @_) }
+sub json_xs_dump { require JSON::XS; _json_dump('JSON::XS', @_) }
+sub cpanel_json_xs_dump { require Cpanel::JSON::XS; _json_dump('Cpanel::JSON::XS', @_) }
+sub _json_dump {
+    my ($class, $docs) = @_;
+    my $coder = $class->new->ascii->pretty->allow_nonref;
+    $coder = $coder->indent_length($indent) if $coder->can('indent_length');
+    $coder = $coder->canonical unless $preserve_order;
+    my $out = '';
+    $out .= $coder->encode($docs->[ $_ ]) for 0 ..$#$docs;
+    return $out;
 }
 
 if ($decode) {
@@ -168,12 +275,17 @@ Options:
     --merge               Enable loading merge keys '<<'
     --perl                Enable loading perl types and objects (use only
                           on trusted input!)
-    --preserve            Comma separated: 'order', 'scalar', 'flow'. By
-                          default all things are preserved
+    --preserve            Comma separated: 'order', 'scalar', 'flow', 'alias'.
+                          By default all things are preserved
     --module -M           YAML::PP (default), YAML, YAML::PP::LibYAML,
                           YAML::Syck, YAML::Tiny, YAML::XS
+    --dump-module -D      All of the above plus Data::Dumper, JSON::PP,
+                          JSON::XS, Cpanel::JSON::XS
     --yaml-version=       '1.2' (default), '1.1', '1.2,1.1', '1.1,1.2'
     --version-directive   Print '%YAML <version>'
+    --include             Enable Include Schema
+    --include-absolute    Allow absolute paths and ../../../ in includes (use
+                          only on trusted input!)
 EOM
     exit $rc;
 }

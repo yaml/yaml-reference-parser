@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package YAML::PP::Dumper;
 
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.031'; # VERSION
 
 use Scalar::Util qw/ blessed refaddr reftype /;
 use YAML::PP;
@@ -130,9 +130,35 @@ sub dump_node {
         if ($seen->{ $refaddr } and $seen->{ $refaddr } > 1) {
             my $anchor = $self->{anchors}->{ $refaddr };
             unless (defined $anchor) {
-                my $num = ++$self->{anchor_num};
-                $self->{anchors}->{ $refaddr } = $num;
-                $node->{anchor} = $num;
+                if ($self->representer->preserve_alias) {
+                    if (ref $node->{value} eq 'YAML::PP::Preserve::Scalar') {
+                        if (defined $node->{value}->alias) {
+                            $node->{anchor} = $node->{value}->alias;
+                            $self->{anchors}->{ $refaddr } = $node->{value}->alias;
+                        }
+                    }
+                    elsif (reftype $node->{value} eq 'HASH') {
+                        if (my $tied = tied %{ $node->{value} } ) {
+                            if (defined $tied->{alias}) {
+                                $node->{anchor} = $tied->{alias};
+                                $self->{anchors}->{ $refaddr } = $node->{anchor};
+                            }
+                        }
+                    }
+                    elsif (reftype $node->{value} eq 'ARRAY') {
+                        if (my $tied = tied @{ $node->{value} } ) {
+                            if (defined $tied->{alias}) {
+                                $node->{anchor} = $tied->{alias};
+                                $self->{anchors}->{ $refaddr } = $node->{anchor};
+                            }
+                        }
+                    }
+                }
+                unless (defined $node->{anchor}) {
+                    my $num = ++$self->{anchor_num};
+                    $self->{anchors}->{ $refaddr } = $num;
+                    $node->{anchor} = $num;
+                }
             }
             else {
                 $node->{value} = $anchor;

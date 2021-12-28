@@ -86,3 +86,25 @@ C<EXE_FILES: bin/json_pp>
 
 =back
 
+=head2 Tue Dec 28 01:34:09 2021: C<Module> L<YAML::PP|YAML::PP>
+
+=over 4
+
+=item *
+
+C<installed into: /home/ingy/src/yaml/yaml-reference-parser/perl/ext-perl/lib/perl5>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 0.031>
+
+=item *
+
+C<EXE_FILES: bin/yamlpp-events bin/yamlpp-highlight bin/yamlpp-load bin/yamlpp-load-dump bin/yamlpp-parse-emit>
+
+=back
+

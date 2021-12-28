@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package YAML::PP::Highlight;
 
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.031'; # VERSION
 
 our @EXPORT_OK = qw/ Dump /;
 
@@ -59,7 +59,9 @@ my %ansicolors = (
 );
 
 sub ansicolored {
-    my ($class, $tokens) = @_;
+    my ($class, $tokens, %args) = @_;
+    my $expand_tabs = $args{expand_tabs};
+    $expand_tabs = 1 unless defined $expand_tabs;
     require Term::ANSIColor;
 
     local $Term::ANSIColor::EACHLINE = "\n";
@@ -80,6 +82,10 @@ sub ansicolored {
         $highlighted .= $str;
     }
 
+    if ($expand_tabs) {
+        # Tabs can't be displayed with ansicolors
+        $highlighted =~ s/\t/' ' x 8/eg;
+    }
     $ansi .= $highlighted;
     return $ansi;
 }

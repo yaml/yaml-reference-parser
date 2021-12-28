@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package YAML::PP::Representer;
 
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.031'; # VERSION
 
 use Scalar::Util qw/ reftype blessed refaddr /;
 
@@ -13,15 +13,15 @@ use YAML::PP::Common qw/
     YAML_LITERAL_SCALAR_STYLE YAML_FOLDED_SCALAR_STYLE
     YAML_FLOW_SEQUENCE_STYLE YAML_FLOW_MAPPING_STYLE
     YAML_BLOCK_MAPPING_STYLE YAML_BLOCK_SEQUENCE_STYLE
-    PRESERVE_ALL PRESERVE_ORDER PRESERVE_SCALAR_STYLE PRESERVE_FLOW_STYLE
+    PRESERVE_ORDER PRESERVE_SCALAR_STYLE PRESERVE_FLOW_STYLE PRESERVE_ALIAS
 /;
 use B;
 
 sub new {
     my ($class, %args) = @_;
     my $preserve = delete $args{preserve} || 0;
-    if ($preserve == PRESERVE_ALL) {
-        $preserve = PRESERVE_ORDER | PRESERVE_SCALAR_STYLE | PRESERVE_FLOW_STYLE;
+    if ($preserve == 1) {
+        $preserve = PRESERVE_ORDER | PRESERVE_SCALAR_STYLE | PRESERVE_FLOW_STYLE | PRESERVE_ALIAS;
     }
     my $self = bless {
         schema => delete $args{schema},
@@ -46,14 +46,17 @@ sub schema { return $_[0]->{schema} }
 sub preserve_order { return $_[0]->{preserve} & PRESERVE_ORDER }
 sub preserve_scalar_style { return $_[0]->{preserve} & PRESERVE_SCALAR_STYLE }
 sub preserve_flow_style { return $_[0]->{preserve} & PRESERVE_FLOW_STYLE }
+sub preserve_alias { return $_[0]->{preserve} & PRESERVE_ALIAS }
 
 sub represent_node {
     my ($self, $node) = @_;
 
-    if ($self->preserve_scalar_style) {
+    my $preserve_alias = $self->preserve_alias;
+    my $preserve_style = $self->preserve_scalar_style;
+    if ($preserve_style or $preserve_alias) {
         if (ref $node->{value} eq 'YAML::PP::Preserve::Scalar') {
             my $value = $node->{value}->value;
-            if ($node->{value}->style != YAML_FOLDED_SCALAR_STYLE) {
+            if ($preserve_style and $node->{value}->style != YAML_FOLDED_SCALAR_STYLE) {
                 $node->{style} = $node->{value}->style;
             }
 #            $node->{tag} = $node->{value}->tag;

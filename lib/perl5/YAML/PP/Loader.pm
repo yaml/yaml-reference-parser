@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package YAML::PP::Loader;
 
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.031'; # VERSION
 
 use YAML::PP::Parser;
 use YAML::PP::Constructor;
@@ -15,6 +15,7 @@ sub new {
     my $cyclic_refs = delete $args{cyclic_refs} || 'allow';
     my $default_yaml_version = delete $args{default_yaml_version} || '1.2';
     my $preserve = delete $args{preserve};
+    my $duplicate_keys = delete $args{duplicate_keys};
     my $schemas = delete $args{schemas};
     $schemas ||= {
         '1.2' => YAML::PP->default_schema(
@@ -27,6 +28,7 @@ sub new {
         cyclic_refs => $cyclic_refs,
         default_yaml_version => $default_yaml_version,
         preserve => $preserve,
+        duplicate_keys => $duplicate_keys,
     );
     my $parser = delete $args{parser};
     unless ($parser) {

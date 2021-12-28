@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package YAML::PP::Schema::JSON;
 
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.031'; # VERSION
 
 use base 'Exporter';
 our @EXPORT_OK = qw/
@@ -199,7 +199,7 @@ strings have to be quoted.
 Here you can see all Schemas and examples implemented by YAML::PP:
 L<https://perlpunk.github.io/YAML-PP-p5/schemas.html>
 
-Official Schwma: L<https://yaml.org/spec/1.2/spec.html#id2803231>
+Official Schema: L<https://yaml.org/spec/1.2/spec.html#id2803231>
 
 =head1 CONFIGURATION
 

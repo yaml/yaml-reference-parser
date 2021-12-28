@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package YAML::PP::Schema::Core;
 
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.031'; # VERSION
 
 use YAML::PP::Schema::JSON qw/
     represent_int represent_float represent_literal represent_bool
@@ -127,7 +127,7 @@ This schema is the official recommended Core Schema for YAML 1.2.
 It loads additional values to the JSON schema as special types, for
 example C<TRUE> and C<True> additional to C<true>.
 
-Official Schwma:
+Official Schema:
 L<https://yaml.org/spec/1.2/spec.html#id2804923>
 
 Here you can see all Schemas and examples implemented by YAML::PP:

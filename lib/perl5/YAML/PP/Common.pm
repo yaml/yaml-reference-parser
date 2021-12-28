@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package YAML::PP::Common;
 
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.031'; # VERSION
 
 use base 'Exporter';
 
@@ -19,6 +19,7 @@ our @EXPORT_OK = qw/
     YAML_BLOCK_MAPPING_STYLE YAML_FLOW_MAPPING_STYLE
 
     PRESERVE_ALL PRESERVE_ORDER PRESERVE_SCALAR_STYLE PRESERVE_FLOW_STYLE
+    PRESERVE_ALIAS
 /;
 
 use constant {
@@ -38,10 +39,12 @@ use constant {
     YAML_BLOCK_MAPPING_STYLE => 1,
     YAML_FLOW_MAPPING_STYLE  => 2,
 
-    PRESERVE_ALL          => 1,
     PRESERVE_ORDER        => 2,
     PRESERVE_SCALAR_STYLE => 4,
     PRESERVE_FLOW_STYLE   => 8,
+    PRESERVE_ALIAS        => 16,
+
+    PRESERVE_ALL          => 31,
 };
 
 my %scalar_style_to_string = (
@@ -221,7 +224,7 @@ YAML::PP::Common - Constants and common functions
 
 =head1 DESCRIPTION
 
-=head1 FUNCTONS
+=head1 FUNCTIONS
 
 =over
 

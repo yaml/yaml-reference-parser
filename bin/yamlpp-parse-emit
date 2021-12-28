@@ -10,6 +10,7 @@ use YAML::PP::Writer;
 use Data::Dumper;
 use Encode;
 use Getopt::Long;
+Getopt::Long::Configure('bundling');
 GetOptions(
     'help|h' => \my $help,
     'indent=i' => \my $indent,

@@ -4,6 +4,16 @@ use warnings;
 
 use YAML::PP::Highlight;
 use Encode;
+use Getopt::Long;
+
+GetOptions(
+    'help|h' => \my $help,
+    'expand-tabs|et!' => \my $expand_tabs,
+) or usage(1);
+
+$expand_tabs = 1 unless defined $expand_tabs;
+
+usage(0) if $help;
 
 my ($file) = @ARGV;
 my $yaml;
@@ -21,8 +31,24 @@ if (defined $file) {
 else {
     ($error, $tokens) = YAML::PP::Parser->yaml_to_tokens( string => $yaml );
 }
-my $highlighted = YAML::PP::Highlight->ansicolored($tokens);
+my $highlighted = YAML::PP::Highlight->ansicolored($tokens, expand_tabs => $expand_tabs);
 print encode_utf8 $highlighted;
 if ($error) {
     die $error;
 }
+
+sub usage {
+    my ($rc) = @_;
+    print <<"EOM";
+Usage:
+
+    $0 [options] < file
+    $0 [options] file
+
+Options:
+    --expand-tabs    --et         Expand tabs to 8 spaces (default true)
+    --no-expand-tabs --no-et      Don't expand tabs
+EOM
+    exit $rc;
+}
+

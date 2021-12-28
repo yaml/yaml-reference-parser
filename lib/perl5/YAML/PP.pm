@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package YAML::PP;
 
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.031'; # VERSION
 
 use YAML::PP::Schema;
 use YAML::PP::Schema::JSON;
@@ -30,6 +30,7 @@ sub new {
     my $writer = delete $args{writer};
     my $header = delete $args{header};
     my $footer = delete $args{footer};
+    my $duplicate_keys = delete $args{duplicate_keys};
     my $yaml_version = $class->_arg_yaml_version(delete $args{yaml_version});
     my $default_yaml_version = $yaml_version->[0];
     my $version_directive = delete $args{version_directive};
@@ -67,6 +68,7 @@ sub new {
         parser => $parser,
         default_yaml_version => $default_yaml_version,
         preserve => $preserve,
+        duplicate_keys => $duplicate_keys,
     );
     my $dumper = YAML::PP::Dumper->new(
         schema => $default_schema,
@@ -204,6 +206,7 @@ sub preserved_mapping {
     %$data = %$hash;
     my $t = tied %$data;
     $t->{style} = $args{style};
+    $t->{alias} = $args{alias};
     return $data;
 }
 
@@ -214,6 +217,7 @@ sub preserved_sequence {
     push @$data, @$array;
     my $t = tied @$data;
     $t->{style} = $args{style};
+    $t->{alias} = $args{alias};
     return $data;
 }
 
@@ -221,12 +225,13 @@ package YAML::PP::Preserve::Hash;
 # experimental
 use Tie::Hash;
 use base qw/ Tie::StdHash /;
+use Scalar::Util qw/ reftype blessed /;
 
 sub TIEHASH {
-    my ($class) = @_;
+    my ($class, %args) = @_;
     my $self = bless {
-        keys => [],
-        data => {},
+        keys => [keys %args],
+        data => { %args },
     }, $class;
 }
 
@@ -235,6 +240,14 @@ sub STORE {
     my $keys = $self->{keys};
     unless (exists $self->{data}->{ $key }) {
         push @$keys, $key;
+    }
+    if (ref $val and not blessed($val)) {
+        if (reftype($val) eq 'HASH' and not tied %$val) {
+            tie %$val, 'YAML::PP::Preserve::Hash', %$val;
+        }
+        elsif (reftype($val) eq 'ARRAY' and not tied @$val) {
+            tie @$val, 'YAML::PP::Preserve::Array', @$val;
+        }
     }
     $self->{data}->{ $key } = $val;
 }
@@ -286,11 +299,12 @@ package YAML::PP::Preserve::Array;
 # experimental
 use Tie::Array;
 use base qw/ Tie::StdArray /;
+use Scalar::Util qw/ reftype blessed /;
 
 sub TIEARRAY {
-    my ($class) = @_;
+    my ($class, @items) = @_;
     my $self = bless {
-        data => [],
+        data => [@items],
     }, $class;
     return $self;
 }
@@ -304,13 +318,27 @@ sub FETCHSIZE {
     return $#{ $self->{data} } + 1;
 }
 
+sub _preserve {
+    my ($val) = @_;
+    if (ref $val and not blessed($val)) {
+        if (reftype($val) eq 'HASH' and not tied %$val) {
+            tie %$val, 'YAML::PP::Preserve::Hash', %$val;
+        }
+        elsif (reftype($val) eq 'ARRAY' and not tied @$val) {
+            tie @$val, 'YAML::PP::Preserve::Array', @$val;
+        }
+    }
+    return $val;
+}
+
 sub STORE {
     my ($self, $i, $val) = @_;
+    _preserve($val);
     $self->{data}->[ $i ] = $val;
 }
 sub PUSH {
     my ($self, @args) = @_;
-    push @{ $self->{data} }, @args;
+    push @{ $self->{data} }, map { _preserve $_ } @args;
 }
 sub STORESIZE {
     my ($self, $i) = @_;
@@ -334,11 +362,11 @@ sub SHIFT {
 }
 sub UNSHIFT {
     my ($self, @args) = @_;
-    unshift @{ $self->{data} }, @args;
+    unshift @{ $self->{data} }, map { _preserve $_ } @args;
 }
 sub SPLICE {
     my ($self, $offset, $length, @args) = @_;
-    splice @{ $self->{data} }, $offset, $length, @args;
+    splice @{ $self->{data} }, $offset, $length, map { _preserve $_ } @args;
 }
 sub EXTEND {}
 
@@ -360,7 +388,8 @@ sub new {
 }
 sub value { $_[0]->{value} }
 sub tag { $_[0]->{tag} }
-sub style { $_[0]->{style} }
+sub style { $_[0]->{style} || 0 }
+sub alias { $_[0]->{alias} }
 
 1;
 
@@ -512,6 +541,8 @@ Options:
 
 Values: C<perl> (currently default), C<JSON::PP>, C<boolean>
 
+This option is for loading and dumping.
+
 Note that when dumping, only the chosen boolean style will be recognized.
 So if you choose C<JSON::PP>, C<boolean> objects will not be recognized
 as booleans and will be dumped as ordinary objects (if you enable the
@@ -520,6 +551,8 @@ Perl schema).
 =item schema
 
 Default: C<['Core']>
+
+This option is for loading and dumping.
 
 Array reference. Here you can define what schema to use.
 Supported standard Schemas are: C<Failsafe>, C<JSON>, C<Core>, C<YAML1_1>.
@@ -533,6 +566,8 @@ Additionally you can add further schemas, for example C<Merge>.
 
 Default: 'allow' but will be switched to fatal in the future for safety!
 
+This option is for loading only.
+
 Defines what to do when a cyclic reference is detected when loading.
 
     # fatal  - die
@@ -540,9 +575,35 @@ Defines what to do when a cyclic reference is detected when loading.
     # ignore - replace with undef
     # allow  - Default
 
+=item duplicate_keys
+
+Default: 0
+
+Since version 0.027
+
+This option is for loading.
+
+The YAML Spec says duplicate mapping keys should be forbidden.
+
+When set to true, duplicate keys in mappings are allowed (and will overwrite
+the previous key).
+
+When set to false, duplicate keys will result in an error when loading.
+
+This is especially useful when you have a longer mapping and don't see
+the duplicate key in your editor:
+
+    ---
+    a: 1
+    b: 2
+    # .............
+    a: 23 # error
+
 =item indent
 
 Default: 2
+
+This option is for dumping.
 
 Use that many spaces for indenting
 
@@ -551,6 +612,8 @@ Use that many spaces for indenting
 Since version 0.025
 
 Default: 80
+
+This option is for dumping.
 
 Maximum columns when dumping.
 
@@ -562,17 +625,23 @@ in the future it will be used also for wrapping long strings.
 
 Default: 1
 
-Print document heaader C<--->
+This option is for dumping.
+
+Print document header C<--->
 
 =item footer
 
 Default: 0
+
+This option is for dumping.
 
 Print document footer C<...>
 
 =item yaml_version
 
 Since version 0.020
+
+This option is for loading and dumping.
 
 Default: C<1.2>
 
@@ -620,6 +689,8 @@ schema.
 
 Since version 0.020
 
+This option is for dumping.
+
 Default: 0
 
 Print Version Directive C<%YAML 1.2> (or C<%YAML 1.1>) on top of each YAML
@@ -630,6 +701,8 @@ document. It will use the first version specified in the C<yaml_version> option.
 Since version 0.021
 
 Default: false
+
+This option is for loading and dumping.
 
 Preserving scalar styles is still experimental.
 
@@ -643,6 +716,9 @@ Preserving scalar styles is still experimental.
 
     # Preserve block/flow style (since 0.024)
     my $yp = YAML::PP->new( preserve => PRESERVE_FLOW_STYLE );
+
+    # Preserve alias names (since 0.027)
+    my $yp = YAML::PP->new( preserve => PRESERVE_ALIAS );
 
     # Combine, e.g. preserve order and scalar style
     my $yp = YAML::PP->new( preserve => PRESERVE_ORDER | PRESERVE_SCALAR_STYLE );
@@ -661,20 +737,38 @@ If you load the following input:
     - |
       literal
     ---
-    block mapping:
+    block mapping: &alias
       flow sequence: [a, b]
+    same mapping: *alias
     flow mapping: {a: b}
+
 
 with this code:
 
     my $yp = YAML::PP->new(
-        preserve => PRESERVE_ORDER | PRESERVE_SCALAR_STYLE | PRESERVE_FLOW_STYLE
+        preserve => PRESERVE_ORDER | PRESERVE_SCALAR_STYLE
+                    | PRESERVE_FLOW_STYLE | PRESERVE_ALIAS
     );
     my ($hash, $styles, $flow) = $yp->load_file($file);
     $yp->dump_file($hash, $styles, $flow);
 
 Then dumping it will return the same output.
 Only folded block scalars '>' cannot preserve the style yet.
+
+Note that YAML allows repeated definition of anchors. They cannot be preserved
+with YAML::PP right now. Example:
+
+    ---
+    - &seq [a]
+    - *seq
+    - &seq [b]
+    - *seq
+
+Because the data could be shuffled before dumping again, the anchor definition
+could be broken. In this case repeated anchor names will be discarded when
+loading and dumped with numeric anchors like usual.
+
+Implementation:
 
 When loading, hashes will be tied to an internal class
 (C<YAML::PP::Preserve::Hash>) that keeps the key order.
@@ -689,8 +783,8 @@ a scalar, the object will be replaced by a simple scalar.
 You can also pass C<1> as a value. In this case all preserving options will be
 enabled, also if there are new options added in the future.
 
-There are also methods to craete preserved nodes from scratch. See the
-C<preserved_(scalar|mapping|sequence> L<"METHODS"> below.
+There are also methods to create preserved nodes from scratch. See the
+C<preserved_(scalar|mapping|sequence)> L<"METHODS"> below.
 
 =back
 
@@ -757,7 +851,7 @@ You can define a certain scalar style when dumping data.
 Figuring out the best style is a hard task and practically impossible to get
 it right for all cases. It's also a matter of taste.
 
-    use YAML::PP::Common qw/ PRESERVE_SCALAR_STYLE /;
+    use YAML::PP::Common qw/ PRESERVE_SCALAR_STYLE YAML_LITERAL_SCALAR_STYLE /;
     my $yp = YAML::PP->new(
         preserve => PRESERVE_SCALAR_STYLE,
     );
@@ -785,7 +879,10 @@ style instead of block style.
 If you add C<PRESERVE_ORDER> to the C<preserve> option, it will also keep the
 order of the keys in a hash.
 
-    use YAML::PP::Common qw/ PRESERVE_ORDER PRESERVE_FLOW_STYLE /;
+    use YAML::PP::Common qw/
+        PRESERVE_ORDER PRESERVE_FLOW_STYLE
+        YAML_FLOW_MAPPING_STYLE YAML_FLOW_SEQUENCE_STYLE
+    /;
     my $yp = YAML::PP->new(
         preserve => PRESERVE_FLOW_STYLE | PRESERVE_ORDER
     );
@@ -993,6 +1090,8 @@ Still TODO:
 
 =item Implicit mapping in flow style sequences
 
+This is supported since 0.029 (except some not relevant cases):
+
     ---
     [ a, b, c: d ]
     # equals
@@ -1123,7 +1222,7 @@ they will be dumped with double quotes.
 It will recognize JSON::PP::Boolean and boolean.pm objects and dump them
 correctly.
 
-Numbers which also have a PV flag will be recognized as numbers and not
+Numbers which also have a C<PV> flag will be recognized as numbers and not
 as strings:
 
     my $int = 23;
@@ -1194,7 +1293,7 @@ overview of which frameworks support which YAML features:
 
 L<https://github.com/yaml/yaml-test-suite>
 
-It contains about 230 test cases and expected parsing events and more.
+It contains almost 400 test cases and expected parsing events and more.
 There will be more tests coming. This test suite allows you to write parsers
 without turning the examples from the Specification into tests yourself.
 Also the examples aren't completely covering all cases - the test suite
@@ -1234,10 +1333,7 @@ and created a matrix view.
 
 L<https://github.com/perlpunk/yaml-test-matrix>
 
-You can find the latest build at L<https://matrix.yaml.io>
-
-As of this writing, the test matrix only contains valid test cases.
-Invalid ones will be added.
+You can find the latest build at L<https://matrix.yaml.info>
 
 =head1 CONTRIBUTORS
 
