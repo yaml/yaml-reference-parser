@@ -1,5 +1,5 @@
 ROOT := $(shell cd ../..; pwd)
-BASE := $(ROOT)/1.3
+BASE := $(ROOT)/parser-1.2
 PARSER_LANG := javascript
 BIN := node
 GRAMMAR :=
@@ -15,12 +15,16 @@ ALL_JS := \
 
 BUILD_DEPS := \
     $(ROOT)/node_modules \
+    build-coffee \
     $(ALL_JS) \
     $(ROOT)/test/testml/src/node/lib \
 
 
 include $(ROOT)/.common.mk
 
+
+build-coffee:
+	$(MAKE) -C $(BASE)/coffeescript build
 
 bin/%: $(BASE)/coffeescript/bin/%
 	echo '#!/usr/bin/env node' > $@

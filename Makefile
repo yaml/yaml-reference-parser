@@ -2,15 +2,15 @@ SHELL := bash
 
 ROOT := $(shell pwd)
 
-CODE_1_3 := 1.3
-CODE_1_2 := 1.2
+PARSER_1_3 := parser-1.3
+PARSER_1_2 := parser-1.2
 
 ALL := \
-    $(CODE_1_3) \
-    $(CODE_1_2) \
+    $(PARSER_1_3) \
+    $(PARSER_1_2) \
 
-ALL_TEST := $(ALL:%=test-%)
-ALL_CLEAN := $(ALL:%=clean-%)
+ALL_TEST := $(ALL:parser-%=test-%)
+ALL_CLEAN := $(ALL:parser-%=clean-%)
 
 default:
 	@echo $(ALL_TEST)
@@ -20,13 +20,13 @@ test: test-1.3
 test-all: $(ALL_TEST)
 
 $(ALL_TEST):
-	$(MAKE) -C $(@:test-%=%) test TRACE=$(TRACE) DEBUG=$(DEBUG)
+	$(MAKE) -C $(@:test-%=parser-%) test TRACE=$(TRACE) DEBUG=$(DEBUG)
 
 clean: $(ALL_CLEAN)
 	rm -fr node_modules
 
 $(ALL_CLEAN):
-	$(MAKE) -C $(@:clean-%=%) clean
+	$(MAKE) -C $(@:clean-%=parser-%) clean
 
 node_modules:
 	git branch --track $@ origin/$@ 2>/dev/null || true

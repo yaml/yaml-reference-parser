@@ -8,7 +8,7 @@ endif
 ifeq (,$(BASE))
     $(error BASE not defined)
 endif
-BASE12 := $(ROOT)/1.2
+BASE12 := $(ROOT)/parser-1.2
 
 LOCAL_MAKE := $(ROOT)/.git/local.mk
 ifneq (,$(wildcard $(LOCAL_MAKE)))
