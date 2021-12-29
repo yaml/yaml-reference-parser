@@ -10,12 +10,12 @@ DEBUG = Boolean ENV.DEBUG
 TRACE = Boolean ENV.TRACE
 STATS = Boolean ENV.STATS
 
-global.Parser = class Parser extends Grammar
+module.exports = global.Parser = class Parser extends Grammar
 
   stats:
     calls: {}
 
-  constructor: (receiver)->
+  constructor: ({receiver})->
     super()
     receiver.parser = @
     @receiver = receiver

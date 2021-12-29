@@ -8,8 +8,7 @@ module.exports =
 class TestMLBridge extends TestML.Bridge
 
   parse: (yaml, expect_error=null)->
-    parser = new Parser
-      receiver: new TestReceiver
+    parser = new Parser(new TestReceiver)
 
     error = ''
     try

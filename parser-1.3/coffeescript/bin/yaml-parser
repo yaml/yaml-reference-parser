@@ -8,7 +8,8 @@ events = false
 
 main = (yaml=file_read('-'))->
 
-  parser = new Parser(new TestReceiver)
+  parser = new Parser
+    receiver: new TestReceiver
 
   pass = true
   start = timer()

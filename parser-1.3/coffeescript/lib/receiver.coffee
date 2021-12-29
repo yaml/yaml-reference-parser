@@ -31,7 +31,7 @@ alias_event = (name)->
 cache = (text)->
   text: text
 
-global.Receiver = class Receiver
+module.exports = global.Receiver = class Receiver
   constructor: ->
     @event = []
     @cache = []

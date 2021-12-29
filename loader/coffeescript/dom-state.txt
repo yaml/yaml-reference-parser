@@ -1,0 +1,157 @@
+---
+name: Document
+explicit: true
+version: null
+node:
+  name: Sequence
+  anchor: null
+  tag: tag:clarkevans.com,2002:shape
+  flow: false
+  value:
+    - name: Mapping
+      anchor: null
+      tag: tag:clarkevans.com,2002:circle
+      flow: false
+      value:
+        - key:
+            name: Scalar
+            anchor: null
+            tag: null
+            style: plain
+            value: center
+          val:
+            &a1
+            name: Mapping
+            anchor: ORIGIN
+            tag: null
+            flow: true
+            value:
+              - key:
+                  name: Scalar
+                  anchor: null
+                  tag: null
+                  style: plain
+                  value: x
+                val:
+                  name: Scalar
+                  anchor: null
+                  tag: null
+                  style: plain
+                  value: "73"
+              - key:
+                  name: Scalar
+                  anchor: null
+                  tag: null
+                  style: plain
+                  value: y
+                val:
+                  name: Scalar
+                  anchor: null
+                  tag: null
+                  style: plain
+                  value: "129"
+        - key:
+            name: Scalar
+            anchor: null
+            tag: null
+            style: plain
+            value: radius
+          val:
+            name: Scalar
+            anchor: null
+            tag: null
+            style: plain
+            value: "7"
+    - name: Mapping
+      anchor: null
+      tag: tag:clarkevans.com,2002:line
+      flow: false
+      value:
+        - key:
+            name: Scalar
+            anchor: null
+            tag: null
+            style: plain
+            value: start
+          val:
+            name: Alias
+            value: ORIGIN
+        - key:
+            name: Scalar
+            anchor: null
+            tag: null
+            style: plain
+            value: finish
+          val:
+            name: Mapping
+            anchor: null
+            tag: null
+            flow: true
+            value:
+              - key:
+                  name: Scalar
+                  anchor: null
+                  tag: null
+                  style: plain
+                  value: x
+                val:
+                  name: Scalar
+                  anchor: null
+                  tag: null
+                  style: plain
+                  value: "89"
+              - key:
+                  name: Scalar
+                  anchor: null
+                  tag: null
+                  style: plain
+                  value: y
+                val:
+                  name: Scalar
+                  anchor: null
+                  tag: null
+                  style: plain
+                  value: "102"
+    - name: Mapping
+      anchor: null
+      tag: tag:clarkevans.com,2002:label
+      flow: false
+      value:
+        - key:
+            name: Scalar
+            anchor: null
+            tag: null
+            style: plain
+            value: start
+          val:
+            name: Alias
+            value: ORIGIN
+        - key:
+            name: Scalar
+            anchor: null
+            tag: null
+            style: plain
+            value: color
+          val:
+            name: Scalar
+            anchor: null
+            tag: null
+            style: plain
+            value: "0xFFEEBB"
+        - key:
+            name: Scalar
+            anchor: null
+            tag: null
+            style: plain
+            value: text
+          val:
+            name: Scalar
+            anchor: null
+            tag: null
+            style: plain
+            value: Pretty vector drawing.
+lookup:
+  ORIGIN: *a1
+...
+
+make: *** [Makefile:14: test] Error 1

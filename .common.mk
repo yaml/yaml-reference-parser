@@ -42,7 +42,7 @@ TEST_DEPS ?= \
     $(ROOT)/test/testml \
     $(ROOT)/test/suite \
 
-test := test/*.tml
+test ?= test/*.tml
 
 .DELETE_ON_ERROR:
 
