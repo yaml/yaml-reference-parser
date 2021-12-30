@@ -1,7 +1,6 @@
 require '../../../test/testml/src/coffee/lib/testml/bridge'
 {loader} = require 'yaml-reference'
 
-module.exports =
 class TestMLBridge extends TestML.Bridge
 
   load: (yaml, schema)->
@@ -22,3 +21,5 @@ class TestMLBridge extends TestML.Bridge
       return new Schema
 
     throw "Can't get schema '#{name}'"
+
+module.exports = TestMLBridge
