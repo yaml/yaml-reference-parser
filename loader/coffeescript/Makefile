@@ -6,9 +6,4 @@ GRAMMAR :=
 
 export NODE_PATH := $(ROOT)/parser-1.3/coffeescript/lib:$(BASE)/lib
 
-# include $(ROOT)/.common.mk
-
-test := test/pass.t
-
-test::
-	coffee test.coffee
+include $(ROOT)/.common.mk

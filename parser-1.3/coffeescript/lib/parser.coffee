@@ -10,13 +10,15 @@ DEBUG = Boolean ENV.DEBUG
 TRACE = Boolean ENV.TRACE
 STATS = Boolean ENV.STATS
 
-module.exports = global.Parser = class Parser extends Grammar
+global.Parser = class Parser extends Grammar
 
   stats:
     calls: {}
 
-  constructor: ({receiver})->
+  constructor: ({receiver, composer, @reader})->
     super()
+    if composer? and not receiver?
+      receiver = composer
     receiver.parser = @
     @receiver = receiver
     @pos = 0
@@ -32,6 +34,8 @@ module.exports = global.Parser = class Parser extends Grammar
       @trace_info = ['', '', '']
 
   parse: (@input)->
+    @input ?= @reader.read()
+
     @input += "\n" unless \
       @input.length == 0 or
       @input.endsWith("\n")
@@ -568,5 +572,7 @@ module.exports = global.Parser = class Parser extends Grammar
     if line
       warn sprintf "%5d %6d %s",
         ++@trace_line, count, line
+
+module.exports = {Parser}
 
 # vim: sw=2:

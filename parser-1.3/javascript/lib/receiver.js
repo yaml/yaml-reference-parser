@@ -78,7 +78,7 @@
     };
   };
 
-  global.Receiver = Receiver = (function() {
+  module.exports = global.Receiver = Receiver = (function() {
     var end1, end2, hex, hex2, hex4, hex8, unescapes;
 
     class Receiver {

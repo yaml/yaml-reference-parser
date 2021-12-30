@@ -21,8 +21,12 @@
     var make;
 
     class Parser extends Grammar {
-      constructor(receiver) {
+      constructor({receiver, composer, reader}) {
         super();
+        this.reader = reader;
+        if ((composer != null) && (receiver == null)) {
+          receiver = composer;
+        }
         receiver.parser = this;
         this.receiver = receiver;
         this.pos = 0;
@@ -41,6 +45,9 @@
       parse(input1) {
         var err, ok;
         this.input = input1;
+        if (this.input == null) {
+          this.input = this.reader.read();
+        }
         if (!(this.input.length === 0 || this.input.endsWith("\n"))) {
           this.input += "\n";
         }
@@ -724,6 +731,8 @@
     return Parser;
 
   }).call(this);
+
+  module.exports = {Parser};
 
   // vim: sw=2:
 

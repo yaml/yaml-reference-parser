@@ -1,6 +1,15 @@
 require 'ingy-prelude'
 
+global.print = say
+global.dump = DUMP
+
+{Loader} = require('loader')
+{Schema} = require('schema')
+{StdLib} = require('stdlib')
+
 module.exports =
-  Loader: require('loader').Loader
-  Schema: require('schema').Schema
-  StdLib: require('stdlib').StdLib
+  Loader: Loader
+  Schema: Schema
+  StdLib: StdLib
+  loader: new Loader
+  stdlib: new StdLib

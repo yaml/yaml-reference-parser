@@ -15,7 +15,9 @@
   module.exports = TestMLBridge = class TestMLBridge extends TestML.Bridge {
     parse(yaml, expect_error = null) {
       var e, error, parser;
-      parser = new Parser(new TestReceiver());
+      parser = new Parser({
+        receiver: new TestReceiver()
+      });
       error = '';
       try {
         parser.parse(yaml);

@@ -14,7 +14,9 @@
 
   main = function(yaml = file_read('-')) {
     var calls, e, i, k, len, n, parser, pass, ref, sorted, start, time;
-    parser = new Parser(new TestReceiver());
+    parser = new Parser({
+      receiver: new TestReceiver()
+    });
     pass = true;
     start = timer();
     try {

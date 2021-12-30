@@ -1,40 +1,24 @@
 require '../../../test/testml/src/coffee/lib/testml/bridge'
-require '../lib/prelude'
-require '../lib/parser'
-require '../lib/grammar'
-require '../lib/test-receiver'
+{loader} = require 'yaml-reference'
 
 module.exports =
 class TestMLBridge extends TestML.Bridge
 
-  parse: (yaml, expect_error=null)->
-    parser = new Parser(new TestReceiver)
+  load: (yaml, schema)->
+    schema = @get_schema(schema)
 
-    error = ''
-    try
-      parser.parse yaml
-    catch e
-      error = String e
+    data = loader.load(string:yaml, schema:schema)
 
-    if expect_error?
-      return if error then 1 else 0
+  json: (o)->
+    JSON.stringify(o, null, 2) + "\n"
 
-    if error
-      error
-    else
-      parser.receiver.output
+  get_schema: (name)->
+    if name == 'json'
+      {Schema} = require 'schema/json'
+      return new Schema
 
-  unescape: (text)->
-    text = text
-      .replace(/␣/g, ' ')
-      .replace(/—*»/g, "\t")
-      .replace(/⇔/g, "\uFEFF")
-      .replace(/↵/g, '')
-      .replace(/∎\n$/, '')
+    if name == 'card'
+      {Schema} = require 'schema/json'
+      return new Schema
 
-    # text = text.replace(/↓/g, "\r")
-
-    return text
-
-  fix_test_output: (text)->
-    return text
+    throw "Can't get schema '#{name}'"

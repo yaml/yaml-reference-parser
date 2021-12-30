@@ -1,31 +1,27 @@
-Parser = require 'parser'
-{Constructor} = require 'constructor'
+{Reader} = require 'reader'
+{Parser} = require 'parser'
 {Dom} = require 'dom'
+{StdLib} = require 'stdlib'
 
 class Loader
 
   constructor: (args={})->
-    {@schema, @lib} = args
+    {@schema, @library} = args
 
-  load_dom: ({string, file})->
-    if string?
-      @input = string
-    else if file?
-      @input = file_read(file)
-    else if arguments.length == 1 and arguments[0]?
-      @input = String(arguments[0])
-    else
-      die "Loader::load_dom() invalid arguments"
+  load: (args)->
+    reader = new Reader
+    reader.open(args)
+    dom = new Dom(args)
 
-    @dom = new Dom
-    @parser = new Parser
-      receiver: @dom
+    parser = new Parser
+      reader: reader
+      composer: dom
 
-    try
-      @parser.parse(@input)
-    catch e
-      throw e
+    parser.parse()
 
-    return @dom
+    if (error = parser.error)?
+      throw error
+
+    dom.construct()
 
 module.exports = {Loader}

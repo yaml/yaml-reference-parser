@@ -23,8 +23,7 @@ class Dom extends Receiver
       when 'document_end' then @end()
       when 'mapping_end' then @end()
       when 'sequence_end' then @end()
-      else
-        XXX ["Unrecognized event", type]
+      else XXX ["Unrecognized event", type]
 
   start: (node)->
     @set(node)
@@ -43,6 +42,9 @@ class Dom extends Receiver
   end: ->
     @stack.pop()
     @node = @stack[@stack.length - 1]
+
+  construct: ->
+    @document
 
 class Document
   constructor: (event)->

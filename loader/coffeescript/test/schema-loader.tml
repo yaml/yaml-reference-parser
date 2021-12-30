@@ -1,0 +1,47 @@
+#!/usr/bin/env testml
+
+
+load(*yaml, *schema).json == *json
+  :"+ -- '{*yaml}'"
+
+
+
+=== Generic Schema
+--- yaml
+- one: 2
+- 3.14
+-
+- true
+
+--- schema: json
+
+--- json
+[
+  {
+    "one": 2
+  },
+  3.12,
+  null,
+  true
+]
+
+
+
+=== Specific Schema
+--- yaml
+name: John Smith
+age: 42
+city: Los Angeles
+zip: 90210
+
+--- schema: card
+
+--- json
+{
+  "name": {
+    "John": "Smith"
+  },
+  "age": 42,
+  "city": "Los Angeles",
+  "zip": "90210"
+}
