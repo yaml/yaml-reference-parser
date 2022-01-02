@@ -180,7 +180,7 @@ global.Receiver = class Receiver
 
   got__c_double_quoted: (o)->
     text = o.text[1...-1]
-      .replace(/(?<!\\)(?:[\ \t]*\r?\n[\ \t]*)/g, "\n")
+      .replace(/((?:\\\ |\\\t)*)(?:[\ \t]*\r?\n[\ \t]*)/gm, "$1\n")
       .replace(/\\\n[\ \t]*/g, '')
       .replace(/(\n)(\n*)/g, (m...)-> if m[2].length then m[2] else ' ')
       .replace(/\\(["\/])/g, "$1")

@@ -349,7 +349,7 @@
 
     got__c_double_quoted(o) {
       var text;
-      text = o.text.slice(1, -1).replace(/(?<!\\)(?:[\ \t]*\r?\n[\ \t]*)/g, "\n").replace(/\\\n[\ \t]*/g, '').replace(/(\n)(\n*)/g, function(...m) {
+      text = o.text.slice(1, -1).replace(/((?:\\\ |\\\t)*)(?:[\ \t]*\r?\n[\ \t]*)/gm, "$1\n").replace(/\\\n[\ \t]*/g, '').replace(/(\n)(\n*)/g, function(...m) {
         if (m[2].length) {
           return m[2];
         } else {
