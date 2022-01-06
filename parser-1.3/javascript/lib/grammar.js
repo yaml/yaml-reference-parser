@@ -3,7 +3,7 @@
   var Grammar;
 
   global.Grammar = Grammar = (function() {
-    var anchor_character, anchor_name, ascii_alpha_character_s, blank_character, blanks_and_comment_line, break_as_line_feed, break_as_space, byte_order_mark, check_flow_json_content, check_node_properties, comment_content, comment_line, comment_lines, decimal_digit, decimal_digit_1_9, decimal_digit_s, directive_name, directive_parameter, document_end_indicator, document_prefix, document_start_indicator, double_quoted_scalar_escape_character, end_of_input, flow_collection_indicator, flow_collection_indicator_s, global_tag_prefix, hexadecimal_digit, i, indentation_spaces_n, indentation_spaces_plus_maybe_more, init, inits, json_character, len, line_break, line_ending, line_trail_comments, local_tag_prefix, make, named_tag_handle, non_break_character, non_break_double_quoted_character, non_break_single_quoted_character, non_space_character, non_space_double_quoted_character, non_space_single_quoted_character, non_specific_tag, primary_tag_handle, ref, secondary_tag_handle, separation_blanks, shorthand_tag, single_quoted_escaped_single_quote, single_quoted_first_line, single_quoted_next_line, single_quoted_one_line, space_character, start_of_line, tag_character, tag_handle, try_got_not, uri_character, verbatim_tag, word_character, word_character_s, ws_lookahead, yaml_character;
+    var anchor_character, anchor_name, ascii_alpha_character_s, blank_character, blanks_and_comment_line, break_as_line_feed, break_as_space, byte_order_mark, check_flow_json_content, check_node_properties, comment_content, comment_line, comment_lines, decimal_digit, decimal_digit_1_9, decimal_digit_s, directive_name, directive_parameter, document_end_indicator, document_prefix, document_start_indicator, double_quoted_scalar_escape_character, end_of_input, flow_collection_indicator, flow_collection_indicator_s, global_tag_prefix, hexadecimal_digit, i, indentation_spaces_n, indentation_spaces_plus_maybe_more, init, inits, json_character, len, line_break, line_ending, line_trail_comments, local_tag_prefix, make, named_tag_handle, non_break_character, non_break_double_quoted_character, non_break_single_quoted_character, non_space_character, non_space_double_quoted_character, non_space_single_quoted_character, non_specific_tag, o, primary_tag_handle, ref, secondary_tag_handle, separation_blanks, shorthand_tag, single_quoted_escaped_single_quote, single_quoted_first_line, single_quoted_next_line, single_quoted_one_line, space_character, start_of_line, tag_character, tag_handle, try_got_not, uri_character, verbatim_tag, word_character, word_character_s, ws_lookahead, yaml_character;
 
     class Grammar {
       // Grammar rules:
@@ -128,7 +128,7 @@
       //     block-node-in-a-block-node(n,c)
       //   | flow-node-in-a-block-node(n)
       block_node(n, c) {
-        return this.any(this.block_node_in_a_block_node(n, c), this.flow_node_in_a_block_node(n));
+        return o(this.any(this.block_node_in_a_block_node(n, c), this.flow_node_in_a_block_node(n)));
       }
 
       // [013]
@@ -136,7 +136,7 @@
       //     block-scalar(n,c)
       //   | block-collection(n,c)
       block_node_in_a_block_node(n, c) {
-        return this.any(this.block_scalar(n, c), this.block_collection(n, c));
+        return o(this.any(this.block_scalar(n, c), this.block_collection(n, c)));
       }
 
       // [014]
@@ -145,7 +145,7 @@
       //   flow-node(n+1,FLOW-OUT)
       //   comment-lines
       flow_node_in_a_block_node(n) {
-        return this.all(this.separation_characters(n + 1, "FLOW-OUT"), this.flow_node(n + 1, "FLOW-OUT"), this.comment_lines);
+        return o(this.all(this.separation_characters(n + 1, "FLOW-OUT"), this.flow_node(n + 1, "FLOW-OUT"), this.comment_lines));
       }
 
       // [015]
@@ -160,7 +160,7 @@
       //     | block-mapping(n)
       //   )
       block_collection(n, c) {
-        return this.all(this.rep('?', this.all(this.separation_characters(n + 1, c), this.check_node_properties, this.any(this.got(this.all(this.node_properties(n + 1, c), this.comment_lines), {
+        return o(this.all(this.rep('?', this.all(this.separation_characters(n + 1, c), this.check_node_properties, this.any(this.got(this.all(this.node_properties(n + 1, c), this.comment_lines), {
           name: 'block_collection_properties',
           not_: true
         }), this.got(this.all(this.tag_property, this.comment_lines), {
@@ -171,21 +171,35 @@
           not_: true
         })))), this.comment_lines, this.any(this.block_sequence_context(n, c), () => {
           return this.block_mapping(n);
-        }));
+        })));
+      }
+
+      // [???]
+      // block_collection_properties(n, c)
+
+      // This production is an implementation detail needed to be able to capture
+      // the correct values.
+      block_collection_properties(n, c) {
+        return o(this.any(this.not(this.all(this.node_properties(n, c), this.comment_lines)), this.not(this.all(this.anchor_property, this.comment_lines), {
+          name: 'block_collection_anchor'
+        }), this.not(this.all(this.tag_property, this.comment_lines), {
+          name: 'block_collection_tag'
+        })));
       }
 
       // [016]
       // block-sequence-context(n,BLOCK-OUT) ::= block-sequence(n-1)
       // block-sequence-context(n,BLOCK-IN)  ::= block-sequence(n)
       block_sequence_context(n, c) {
-        return this.got(() => {
+        var case_;
+        return o(this.got(case_ = () => {
           switch (c) {
             case 'BLOCK-OUT':
               return this.block_sequence(n - 1);
             case 'BLOCK-IN':
               return this.block_sequence(n);
           }
-        }, try_got_not);
+        }, try_got_not));
       }
 
       // [017]
@@ -200,7 +214,7 @@
       //     | block-folded-scalar(n)
       //   )
       block_scalar(n, c) {
-        return this.all(this.separation_characters(n + 1, c), this.rep('?', this.all(this.node_properties(n + 1, c), this.separation_characters(n + 1, c))), this.any(this.block_literal_scalar(n), this.block_folded_scalar(n)));
+        return o(this.all(this.separation_characters(n + 1, c), this.rep('?', this.all(this.node_properties(n + 1, c), this.separation_characters(n + 1, c))), this.any(this.block_literal_scalar(n), this.block_folded_scalar(n))));
       }
 
       // [018]
@@ -214,7 +228,7 @@
         if (!(m = this.call([this.auto_detect_indent, n], 'number'))) {
           return false;
         }
-        return this.got(this.all(this.rep('+', this.all(this.indentation_spaces_n(n + m), this.block_mapping_entry(n + m)))), try_got_not);
+        return o(this.got(this.all(this.rep('+', this.all(this.indentation_spaces_n(n + m), this.block_mapping_entry(n + m)))), try_got_not));
       }
 
       // [019]
@@ -222,7 +236,7 @@
       //     block-mapping-explicit-entry(n)
       //   | block-mapping-implicit-entry(n)
       block_mapping_entry(n) {
-        return this.any(this.block_mapping_explicit_entry(n), this.block_mapping_implicit_entry(n));
+        return o(this.any(this.block_mapping_explicit_entry(n), this.block_mapping_implicit_entry(n)));
       }
 
       // [020]
@@ -233,7 +247,7 @@
       //     | empty-node
       //   )
       block_mapping_explicit_entry(n) {
-        return this.got(this.all(this.block_mapping_explicit_key(n), this.any(this.block_mapping_explicit_value(n), this.empty_node)), try_got_not);
+        return o(this.got(this.all(this.block_mapping_explicit_key(n), this.any(this.block_mapping_explicit_value(n), this.empty_node)), try_got_not));
       }
 
       // [021]
@@ -241,9 +255,9 @@
       //   '?'                               # Not followed by non-ws char
       //   block-indented-node(n,BLOCK-OUT)
       block_mapping_explicit_key(n) {
-        return this.all(this.rgx(RegExp(`\\?${ws_lookahead}`)), () => {
+        return o(this.all(this.rgx(RegExp(`\\?${ws_lookahead}`), '"? "'), () => {
           return this.block_indented_node(n, "BLOCK-OUT");
-        });
+        }));
       }
 
       // [022]
@@ -252,9 +266,9 @@
       //   ':'                               # Not followed by non-ws char
       //   block-indented-node(n,BLOCK-OUT)
       block_mapping_explicit_value(n) {
-        return this.all(this.indentation_spaces_n(n), this.rgx(RegExp(`:${ws_lookahead}`)), () => {
+        return o(this.all(this.indentation_spaces_n(n), this.rgx(RegExp(`:${ws_lookahead}`)), () => {
           return this.block_indented_node(n, "BLOCK-OUT");
-        });
+        }));
       }
 
       // [023]
@@ -265,7 +279,7 @@
       //   )
       //   block-mapping-implicit-value(n)
       block_mapping_implicit_entry(n) {
-        return this.got(this.all(this.any(this.block_mapping_implicit_key, this.empty_node), this.block_mapping_implicit_value(n)), try_got_not);
+        return o(this.got(this.all(this.any(this.block_mapping_implicit_key, this.empty_node), this.block_mapping_implicit_value(n)), try_got_not));
       }
 
       // XXX Can fold into 023
@@ -288,7 +302,7 @@
       //       )
       //   )
       block_mapping_implicit_value(n) {
-        return this.all(this.rgx(RegExp(`:${ws_lookahead}`)), this.any(this.block_node(n, "BLOCK-OUT"), this.all(this.empty_node, this.comment_lines)));
+        return o(this.all(this.rgx(RegExp(`:${ws_lookahead}`)), this.any(this.block_node(n, "BLOCK-OUT"), this.all(this.empty_node, this.comment_lines))));
       }
 
       // [026]
@@ -299,7 +313,7 @@
       //     block-mapping-entry(n)
       //   )*
       compact_mapping(n) {
-        return this.got(this.all(this.block_mapping_entry(n), this.rep('*', this.all(this.indentation_spaces_n(n), this.block_mapping_entry(n)))), try_got_not);
+        return o(this.got(this.all(this.block_mapping_entry(n), this.rep('*', this.all(this.indentation_spaces_n(n), this.block_mapping_entry(n)))), try_got_not));
       }
 
       // [027]
@@ -313,7 +327,7 @@
         if (!(m = this.auto_detect_indent(n))) {
           return false;
         }
-        return this.all(this.rep('+', this.all(this.indentation_spaces_n(n + m), this.block_sequence_entry(n + m))));
+        return o(this.all(this.rep('+', this.all(this.indentation_spaces_n(n + m), this.block_sequence_entry(n + m)))));
       }
 
       // [028]
@@ -322,9 +336,9 @@
       //   [ lookahead ≠ non-space-character ]
       //   block-indented-node(n,BLOCK-IN)
       block_sequence_entry(n) {
-        return this.all(this.rgx(RegExp(`-${ws_lookahead}(!${non_space_character})`, "u")), () => {
+        return o(this.all(this.rgx(RegExp(`-${ws_lookahead}(!${non_space_character})`, "u")), () => {
           return this.block_indented_node(n, "BLOCK-IN");
-        });
+        }));
       }
 
       // [029]
@@ -344,7 +358,7 @@
       block_indented_node(n, c) {
         var m;
         m = this.auto_detect_indent(n);
-        return this.any(this.all(this.indentation_spaces_n(m), this.any(this.compact_sequence(n + 1 + m), this.compact_mapping(n + 1 + m))), this.block_node(n, c), this.all(this.empty_node, this.comment_lines));
+        return o(this.any(this.all(this.indentation_spaces_n(m), this.any(this.compact_sequence(n + 1 + m), this.compact_mapping(n + 1 + m))), this.block_node(n, c), this.all(this.empty_node, this.comment_lines)));
       }
 
       // [030]
@@ -355,7 +369,7 @@
       //     block-sequence-entry(n)
       //   )*
       compact_sequence(n) {
-        return this.got(this.all(this.block_sequence_entry(n), this.rep('*', this.all(this.indentation_spaces_n(n), this.block_sequence_entry(n)))), try_got_not);
+        return o(this.got(this.all(this.block_sequence_entry(n), this.rep('*', this.all(this.indentation_spaces_n(n), this.block_sequence_entry(n)))), try_got_not));
       }
 
       // [031]
@@ -364,7 +378,7 @@
       //   block-scalar-indicators(t)
       //   literal-scalar-content(n+m,t)
       block_literal_scalar(n) {
-        return this.got(this.all(this.chr('|'), this.block_scalar_indicators(n), this.literal_scalar_content(this.m(n), this.t())), try_got_not);
+        return o(this.got(this.all(this.chr('|'), this.block_scalar_indicators(n), this.literal_scalar_content(this.m(n), this.t())), try_got_not));
       }
 
       // [032]
@@ -376,7 +390,7 @@
       //   )?
       //   block-scalar-chomp-empty(n,t)
       literal_scalar_content(n, t) {
-        return this.all(this.rep('?', this.all([this.literal_scalar_line_content, n], this.rep('*', [this.literal_scalar_next_line, n]), this.rgx(line_ending))), [this.block_scalar_chomp_empty, n, t]);
+        return o(this.all(this.rep('?', this.all([this.literal_scalar_line_content, n], this.rep('*', [this.literal_scalar_next_line, n]), this.rgx(line_ending))), [this.block_scalar_chomp_empty, n, t]));
       }
 
       // [033]
@@ -385,7 +399,7 @@
       //   indentation-spaces(n)
       //   non-break-character+
       literal_scalar_line_content(n) {
-        return this.all(this.rep('*', this.empty_line(n, "BLOCK-IN")), this.indentation_spaces_n(n), this.got(this.rgx(RegExp(`${non_break_character}+`, "u"))));
+        return o(this.all(this.rep('*', this.empty_line(n, "BLOCK-IN")), this.indentation_spaces_n(n), this.got(this.rgx(RegExp(`${non_break_character}+`, "u")))));
       }
 
       // [034]
@@ -393,7 +407,7 @@
       //   break-as-line-feed
       //   literal-scalar-line-content(n)
       literal_scalar_next_line(n) {
-        return this.all(this.rgx(break_as_line_feed), this.literal_scalar_line_content(n));
+        return o(this.all(this.rgx(break_as_line_feed), this.literal_scalar_line_content(n)));
       }
 
       // [035]
@@ -402,7 +416,7 @@
       //   block-scalar-indicators(t)
       //   folded-scalar-content(n+m,t)
       block_folded_scalar(n) {
-        return this.got(this.all(this.chr('>'), this.block_scalar_indicators(n), this.folded_scalar_content(this.m(n), this.t())), try_got_not);
+        return o(this.got(this.all(this.chr('>'), this.block_scalar_indicators(n), this.folded_scalar_content(this.m(n), this.t())), try_got_not));
       }
 
       // [036]
@@ -413,7 +427,7 @@
       //   )?
       //   block-scalar-chomp-empty(n,t)
       folded_scalar_content(n, t) {
-        return this.all(this.rep('?', this.all(this.folded_scalar_lines_different_indentation(n), this.rgx(line_ending))), [this.block_scalar_chomp_empty, n, t]);
+        return o(this.all(this.rep('?', this.all(this.folded_scalar_lines_different_indentation(n), this.rgx(line_ending))), [this.block_scalar_chomp_empty, n, t]));
       }
 
       // [037]
@@ -424,7 +438,7 @@
       //     folded-scalar-lines-same-indentation(n)
       //   )*
       folded_scalar_lines_different_indentation(n) {
-        return this.all(this.folded_scalar_lines_same_indentation(n), this.rep('*', this.all(this.rgx(break_as_line_feed), this.folded_scalar_lines_same_indentation(n))));
+        return o(this.all(this.folded_scalar_lines_same_indentation(n), this.rep('*', this.all(this.rgx(break_as_line_feed), this.folded_scalar_lines_same_indentation(n)))));
       }
 
       // [038]
@@ -435,7 +449,7 @@
       //     | folded-scalar-spaced-lines(n)
       //   )
       folded_scalar_lines_same_indentation(n) {
-        return this.all(this.rep('*', this.empty_line(n, "BLOCK-IN")), this.any([this.folded_scalar_lines, n], [this.folded_scalar_spaced_lines, n]));
+        return o(this.all(this.rep('*', this.empty_line(n, "BLOCK-IN")), this.any([this.folded_scalar_lines, n], [this.folded_scalar_spaced_lines, n])));
       }
 
       // [039]
@@ -446,7 +460,7 @@
       //     folded-scalar-text(n)
       //   )*
       folded_scalar_lines(n) {
-        return this.all([this.folded_scalar_text, n], this.rep('*', this.all([this.folded_whitespace, n, "BLOCK-IN"], [this.folded_scalar_text, n])));
+        return o(this.all([this.folded_scalar_text, n], this.rep('*', this.all([this.folded_whitespace, n, "BLOCK-IN"], [this.folded_scalar_text, n]))));
       }
 
       // [040]
@@ -457,7 +471,7 @@
       //     folded-scalar-spaced-text(n)
       //   )*
       folded_scalar_spaced_lines(n) {
-        return this.all(this.folded_scalar_spaced_text(n), this.rep('*', this.all(this.line_break_and_empty_lines(n), this.folded_scalar_spaced_text(n))));
+        return o(this.all(this.folded_scalar_spaced_text(n), this.rep('*', this.all(this.line_break_and_empty_lines(n), this.folded_scalar_spaced_text(n)))));
       }
 
       // [041]
@@ -466,7 +480,7 @@
       //   non-space-character
       //   non-break-character*
       folded_scalar_text(n) {
-        return this.all(this.indentation_spaces_n(n), this.got(this.rgx(RegExp(`${non_space_character}+${non_break_character}*`, "u"))));
+        return o(this.all(this.indentation_spaces_n(n), this.got(this.rgx(RegExp(`${non_space_character}+${non_break_character}*`, "u")))));
       }
 
       // [042]
@@ -474,7 +488,7 @@
       //   break-as-line-feed
       //   empty-line(n,BLOCK-IN)*
       line_break_and_empty_lines(n) {
-        return this.all(this.rgx(break_as_line_feed), this.rep('*', this.empty_line(n, "BLOCK-IN")));
+        return o(this.all(this.rgx(break_as_line_feed), this.rep('*', this.empty_line(n, "BLOCK-IN"))));
       }
 
       // [043]
@@ -483,7 +497,7 @@
       //   blank-character
       //   non-break-character*
       folded_scalar_spaced_text(n) {
-        return this.all(this.indentation_spaces_n(n), this.got(this.rgx(RegExp(`${blank_character}${non_break_character}*`, "u"))));
+        return o(this.all(this.indentation_spaces_n(n), this.got(this.rgx(RegExp(`${blank_character}${non_break_character}*`, "u")))));
       }
 
       // [044]
@@ -500,20 +514,20 @@
       //   )
       //   comment-line
       block_scalar_indicators(n) {
-        return this.all(this.any(this.all(() => {
+        return o(this.all(this.any(this.all(() => {
           return this.block_scalar_indentation_indicator(n);
         }, this.block_scalar_chomping_indicator, this.ws_lookahead), this.all(this.block_scalar_chomping_indicator, () => { // TODO This might be needed in spec
           return this.block_scalar_indentation_indicator(n);
-        })), this.comment_line);
+        })), this.comment_line));
       }
 
       // [045]
       // block-scalar-indentation-indicator ::=
       //   decimal-digit-1-9
       block_scalar_indentation_indicator(n) {
-        return this.any(this.if(this.rgx(decimal_digit_1_9), this.set('m', this.ord(this.match))), this.if(this.empty, this.set('m', () => {
+        return o(this.any(this.if(this.rgx(decimal_digit_1_9), this.set('m', this.ord(this.match))), this.if(this.empty, this.set('m', () => {
           return this.auto_detect(n);
-        })));
+        }))));
       }
 
       // [046]
@@ -530,7 +544,7 @@
       //   # block-scalar-chomp-last(CLIP)  ::= break-as-line-feed | <end-of-input>
       //   # block-scalar-chomp-last(KEEP)  ::= break-as-line-feed | <end-of-input>
 
-      //   block_scalar_chomp_last: (t)->
+      //   block_scalar_chomp_last: (t)-> o \
       //     @rgx(line_ending)
 
         //   [048]
@@ -556,7 +570,7 @@
       //   )*
       //   line-trail-comments(n)?
       line_strip_empty(n) {
-        return this.all(this.rep('*', this.all(this.indentation_spaces_less_or_equal(n), this.rgx(line_break))), this.rep('?', this.line_trail_comments(n)));
+        return o(this.all(this.rep('*', this.all(this.indentation_spaces_less_or_equal(n), this.rgx(line_break))), this.rep('?', this.line_trail_comments(n))));
       }
 
       // [050]
@@ -564,7 +578,7 @@
       //   empty-line(n,BLOCK-IN)*
       //   line-trail-comments(n)?
       line_keep_empty(n) {
-        return this.all(this.rep('*', this.empty_line(n, "BLOCK-IN")), this.rep('?', this.line_trail_comments(n)));
+        return o(this.all(this.rep('*', this.empty_line(n, "BLOCK-IN")), this.rep('?', this.line_trail_comments(n))));
       }
 
       // [051]
@@ -574,7 +588,7 @@
       //   line-ending
       //   comment-line*
       line_trail_comments(n) {
-        return this.all(this.indentation_spaces_less_than(n), this.rgx(line_trail_comments), this.rep('*', this.comment_line));
+        return o(this.all(this.indentation_spaces_less_than(n), this.rgx(line_trail_comments), this.rep('*', this.comment_line)));
       }
 
       // [052]
@@ -592,7 +606,7 @@
       //       )
       //     )
       flow_node(n, c) {
-        return this.any(this.alias_node, this.flow_content(n, c), this.all(this.node_properties(n, c), this.any(this.all(this.separation_characters(n, c), this.flow_content(n, c)), this.empty_node)));
+        return o(this.any(this.alias_node, this.flow_content(n, c), this.all(this.node_properties(n, c), this.any(this.all(this.separation_characters(n, c), this.flow_content(n, c)), this.empty_node))));
       }
 
       // [053]
@@ -600,18 +614,18 @@
       //     flow-yaml-content(n,c)
       //   | flow-json-content(n,c)
       flow_content(n, c) {
-        return this.any(this.flow_yaml_content(n, c), this.flow_json_content(n, c));
+        return o(this.any(this.flow_yaml_content(n, c), this.flow_json_content(n, c)));
       }
 
       // [054]
       // flow-yaml-content(n,c) ::=
       //   flow-plain-scalar(n,c)
       flow_yaml_content(n, c) {
-        return this.flow_plain_scalar(n, c);
+        return o(this.flow_plain_scalar(n, c));
       }
 
       flow_json_content(n, c) {
-        return this.all(this.rgx(check_flow_json_content), this.any(this.flow_sequence(n, c), this.flow_mapping(n, c), this.single_quoted_scalar(n, c), this.double_quoted_scalar(n, c)));
+        return o(this.all(this.rgx(check_flow_json_content), this.any(this.flow_sequence(n, c), this.flow_mapping(n, c), this.single_quoted_scalar(n, c), this.double_quoted_scalar(n, c))));
       }
 
       // [056]
@@ -621,11 +635,11 @@
       //   flow-mapping-context(n,c)?
       //   '}'
       flow_mapping(n, c) {
-        return this.all(this.got(this.chr('{'), {
+        return o(this.all(this.got(this.chr('{'), {
           name: 'flow_mapping_start'
         }), this.rep('?', this.separation_characters(n, c)), this.rep('?', this.flow_mapping_context(n, c)), this.got(this.chr('}'), {
           name: 'flow_mapping_end'
-        }));
+        })));
       }
 
       // [057]
@@ -638,9 +652,9 @@
       //     flow-mapping-entries(n,c)?
       //   )?
       flow_mapping_entries(n, c) {
-        return this.all(this.flow_mapping_entry(n, c), this.rep('?', this.separation_characters(n, c)), this.rep('?', this.all(this.chr(','), this.rep('?', this.separation_characters(n, c)), () => {
+        return o(this.all(this.flow_mapping_entry(n, c), this.rep('?', this.separation_characters(n, c)), this.rep('?', this.all(this.chr(','), this.rep('?', this.separation_characters(n, c)), () => {
           return this.rep('?', this.flow_mapping_entries(n, c));
-        })));
+        }))));
       }
 
       // [058]
@@ -652,7 +666,7 @@
       //     )
       //   | flow-mapping-implicit-entry(n,c)
       flow_mapping_entry(n, c) {
-        return this.any(this.all(this.rgx(RegExp(`\\?${ws_lookahead}`)), [this.separation_characters, n, c], [this.flow_mapping_explicit_entry, n, c]), [this.flow_mapping_implicit_entry, n, c]);
+        return o(this.any(this.all(this.rgx(RegExp(`\\?${ws_lookahead}`)), [this.separation_characters, n, c], [this.flow_mapping_explicit_entry, n, c]), [this.flow_mapping_implicit_entry, n, c]));
       }
 
       // [059]
@@ -663,7 +677,7 @@
       //       empty-node
       //     )
       flow_mapping_explicit_entry(n, c) {
-        return this.any([this.flow_mapping_implicit_entry, n, c], this.all(this.empty_node, this.empty_node));
+        return o(this.any([this.flow_mapping_implicit_entry, n, c], this.all(this.empty_node, this.empty_node)));
       }
 
       // [060]
@@ -672,7 +686,7 @@
       //   | flow-mapping-empty-key-entry(n,c)
       //   | flow-mapping-json-key-entry(n,c)
       flow_mapping_implicit_entry(n, c) {
-        return this.any([this.flow_mapping_yaml_key_entry, n, c], [this.flow_mapping_empty_key_entry, n, c], [this.flow_mapping_json_key_entry, n, c]);
+        return o(this.any([this.flow_mapping_yaml_key_entry, n, c], [this.flow_mapping_empty_key_entry, n, c], [this.flow_mapping_json_key_entry, n, c]));
       }
 
       // [061]
@@ -686,7 +700,7 @@
       //     | empty-node
       //   )
       flow_mapping_yaml_key_entry(n, c) {
-        return this.all([this.flow_yaml_node, n, c], this.any(this.all(this.rep('?', [this.separation_characters, n, c]), [this.flow_mapping_separate_value, n, c]), this.empty_node));
+        return o(this.all([this.flow_yaml_node, n, c], this.any(this.all(this.rep('?', [this.separation_characters, n, c]), [this.flow_mapping_separate_value, n, c]), this.empty_node)));
       }
 
       // [062]
@@ -694,7 +708,7 @@
       //   empty-node
       //   flow-mapping-separate-value(n,c)
       flow_mapping_empty_key_entry(n, c) {
-        return this.got(this.all(this.empty_node, [this.flow_mapping_separate_value, n, c]), try_got_not);
+        return o(this.got(this.all(this.empty_node, [this.flow_mapping_separate_value, n, c]), try_got_not));
       }
 
       // [063]
@@ -709,7 +723,7 @@
       //     | empty-node
       //   )
       flow_mapping_separate_value(n, c) {
-        return this.all(this.rgx(RegExp(`(::(!${this.non_space_plain_scalar_character(c)}))`, "u")), this.any(this.all([this.separation_characters, n, c], [this.flow_node, n, c]), this.empty_node));
+        return o(this.all(this.rgx(RegExp(`(::(!${this.non_space_plain_scalar_character(c)}))`, "u")), this.any(this.all([this.separation_characters, n, c], [this.flow_node, n, c]), this.empty_node)));
       }
 
       // [064]
@@ -723,7 +737,7 @@
       //     | empty-node
       //   )
       flow_mapping_json_key_entry(n, c) {
-        return this.all([this.flow_json_node, n, c], this.any(this.all(this.rep('?', [this.separation_characters, n, c]), [this.flow_mapping_adjacent_value, n, c]), this.empty_node));
+        return o(this.all([this.flow_json_node, n, c], this.any(this.all(this.rep('?', [this.separation_characters, n, c]), [this.flow_mapping_adjacent_value, n, c]), this.empty_node)));
       }
 
       // [065]
@@ -737,7 +751,7 @@
       //     | empty-node
       //   )
       flow_mapping_adjacent_value(n, c) {
-        return this.all(this.chr(':'), this.any(this.all(this.rep('?', [this.separation_characters, n, c]), [this.flow_node, n, c]), this.empty_node));
+        return o(this.all(this.chr(':'), this.any(this.all(this.rep('?', [this.separation_characters, n, c]), [this.flow_node, n, c]), this.empty_node)));
       }
 
       // [066]
@@ -749,7 +763,7 @@
       //     )
       //   | flow-pair-entry(n,c)
       flow_pair(n, c) {
-        return this.got(this.any(this.all(this.rgx(RegExp(`\\?${ws_lookahead}`)), [this.separation_characters, n, c], [this.flow_mapping_explicit_entry, n, c]), [this.flow_pair_entry, n, c]), try_got_not);
+        return o(this.got(this.any(this.all(this.rgx(RegExp(`\\?${ws_lookahead}`)), [this.separation_characters, n, c], [this.flow_mapping_explicit_entry, n, c]), [this.flow_pair_entry, n, c]), try_got_not));
       }
 
       // [067]
@@ -758,7 +772,7 @@
       //   | flow-mapping-empty-key-entry(n,c)
       //   | flow-pair-json-key-entry(n,c)
       flow_pair_entry(n, c) {
-        return this.any([this.flow_pair_yaml_key_entry, n, c], [this.flow_mapping_empty_key_entry, n, c], [this.flow_pair_json_key_entry, n, c]);
+        return o(this.any([this.flow_pair_yaml_key_entry, n, c], [this.flow_mapping_empty_key_entry, n, c], [this.flow_pair_json_key_entry, n, c]));
       }
 
       // [068]
@@ -766,7 +780,7 @@
       //   implicit-yaml-key(FLOW-KEY)
       //   flow-mapping-separate-value(n,c)
       flow_pair_yaml_key_entry(n, c) {
-        return this.all([this.implicit_yaml_key, "FLOW-KEY"], [this.flow_mapping_separate_value, n, c]);
+        return o(this.all([this.implicit_yaml_key, "FLOW-KEY"], [this.flow_mapping_separate_value, n, c]));
       }
 
       // [069]
@@ -774,7 +788,7 @@
       //   implicit-json-key(FLOW-KEY)
       //   flow-mapping-adjacent-value(n,c)
       flow_pair_json_key_entry(n, c) {
-        return this.all([this.implicit_json_key, "FLOW-KEY"], [this.flow_mapping_adjacent_value, n, c]);
+        return o(this.all([this.implicit_json_key, "FLOW-KEY"], [this.flow_mapping_adjacent_value, n, c]));
       }
 
       // [070]
@@ -784,7 +798,7 @@
       //   /* At most 1024 characters altogether */
       implicit_yaml_key(c) {
         // @max(1024)
-        return this.all([this.flow_yaml_node, null, c], this.rep('?', this.separation_blanks));
+        return o(this.all([this.flow_yaml_node, null, c], this.rep('?', this.separation_blanks)));
       }
 
       // [071]
@@ -794,7 +808,7 @@
       //   /* At most 1024 characters altogether */
       implicit_json_key(c) {
         // @max(1024)
-        return this.all([this.flow_json_node, null, c], this.rep('?', this.separation_blanks));
+        return o(this.all([this.flow_json_node, null, c], this.rep('?', this.separation_blanks)));
       }
 
       // [072]
@@ -812,7 +826,7 @@
       //       )
       //     )
       flow_yaml_node(n, c) {
-        return this.any(this.alias_node, [this.flow_yaml_content, n, c], this.all([this.node_properties, n, c], this.any(this.all([this.separation_characters, n, c], [this.flow_content, n, c]), this.empty_node)));
+        return o(this.any(this.alias_node, [this.flow_yaml_content, n, c], this.all([this.node_properties, n, c], this.any(this.all([this.separation_characters, n, c], [this.flow_content, n, c]), this.empty_node))));
       }
 
       // [073]
@@ -823,7 +837,7 @@
       //   )?
       //   flow-json-content(n,c)
       flow_json_node(n, c) {
-        return this.all(this.rep('?', this.all([this.node_properties, n, c], [this.separation_characters, n, c])), [this.flow_json_content, n, c]);
+        return o(this.all(this.rep('?', this.all([this.node_properties, n, c], [this.separation_characters, n, c])), [this.flow_json_content, n, c]));
       }
 
       // [074]
@@ -833,11 +847,11 @@
       //   flow-sequence-context(n,c)?
       //   ']'
       flow_sequence(n, c) {
-        return this.all(this.got(this.chr('['), {
+        return o(this.all(this.got(this.chr('['), {
           name: 'flow_sequence_start'
         }), this.rep('?', [this.separation_characters, n, c]), this.rep('?', [this.flow_sequence_context, n, c]), this.got(this.chr(']'), {
           name: 'flow_sequence_end'
-        }));
+        })));
       }
 
       // [075]
@@ -850,7 +864,7 @@
       //     flow-sequence-entries(n,c)?
       //   )?
       flow_sequence_entries(n, c) {
-        return this.all([this.flow_sequence_entry, n, c], this.rep('?', [this.separation_characters, n, c]), this.rep('?', this.all(this.chr(','), this.rep('?', [this.separation_characters, n, c]), this.rep('?', [this.flow_sequence_entries, n, c]))));
+        return o(this.all([this.flow_sequence_entry, n, c], this.rep('?', [this.separation_characters, n, c]), this.rep('?', this.all(this.chr(','), this.rep('?', [this.separation_characters, n, c]), this.rep('?', [this.flow_sequence_entries, n, c])))));
       }
 
       // [076]
@@ -858,7 +872,7 @@
       //     flow-pair(n,c)
       //   | flow-node(n,c)
       flow_sequence_entry(n, c) {
-        return this.any([this.flow_pair, n, c], [this.flow_node, n, c]);
+        return o(this.any([this.flow_pair, n, c], [this.flow_node, n, c]));
       }
 
       // [077]
@@ -867,7 +881,7 @@
       //   double-quoted-text(n,c)
       //   '"'
       double_quoted_scalar(n, c) {
-        return this.got(this.all(this.chr('"'), [this.double_quoted_text, n, c], this.chr('"')));
+        return o(this.got(this.all(this.chr('"'), [this.double_quoted_text, n, c], this.chr('"'))));
       }
 
       // [078]
@@ -896,7 +910,7 @@
       //     | blank-character*
       //   )
       double_quoted_multi_line(n) {
-        return this.all(this.double_quoted_first_line, this.any([this.double_quoted_next_line, n], this.rgx(RegExp(`${blank_character}*`))));
+        return o(this.all(this.double_quoted_first_line, this.any([this.double_quoted_next_line, n], this.rgx(RegExp(`${blank_character}*`)))));
       }
 
       // [080]
@@ -931,7 +945,7 @@
       //     )
       //   )?
       double_quoted_next_line(n) {
-        return this.all(this.any([this.double_quoted_line_continuation, n], [this.flow_folded_whitespace, n]), this.rep('?', this.all(this.non_space_double_quoted_character, this.double_quoted_first_line, this.any([this.double_quoted_next_line, n], this.rgx(RegExp(`${blank_character}*`))))));
+        return o(this.all(this.any([this.double_quoted_line_continuation, n], [this.flow_folded_whitespace, n]), this.rep('?', this.all(this.non_space_double_quoted_character, this.double_quoted_first_line, this.any([this.double_quoted_next_line, n], this.rgx(RegExp(`${blank_character}*`)))))));
       }
 
       // [083]
@@ -950,7 +964,7 @@
       //   empty-line(n,FLOW-IN)*
       //   indentation-spaces-plus-maybe-more(n)
       double_quoted_line_continuation(n) {
-        return this.all(this.rgx(RegExp(`${blank_character}*\\\\${line_break}`)), this.rep('*', [this.empty_line, n, "FLOW-IN"]), [this.indentation_spaces_plus_maybe_more, n]);
+        return o(this.all(this.rgx(RegExp(`${blank_character}*\\\\${line_break}`)), this.rep('*', [this.empty_line, n, "FLOW-IN"]), [this.indentation_spaces_plus_maybe_more, n]));
       }
 
       // [086]  # XXX fix typo in 1.3.0 spec
@@ -995,7 +1009,7 @@
       //   single-quoted-text(n,c)
       //   "'"
       single_quoted_scalar(n, c) {
-        return this.got(this.all(this.chr("'"), [this.single_quoted_text, n, c], this.chr("'")));
+        return o(this.got(this.all(this.chr("'"), [this.single_quoted_text, n, c], this.chr("'"))));
       }
 
       // [089]
@@ -1024,11 +1038,11 @@
       //     | blank-character*
       //   )
       single_quoted_multi_line(n) {
-        return this.all(this.rgx(single_quoted_first_line), this.any([this.single_quoted_next_line, n], this.rgx(RegExp(`${blank_character}*`))));
+        return o(this.all(this.rgx(single_quoted_first_line), this.any([this.single_quoted_next_line, n], this.rgx(RegExp(`${blank_character}*`)))));
       }
 
       single_quoted_next_line(n) {
-        return this.all([this.flow_folded_whitespace, n], this.rep('?', this.all(this.rgx(single_quoted_next_line), this.any([this.single_quoted_next_line, n], this.rgx(RegExp(`${blank_character}*`))))));
+        return o(this.all([this.flow_folded_whitespace, n], this.rep('?', this.all(this.rgx(single_quoted_next_line), this.any([this.single_quoted_next_line, n], this.rgx(RegExp(`${blank_character}*`)))))));
       }
 
       // [097]
@@ -1037,7 +1051,8 @@
       // flow-plain-scalar(n,BLOCK-KEY) ::= plain-scalar-single-line(BLOCK-KEY)
       // flow-plain-scalar(n,FLOW-KEY)  ::= plain-scalar-single-line(FLOW-KEY)
       flow_plain_scalar(n, c) {
-        return this.got(() => {
+        var case_;
+        return this.got(case_ = () => {
           switch (c) {
             case 'FLOW-OUT':
               return [this.plain_scalar_multi_line, n, c];
@@ -1056,7 +1071,7 @@
       //   plain-scalar-single-line(c)
       //   plain-scalar-next-line(n,c)*
       plain_scalar_multi_line(n, c) {
-        return this.all(this.plain_scalar_single_line(c), this.rep('*', this.plain_scalar_next_line(n, c)));
+        return o(this.all(this.plain_scalar_single_line(c), this.rep('*', this.plain_scalar_next_line(n, c))));
       }
 
       // [099]
@@ -1064,7 +1079,7 @@
       //   plain-scalar-first-character(c)
       //   plain-scalar-line-characters(c)
       plain_scalar_single_line(c) {
-        return this.all(this.plain_scalar_first_character(c), this.plain_scalar_line_characters(c));
+        return o(this.all(this.plain_scalar_first_character(c), this.plain_scalar_line_characters(c)));
       }
 
       // [100]
@@ -1073,7 +1088,7 @@
       //   plain-scalar-characters(c)
       //   plain-scalar-line-characters(c)
       plain_scalar_next_line(n, c) {
-        return this.all(this.flow_folded_whitespace(n), this.plain_scalar_characters(c), this.plain_scalar_line_characters(c));
+        return o(this.all(this.flow_folded_whitespace(n), this.plain_scalar_characters(c), this.plain_scalar_line_characters(c)));
       }
 
       // [101]
@@ -1083,7 +1098,7 @@
       //     plain-scalar-characters(c)
       //   )*
       plain_scalar_line_characters(c) {
-        return this.rgx(RegExp(`(:${blank_character}*${this.plain_scalar_characters_re(c)})*`, "u"));
+        return o(this.rgx(RegExp(`(:${blank_character}*${this.plain_scalar_characters_re(c)})*`, "u")));
       }
 
       // [102]
@@ -1115,8 +1130,8 @@
       //       [ lookahead = non-space-plain-scalar-character(c) ]
       //     )
       plain_scalar_first_character(c) {
-        return this.rgx(RegExp(`(:(![-?:,[\\]{}\\x23&*!|>'"%@\`])${non_space_character // '#'
-}|(:[?:-](=${this.non_space_plain_scalar_character(c)})))`, "u"));
+        return o(this.rgx(RegExp(`(:(![-?:,[\\]{}\\x23&*!|>'"%@\`])${non_space_character // '#'
+}|(:[?:-](=${this.non_space_plain_scalar_character(c)})))`, "u")));
       }
 
       // [103]
@@ -1142,7 +1157,7 @@
       }
 
       plain_scalar_characters(c) {
-        return this.rgx(RegExp(`${this.plain_scalar_characters_re(c)}`, "u"));
+        return o(this.rgx(RegExp(`${this.plain_scalar_characters_re(c)}`, "u")));
       }
 
       // [104]
@@ -1205,7 +1220,7 @@
       }
 
       indentation_spaces_n(n) {
-        return this.rgx(RegExp(`${space_character}{${n}}`));
+        return o(this.rgx(RegExp(`${space_character}{${n}}`)));
       }
 
       // [110]
@@ -1214,7 +1229,7 @@
 
         // # When n≥1
       indentation_spaces_less_than(n) {
-        return this.all(this.indentation_spaces(), this.lt(this.len(this.match), n));
+        return o(this.all(this.indentation_spaces(), this.lt(this.len(this.match), n)));
       }
 
       // [111]
@@ -1223,7 +1238,7 @@
 
         // # When n≥0
       indentation_spaces_less_or_equal(n) {
-        return this.all(this.indentation_spaces(), this.le(this.len(this.match), n));
+        return o(this.all(this.indentation_spaces(), this.le(this.len(this.match), n)));
       }
 
       // [112]
@@ -1248,11 +1263,11 @@
       // indentation-spaces-exact(n) ::=
       //   indentation-spaces(n)
       indentation_spaces_exact(n) {
-        return this.indentation_spaces_n(n);
+        return o(this.indentation_spaces_n(n));
       }
 
       indentation_spaces_plus_maybe_more(n) {
-        return this.rgx(indentation_spaces_plus_maybe_more(n));
+        return o(this.rgx(indentation_spaces_plus_maybe_more(n)));
       }
 
       // [115]
@@ -1261,7 +1276,7 @@
       //   folded-whitespace(n,FLOW-IN)
       //   indentation-spaces-plus-maybe-more(n)
       flow_folded_whitespace(n) {
-        return this.all(this.rgx(RegExp(`${separation_blanks}?`)), this.folded_whitespace(n, "FLOW-IN"), this.indentation_spaces_plus_maybe_more(n));
+        return o(this.all(this.rgx(RegExp(`${separation_blanks}?`)), this.folded_whitespace(n, "FLOW-IN"), this.indentation_spaces_plus_maybe_more(n)));
       }
 
       // [116]
@@ -1272,7 +1287,7 @@
       //     )
       //   | break-as-space
       folded_whitespace(n, c) {
-        return this.any(this.all(this.rgx(line_break), this.rep('+', this.empty_line(n, c))), this.rgx(break_as_space));
+        return o(this.any(this.all(this.rgx(line_break), this.rep('+', this.empty_line(n, c))), this.rgx(break_as_space)));
       }
 
       // [117]
@@ -1314,7 +1329,7 @@
       //   )
       //   break-as-line-feed
       empty_line(n, c) {
-        return this.got(this.all(this.any([this.line_prefix_spaces, n, c], this.indentation_spaces_less_than(n)), this.rgx(break_as_line_feed)));
+        return o(this.got(this.all(this.any([this.line_prefix_spaces, n, c], this.indentation_spaces_less_than(n)), this.rgx(break_as_line_feed))));
       }
 
       // [121]
@@ -1349,7 +1364,7 @@
       //     )
       //   | separation-blanks
       separation_lines(n) {
-        return this.rgx(RegExp(`(:(:${comment_lines}${indentation_spaces_plus_maybe_more(n)})|${separation_blanks})`, "u"));
+        return o(this.rgx(RegExp(`(:(:${comment_lines}${indentation_spaces_plus_maybe_more(n)})|${separation_blanks})`, "u")));
       }
 
       separation_blanks() {
@@ -1413,7 +1428,7 @@
       }
 
       node_properties(n, c) {
-        return this.all(this.check_node_properties, this.any(this.all(this.tag_property, this.rep('?', this.all(this.separation_characters(n, c), this.anchor_property))), this.all(this.anchor_property, this.rep('?', this.all(this.separation_characters(n, c), this.tag_property)))));
+        return o(this.all(this.check_node_properties, this.any(this.all(this.tag_property, this.rep('?', this.all(this.separation_characters(n, c), this.anchor_property))), this.all(this.anchor_property, this.rep('?', this.all(this.separation_characters(n, c), this.tag_property))))));
       }
 
       // [138]
@@ -1483,6 +1498,21 @@
       try_: true,
       got_: true,
       not_: true
+    };
+
+    o = function(f) {
+      var fn, name;
+      if (!Boolean(ENV.TRACE)) {
+        return f;
+      }
+      name = ((new Error().stack).match(/at Parser.(\w+?_\w+) \(/))[1];
+      fn = function() {
+        return f;
+      };
+      Object.defineProperty(fn, 'name', {
+        value: name
+      });
+      return fn;
     };
 
     // [002]

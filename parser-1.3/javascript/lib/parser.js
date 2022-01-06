@@ -186,7 +186,7 @@
       }
 
       got(rule, {name, try_, got_, not_} = {}) {
-        var got_func, not_func, try_func;
+        var got, got_func, not_func, try_func;
         if (name == null) {
           name = ((new Error().stack).match(/at Parser.(\w+?_\w+) \(/))[1];
         }
@@ -208,7 +208,7 @@
         if (not_) {
           not_func = this.receiver.constructor.prototype[`not_${name}`] || die(`@receiver.not_${name} not defined`);
         }
-        return () => {
+        return got = () => {
           var context, pos, value;
           pos = this.pos;
           context = {
@@ -313,7 +313,7 @@
       }
 
       // Match a regex:
-      rgx(regex, debug = false) {
+      rgx(regex, name) {
         var on_end, rgx;
         if (!isRegex(regex)) {
           regex = RegExp(`${regex}`, "u");
@@ -332,7 +332,12 @@
           }
           return false;
         };
-        return name_('rgx', rgx, `rgx(${stringify(regex)})`);
+        if (TRACE) {
+          if (name == null) {
+            name = ((new Error().stack).match(/at Parser.(\w+?_\w+) \(/))[1];
+          }
+        }
+        return name_('rgx', rgx, `rgx('${name}' ${stringify(regex)})`);
       }
 
       // Match a single char:

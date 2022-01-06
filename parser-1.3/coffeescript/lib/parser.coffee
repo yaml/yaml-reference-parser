@@ -174,7 +174,7 @@ global.Parser = class Parser extends Grammar
       not_func = @receiver.constructor.prototype["not_#{name}"] or
         die "@receiver.not_#{name} not defined"
 
-    =>
+    got = =>
       pos = @pos
 
       context =
@@ -270,7 +270,7 @@ global.Parser = class Parser extends Grammar
     return [regex, on_end]
 
   # Match a regex:
-  rgx: (regex, debug=false)->
+  rgx: (regex, name)->
     regex = /// #{regex} ///u unless isRegex regex
     regex = String(regex)
     [regex, on_end] = make(regex)
@@ -282,7 +282,9 @@ global.Parser = class Parser extends Grammar
         @pos += m[0].length
         return true
       return false
-    name_ 'rgx', rgx, "rgx(#{stringify regex})"
+    if TRACE
+      name ?= ((new Error().stack).match(/at Parser.(\w+?_\w+) \(/))[1]
+    name_ 'rgx', rgx, "rgx('#{name}' #{stringify regex})"
 
   # Match a single char:
   chr: (char)->
