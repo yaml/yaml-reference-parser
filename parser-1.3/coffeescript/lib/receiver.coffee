@@ -75,14 +75,6 @@ global.Receiver = class Receiver
     events = @cache.pop() or FAIL 'cache_drop'
     return events
 
-  cache_get: (type)->
-    last = _.last @cache
-    return \
-      last &&
-      last[0] &&
-      last[0].event == type &&
-      last[0]
-
   check_document_start: ->
     return unless @document_start
     @send @document_start
@@ -295,11 +287,11 @@ global.Receiver = class Receiver
     delete @tag
     delete @anchor
 
-  not_block_collection_tag: ->
-    delete @tag
-
   not_block_collection_anchor: ->
     delete @anchor
+
+  not_block_collection_tag: ->
+    delete @tag
 
   got_anchor_property: (o)->
     @anchor = o.text[1..]

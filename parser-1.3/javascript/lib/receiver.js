@@ -146,12 +146,6 @@
         return events;
       }
 
-      cache_get(type) {
-        var last;
-        last = _.last(this.cache);
-        return last && last[0] && last[0].event === type && last[0];
-      }
-
       check_document_start() {
         if (!this.document_start) {
           return;
@@ -468,12 +462,12 @@
         return delete this.anchor;
       }
 
-      not_block_collection_tag() {
-        return delete this.tag;
-      }
-
       not_block_collection_anchor() {
         return delete this.anchor;
+      }
+
+      not_block_collection_tag() {
+        return delete this.tag;
       }
 
       got_anchor_property(o) {

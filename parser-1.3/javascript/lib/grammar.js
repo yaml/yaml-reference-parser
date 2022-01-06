@@ -160,16 +160,7 @@
       //     | block-mapping(n)
       //   )
       block_collection(n, c) {
-        return o(this.all(this.rep('?', this.all(this.separation_characters(n + 1, c), this.check_node_properties, this.any(this.got(this.all(this.node_properties(n + 1, c), this.comment_lines), {
-          name: 'block_collection_properties',
-          not_: true
-        }), this.got(this.all(this.tag_property, this.comment_lines), {
-          name: 'block_collection_tag',
-          not_: true
-        }), this.got(this.all(this.anchor_property, this.comment_lines), {
-          name: 'block_collection_anchor',
-          not_: true
-        })))), this.comment_lines, this.any(this.block_sequence_context(n, c), () => {
+        return o(this.all(this.rep('?', this.all(this.separation_characters(n + 1, c), this.block_collection_properties(n + 1, c))), this.comment_lines, this.any(this.block_sequence_context(n, c), () => {
           return this.block_mapping(n);
         })));
       }
@@ -1428,7 +1419,7 @@
       }
 
       node_properties(n, c) {
-        return o(this.all(this.check_node_properties, this.any(this.all(this.tag_property, this.rep('?', this.all(this.separation_characters(n, c), this.anchor_property))), this.all(this.anchor_property, this.rep('?', this.all(this.separation_characters(n, c), this.tag_property))))));
+        return o(this.all(this.check_node_properties, this.any(this.all(this.anchor_property, this.rep('?', this.all(this.separation_characters(n, c), this.tag_property))), this.all(this.tag_property, this.rep('?', this.all(this.separation_characters(n, c), this.anchor_property))))));
       }
 
       // [138]

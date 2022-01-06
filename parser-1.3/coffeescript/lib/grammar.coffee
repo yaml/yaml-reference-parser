@@ -328,35 +328,7 @@ global.Grammar = class Grammar
       @rep('?',
         @all(
           @separation_characters(n + 1, c)
-          @check_node_properties
-          @any(
-            @got(
-              @all(
-                @node_properties(n + 1, c)
-                @comment_lines
-              )
-              name: 'block_collection_properties'
-              not_: true
-            )
-
-            @got(
-              @all(
-                @tag_property
-                @comment_lines
-              )
-              name: 'block_collection_tag'
-              not_: true
-            )
-
-            @got(
-              @all(
-                @anchor_property
-                @comment_lines
-              )
-              name: 'block_collection_anchor'
-              not_: true
-            )
-          )
+          @block_collection_properties(n + 1, c)
         )
       )
       @comment_lines
@@ -2751,20 +2723,20 @@ global.Grammar = class Grammar
       @check_node_properties
       @any(
         @all(
-          @tag_property
-          @rep('?',
-            @all(
-              @separation_characters(n, c)
-              @anchor_property
-            )
-          )
-        )
-        @all(
           @anchor_property
           @rep('?',
             @all(
               @separation_characters(n, c)
               @tag_property
+            )
+          )
+        )
+        @all(
+          @tag_property
+          @rep('?',
+            @all(
+              @separation_characters(n, c)
+              @anchor_property
             )
           )
         )

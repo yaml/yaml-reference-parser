@@ -185,6 +185,14 @@
         return value;
       }
 
+      not(rule, {name} = {}) {
+        return this.got(rule, {
+          name: name,
+          not_: true,
+          got_: false
+        });
+      }
+
       got(rule, {name, try_, got_, not_} = {}) {
         var got, got_func, not_func, try_func;
         if (name == null) {

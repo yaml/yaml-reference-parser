@@ -158,6 +158,9 @@ global.Parser = class Parser extends Grammar
 
     return value
 
+  not: (rule, {name} = {})->
+    @got(rule, name: name, not_: true, got_: false)
+
   got: (rule, {name, try_, got_, not_} = {})->
     name ?= ((new Error().stack).match(/at Parser.(\w+?_\w+) \(/))[1]
     try_ ?= false
