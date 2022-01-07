@@ -22,6 +22,7 @@
 
     class Parser extends Grammar {
       constructor(receiver) {
+        var f, j, len1, make_method, method_name, ref;
         super();
         receiver.parser = this;
         this.receiver = receiver;
@@ -35,6 +36,36 @@
           this.trace_on = true;
           this.trace_off = 0;
           this.trace_info = ['', '', ''];
+          make_method = function(name, method) {
+            return function(...a) {
+              var fn1, fn2;
+              fn1 = method.call(this, ...a);
+              if (isFunction(fn1)) {
+                fn2 = function() {
+                  return fn1;
+                };
+                Object.defineProperty(fn2, 'name', {
+                  value: fn1.name
+                });
+                Object.defineProperty(fn1, 'name', {
+                  value: name
+                });
+                return fn2;
+              }
+              return fn1;
+            };
+          };
+          ref = Object.getOwnPropertyNames(Grammar.prototype);
+          for (j = 0, len1 = ref.length; j < len1; j++) {
+            method_name = ref[j];
+            if (method_name === 'constructor') {
+              continue;
+            }
+            if ((f = String(Grammar.prototype[method_name])).match(/^\w+\(\)/)) {
+              continue;
+            }
+            Grammar.prototype[method_name] = make_method(method_name, Grammar.prototype[method_name]);
+          }
         }
       }
 
@@ -141,6 +172,9 @@
           [func, ...args] = func;
         } else {
           args = [];
+        }
+        if (func === Grammar.prototype.block_node) {
+          XXX(func);
         }
         (() => {
           if (!isFunction(func)) {

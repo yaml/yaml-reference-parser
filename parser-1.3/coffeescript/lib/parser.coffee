@@ -31,6 +31,22 @@ global.Parser = class Parser extends Grammar
       @trace_off = 0
       @trace_info = ['', '', '']
 
+      make_method = (name, method)->
+        (a...)->
+          fn1 = method.call(@, a...)
+          if isFunction fn1
+            fn2 = -> fn1
+            Object.defineProperty(fn2, 'name', value: fn1.name)
+            Object.defineProperty(fn1, 'name', value: name)
+            return fn2
+          return fn1
+
+      for method_name in Object.getOwnPropertyNames(Grammar::)
+        continue if method_name is 'constructor'
+        if (f = String(Grammar::[method_name])).match(/^\w+\(\)/)
+          continue
+        Grammar::[method_name] = make_method(method_name, Grammar::[method_name])
+
   parse: (@input)->
     @input += "\n" unless \
       @input.length == 0 or
@@ -118,6 +134,7 @@ global.Parser = class Parser extends Grammar
       [func, args...] = func
     else
       args = []
+    XXX func if func == Grammar::block_node
 
     do =>
       FAIL "Bad call type '#{typeof_ func}' for '#{func}'" \
@@ -126,6 +143,7 @@ global.Parser = class Parser extends Grammar
     @state_push(func.name)
 
     trace = func.trace ?= func.name
+
     if STATS
       @stats.calls[trace] ?= 0
       @stats.calls[trace]++
