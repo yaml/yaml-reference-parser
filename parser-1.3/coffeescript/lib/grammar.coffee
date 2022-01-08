@@ -1,3 +1,11 @@
+Function::n = (name)->
+  Object.defineProperty(@, 'name', value: name)
+  return @
+
+Function::w = ->
+  warn 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  return XXX typeof @
+
 global.Grammar = class Grammar
   # Helper functions:
 
@@ -328,7 +336,7 @@ global.Grammar = class Grammar
       @comment_lines
       @any(
         @block_sequence_context(n, c)
-        => @block_mapping(n)
+        -> @block_mapping(n)
       )
     )
 
@@ -373,7 +381,7 @@ global.Grammar = class Grammar
 
   block_sequence_context: (n, c)->
     @got(
-      case_ = =>
+      case_ = ->
         switch c
           when 'BLOCK-OUT' then @block_sequence(n - 1)
           when 'BLOCK-IN'  then @block_sequence(n)
@@ -481,7 +489,7 @@ global.Grammar = class Grammar
         \?
         #{ws_lookahead}
       ///, '"? "')
-      => @block_indented_node(n, "BLOCK-OUT")
+      -> @block_indented_node(n, "BLOCK-OUT")
     )
 
 
@@ -499,7 +507,7 @@ global.Grammar = class Grammar
         :
         #{ws_lookahead}
       ///)
-      => @block_indented_node(n, "BLOCK-OUT")
+      -> @block_indented_node(n, "BLOCK-OUT")
     )
 
 
@@ -626,7 +634,7 @@ global.Grammar = class Grammar
         #{ws_lookahead}
         (! #{non_space_character} )
       ///u)
-      => @block_indented_node(n, "BLOCK-IN")
+      -> @block_indented_node(n, "BLOCK-IN")
     )
 
 
@@ -833,7 +841,7 @@ global.Grammar = class Grammar
     @all(
       @rep('*', @empty_line(n, "BLOCK-IN"))
       @any(
-        [ @folded_scalar_lines, n ]
+        @folded_scalar_lines(n)
         [ @folded_scalar_spaced_lines, n ]
       )
     )
@@ -853,7 +861,7 @@ global.Grammar = class Grammar
       [ @folded_scalar_text, n ]
       @rep('*',
         @all(
-          [ @folded_whitespace, n, "BLOCK-IN" ]
+          @folded_whitespace(n, "BLOCK-IN")
           [ @folded_scalar_text, n ]
         )
       )
@@ -951,13 +959,13 @@ global.Grammar = class Grammar
     @all(
       @any(
         @all(
-          => @block_scalar_indentation_indicator(n)
+          -> @block_scalar_indentation_indicator(n)
           @block_scalar_chomping_indicator
           @ws_lookahead     # TODO This might be needed in spec
         )
         @all(
           @block_scalar_chomping_indicator
-          => @block_scalar_indentation_indicator(n)
+          -> @block_scalar_indentation_indicator(n)
         )
       )
       @comment_line
@@ -972,7 +980,7 @@ global.Grammar = class Grammar
   block_scalar_indentation_indicator: (n)->
     @any(
       @if(@rgx(decimal_digit_1_9), @set('m', @ord(@match)))
-      @if(@empty, @set('m', => @auto_detect(n)))
+      @if(@empty, @set('m', -> @auto_detect(n)))
     )
 
 
@@ -1008,10 +1016,11 @@ global.Grammar = class Grammar
   #   block-scalar-chomp-empty(n,KEEP)  ::= line-keep-empty(n)
 
   block_scalar_chomp_empty: (n, t)->
-    switch t
-      when 'STRIP' then @line_strip_empty(n)
-      when 'CLIP'  then @line_strip_empty(n)
-      when 'KEEP'  then @line_keep_empty(n)
+    ->
+      switch t
+        when 'STRIP' then @line_strip_empty(n)
+        when 'CLIP'  then @line_strip_empty(n)
+        when 'KEEP'  then @line_keep_empty(n)
 
 
 
@@ -1191,7 +1200,7 @@ global.Grammar = class Grammar
         @all(
           @chr(',')
           @rep('?', @separation_characters(n, c))
-          => @rep('?', @flow_mapping_entries(n, c ))
+          -> @rep('?', @flow_mapping_entries(n, c ))
         )
       )
     )
@@ -1214,10 +1223,10 @@ global.Grammar = class Grammar
           \?
           #{ws_lookahead}
         ///)
-        [ @separation_characters, n, c ]
-        [ @flow_mapping_explicit_entry, n, c ]
+        @separation_characters(n, c)
+        @flow_mapping_explicit_entry(n, c)
       )
-      [ @flow_mapping_implicit_entry, n, c ]
+      @flow_mapping_implicit_entry(n, c)
     )
 
 
@@ -1232,10 +1241,10 @@ global.Grammar = class Grammar
 
   flow_mapping_explicit_entry: (n, c)->
     @any(
-      [ @flow_mapping_implicit_entry, n, c ]
+      @flow_mapping_implicit_entry(n, c)
       @all(
-        @empty_node
-        @empty_node
+        @empty_node()
+        @empty_node()
       )
     )
 
@@ -1249,9 +1258,9 @@ global.Grammar = class Grammar
 
   flow_mapping_implicit_entry: (n, c)->
     @any(
-      [ @flow_mapping_yaml_key_entry, n, c ]
-      [ @flow_mapping_empty_key_entry, n, c ]
-      [ @flow_mapping_json_key_entry, n, c ]
+      @flow_mapping_yaml_key_entry(n, c)
+      @flow_mapping_empty_key_entry(n, c)
+      @flow_mapping_json_key_entry(n, c)
     )
 
 
@@ -1269,11 +1278,11 @@ global.Grammar = class Grammar
 
   flow_mapping_yaml_key_entry: (n, c)->
     @all(
-      [ @flow_yaml_node, n, c ]
+      @flow_yaml_node(n, c)
       @any(
         @all(
-          @rep('?', [ @separation_characters, n, c ])
-          [ @flow_mapping_separate_value, n, c ]
+          @rep('?', @separation_characters(n, c ))
+          @flow_mapping_separate_value(n, c)
         )
         @empty_node
       )
@@ -1290,7 +1299,7 @@ global.Grammar = class Grammar
     @got(
       @all(
         @empty_node
-        [ @flow_mapping_separate_value, n, c ]
+        @flow_mapping_separate_value(n, c)
       )
       try_got_not
     )
@@ -1319,8 +1328,8 @@ global.Grammar = class Grammar
       ///u)
       @any(
         @all(
-          [ @separation_characters, n, c ]
-          [ @flow_node, n, c ]
+          @separation_characters(n, c)
+          -> @flow_node(n, c)
         )
         @empty_node
       )
@@ -1341,11 +1350,11 @@ global.Grammar = class Grammar
 
   flow_mapping_json_key_entry: (n, c)->
     @all(
-      [ @flow_json_node, n, c ]
+      -> @flow_json_node(n, c)
       @any(
         @all(
-          @rep('?', [ @separation_characters, n, c ])
-          [ @flow_mapping_adjacent_value, n, c ]
+          @rep('?', @separation_characters(n, c))
+          @flow_mapping_adjacent_value(n, c)
         )
         @empty_node
       )
@@ -1369,8 +1378,8 @@ global.Grammar = class Grammar
       @chr(':')
       @any(
         @all(
-          @rep('?', [ @separation_characters, n, c ])
-          [ @flow_node, n, c ]
+          @rep('?', @separation_characters(n, c))
+          -> @flow_node(n, c)
         )
         @empty_node
       )
@@ -1395,10 +1404,10 @@ global.Grammar = class Grammar
             \?
             #{ws_lookahead}
           ///)
-          [ @separation_characters, n, c ]
-          [ @flow_mapping_explicit_entry, n, c ]
+          @separation_characters(n, c)
+          @flow_mapping_explicit_entry(n, c)
         )
-        [ @flow_pair_entry, n, c ]
+        @flow_pair_entry(n, c)
       )
       try_got_not
     )
@@ -1413,9 +1422,9 @@ global.Grammar = class Grammar
 
   flow_pair_entry: (n, c)->
     @any(
-      [ @flow_pair_yaml_key_entry, n, c ]
-      [ @flow_mapping_empty_key_entry, n, c ]
-      [ @flow_pair_json_key_entry, n, c ]
+      @flow_pair_yaml_key_entry(n, c)
+      @flow_mapping_empty_key_entry(n, c)
+      @flow_pair_json_key_entry(n, c)
     )
 
 
@@ -1427,8 +1436,8 @@ global.Grammar = class Grammar
 
   flow_pair_yaml_key_entry: (n, c)->
     @all(
-      [ @implicit_yaml_key, "FLOW-KEY" ]
-      [ @flow_mapping_separate_value, n, c ]
+      @implicit_yaml_key("FLOW-KEY")
+      @flow_mapping_separate_value(n, c)
     )
 
 
@@ -1440,8 +1449,8 @@ global.Grammar = class Grammar
 
   flow_pair_json_key_entry: (n, c)->
     @all(
-      [ @implicit_json_key, "FLOW-KEY" ]
-      [ @flow_mapping_adjacent_value, n, c ]
+      @implicit_json_key("FLOW-KEY")
+      (@flow_mapping_adjacent_value(n, c))
     )
 
 
@@ -1455,7 +1464,7 @@ global.Grammar = class Grammar
   implicit_yaml_key: (c)->
     @all(
       # @max(1024)
-      [ @flow_yaml_node, null, c ]
+      @flow_yaml_node(null, c)
       @rep('?', @separation_blanks)
     )
 
@@ -1470,7 +1479,7 @@ global.Grammar = class Grammar
   implicit_json_key: (c)->
     @all(
       # @max(1024)
-      [ @flow_json_node, null, c ]
+      @flow_json_node(null, c)
       @rep('?', @separation_blanks)
     )
 
@@ -1494,13 +1503,13 @@ global.Grammar = class Grammar
   flow_yaml_node: (n, c)->
     @any(
       @alias_node
-      [ @flow_yaml_content, n, c ]
+      @flow_yaml_content(n, c)
       @all(
-        [ @node_properties, n, c ]
+        @node_properties(n, c)
         @any(
           @all(
-            [ @separation_characters, n, c ]
-            [ @flow_content, n, c ]
+            @separation_characters(n, c)
+            -> @flow_content(n, c)
           )
           @empty_node
         )
@@ -1521,11 +1530,11 @@ global.Grammar = class Grammar
     @all(
       @rep('?',
         @all(
-          [ @node_properties, n, c ]
-          [ @separation_characters, n, c ]
+          @node_properties(n, c)
+          @separation_characters(n, c)
         )
       )
-      [ @flow_json_content, n, c ]
+      @flow_json_content(n, c)
     )
 
 
@@ -1543,8 +1552,8 @@ global.Grammar = class Grammar
         @chr('[')
         name: 'flow_sequence_start'
       )
-      @rep('?', [ @separation_characters, n, c ])
-      @rep('?', [ @flow_sequence_context, n, c ])
+      @rep('?', @separation_characters(n, c))
+      @rep('?', @flow_sequence_context(n, c))
       @got(
         @chr(']')
         name: 'flow_sequence_end'
@@ -1565,13 +1574,13 @@ global.Grammar = class Grammar
 
   flow_sequence_entries: (n, c)->
     @all(
-      [ @flow_sequence_entry, n, c ]
-      @rep('?', [ @separation_characters, n, c ])
+      @flow_sequence_entry(n, c)
+      @rep('?', @separation_characters(n, c))
       @rep('?',
         @all(
           @chr(',')
-          @rep('?', [ @separation_characters, n, c ])
-          @rep('?', [ @flow_sequence_entries, n, c ])
+          @rep('?', @separation_characters(n, c))
+          @rep('?', -> @flow_sequence_entries(n, c))
         )
       )
     )
@@ -1585,8 +1594,8 @@ global.Grammar = class Grammar
 
   flow_sequence_entry: (n, c)->
     @any(
-      [ @flow_pair, n, c ]
-      [ @flow_node, n, c ]
+      -> @flow_pair(n, c)
+      -> @flow_node(n, c)
     )
 
 
@@ -1601,7 +1610,7 @@ global.Grammar = class Grammar
     @got(
       @all(
         @chr('"')
-        [ @double_quoted_text, n, c ]
+        @double_quoted_text(n, c)
         @chr('"')
       )
     )
@@ -1635,7 +1644,7 @@ global.Grammar = class Grammar
     @all(
       @double_quoted_first_line
       @any(
-        [ @double_quoted_next_line, n ]
+        @double_quoted_next_line(n)
         @rgx(/// #{blank_character}* ///)
       )
     )
@@ -1688,15 +1697,15 @@ global.Grammar = class Grammar
   double_quoted_next_line: (n)->
     @all(
       @any(
-        [ @double_quoted_line_continuation, n ]
-        [ @flow_folded_whitespace, n ]
+        @double_quoted_line_continuation(n)
+        @flow_folded_whitespace(n)
       )
       @rep('?',
         @all(
           @non_space_double_quoted_character
           @double_quoted_first_line
           @any(
-            [ @double_quoted_next_line, n ]
+            -> @double_quoted_next_line(n)
             @rgx(/// #{blank_character}* ///)
           )
         )
@@ -1757,8 +1766,8 @@ global.Grammar = class Grammar
         \\
         #{line_break}
       ///)
-      @rep('*', [ @empty_line, n, "FLOW-IN" ])
-      [ @indentation_spaces_plus_maybe_more, n ]
+      @rep('*', @empty_line(n, "FLOW-IN"))
+      @indentation_spaces_plus_maybe_more(n)
     )
 
 
@@ -1803,7 +1812,7 @@ global.Grammar = class Grammar
     @got(
       @all(
         @chr("'")
-        [ @single_quoted_text, n, c ]
+        @single_quoted_text(n, c)
         @chr("'")
       )
     )
@@ -1837,7 +1846,7 @@ global.Grammar = class Grammar
     @all(
       @rgx(single_quoted_first_line)
       @any(
-        [ @single_quoted_next_line, n ]
+        @single_quoted_next_line(n)
         @rgx(/// #{blank_character}* ///)
       )
     )
@@ -1893,12 +1902,12 @@ global.Grammar = class Grammar
 
   single_quoted_next_line: (n)->
     @all(
-      [ @flow_folded_whitespace, n ]
+      @flow_folded_whitespace(n)
       @rep('?',
         @all(
           @rgx(single_quoted_next_line)
           @any(
-            [ @single_quoted_next_line, n ]
+            -> @single_quoted_next_line(n)
             @rgx(/// #{blank_character}* ///)
           )
         )
@@ -1962,12 +1971,12 @@ global.Grammar = class Grammar
 
   flow_plain_scalar: (n, c)->
     @got(
-      case_ = =>
+      case_ = ->
         switch c
-          when 'FLOW-OUT'  then [ @plain_scalar_multi_line, n, c ]
-          when 'FLOW-IN'   then [ @plain_scalar_multi_line, n, c ]
-          when 'BLOCK-KEY' then [ @plain_scalar_single_line, c ]
-          when 'FLOW-KEY'  then [ @plain_scalar_single_line, c ]
+          when 'FLOW-OUT'  then @plain_scalar_multi_line(n, c)
+          when 'FLOW-IN'   then @plain_scalar_multi_line(n, c)
+          when 'BLOCK-KEY' then @plain_scalar_single_line(c)
+          when 'FLOW-KEY'  then @plain_scalar_single_line(c)
     )
 
 

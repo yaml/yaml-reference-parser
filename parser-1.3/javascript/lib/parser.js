@@ -658,6 +658,7 @@
 
       trace_quiet() {
         var noisy, small;
+        return [];
         if (DEBUG) {
           return [];
         }

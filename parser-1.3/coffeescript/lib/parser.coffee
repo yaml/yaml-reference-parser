@@ -488,6 +488,7 @@ global.Parser = class Parser extends Grammar
     '' || ENV.TRACE_START
 
   trace_quiet: ->
+    return []
     return [] if DEBUG
 
     small = [
