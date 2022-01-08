@@ -1,8 +1,46 @@
 require 'ingy-prelude'
 
+Function::n = (name)->
+  Object.defineProperty(@, 'name', value: name)
+  return @
+
+Function::w = ->
+  warn 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  return XXX typeof @
+
 global.ENV = process.env
 
 global.memoize = require('moize').maxSize(50)
+
+#------------------------------------------------------------------------------
+# Grammar helper functions:
+#------------------------------------------------------------------------------
+
+# Generate required regular expression and string variants:
+global.make = (rgx)->
+  str = String(rgx)
+
+  # XXX Can remove when stable:
+  if str.match(/>>\d+<</)
+    die_ "Bad regex '#{rgx}'"
+  if str.match(/\/mu?y?$/)
+    die_ "make(#{str}) expression should not use 'm' flag"
+
+  str = str[0..-2] if str.endsWith('u')
+  str = String(str)[1..-2]
+  chars = str[1..-2]
+  str = str
+    .replace(/\(([:!=]|<=)/g, '(?$1')
+  return [ str, chars ]
+
+global.start_of_line = '^'
+global.end_of_input = '(?!.|\\n)'
+global.try_got_not = try_: true, got_: true, not_: true
+
+
+#------------------------------------------------------------------------------
+# Generic helper functions:
+#------------------------------------------------------------------------------
 
 global.name_ = (name, func, trace)->
   func.trace = trace || name

@@ -1,50 +1,22 @@
-Function::n = (name)->
-  Object.defineProperty(@, 'name', value: name)
-  return @
+# The code for the YANL 1.3 grammar is meant to mirror the spec productions:
+#
+# * https://spec.yaml.io/main/spec/1.3.0/#rule-yaml-stream
+# * https://github.com/yaml/yaml-spec/blob/main-1.3/spec/1.3.0/spec.md?plain=1#L4606
+#
+# Each grammar rule function here is preceded by the spec production.
 
-Function::w = ->
-  warn 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-  return XXX typeof @
+require './prelude'
 
 global.Grammar = class Grammar
-  # Helper functions:
-
-  # Generate required regular expression and string variants:
-  make = (rgx)->
-    str = String(rgx)
-
-    # XXX Can remove when stable:
-    if str.match(/>>\d+<</)
-      die_ "Bad regex '#{rgx}'"
-    if str.match(/\/mu?y?$/)
-      die_ "make(#{str}) expression should not use 'm' flag"
-
-    str = str[0..-2] if str.endsWith('u')
-    str = String(str)[1..-2]
-    chars = str[1..-2]
-    str = str
-      .replace(/\(([:!=]|<=)/g, '(?$1')
-    return [ str, chars ]
-
-  start_of_line = '^'
-  end_of_input = '(?!.|\\n)'
 
   inits = []
   init = (func, pos)->
-    line = (new Error()).stack.split("\n")[2].split(':')[1]
-    line =">>#{line}<<"
-
+    line = ">>#{(new Error()).stack.split("\n")[2].split(':')[1]}<<"
     if pos?
       inits.splice(pos, 0, func)
     else
       inits.push(func)
       return [line, line]
-
-  try_got_not = try_: true, got_: true, not_: true
-
-
-
-  # Grammar rules:
 
   TOP: -> @yaml_stream
 

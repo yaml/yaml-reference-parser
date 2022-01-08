@@ -2,10 +2,59 @@
 (function() {
   require('ingy-prelude');
 
+  Function.prototype.n = function(name) {
+    Object.defineProperty(this, 'name', {
+      value: name
+    });
+    return this;
+  };
+
+  Function.prototype.w = function() {
+    warn('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+    return XXX(typeof this);
+  };
+
   global.ENV = process.env;
 
   global.memoize = require('moize').maxSize(50);
 
+  //------------------------------------------------------------------------------
+  // Grammar helper functions:
+  //------------------------------------------------------------------------------
+
+  // Generate required regular expression and string variants:
+  global.make = function(rgx) {
+    var chars, str;
+    str = String(rgx);
+    // XXX Can remove when stable:
+    if (str.match(/>>\d+<</)) {
+      die_(`Bad regex '${rgx}'`);
+    }
+    if (str.match(/\/mu?y?$/)) {
+      die_(`make(${str}) expression should not use 'm' flag`);
+    }
+    if (str.endsWith('u')) {
+      str = str.slice(0, -1);
+    }
+    str = String(str).slice(1, -1);
+    chars = str.slice(1, -1);
+    str = str.replace(/\(([:!=]|<=)/g, '(?$1');
+    return [str, chars];
+  };
+
+  global.start_of_line = '^';
+
+  global.end_of_input = '(?!.|\\n)';
+
+  global.try_got_not = {
+    try_: true,
+    got_: true,
+    not_: true
+  };
+
+  //------------------------------------------------------------------------------
+  // Generic helper functions:
+  //------------------------------------------------------------------------------
   global.name_ = function(name, func, trace) {
     var f;
     func.trace = trace || name;
