@@ -1170,7 +1170,7 @@
       plain_scalar_characters_re(c) {
         var non_space_plain_scalar_character, plain_scalar_characters;
         non_space_plain_scalar_character = this.non_space_plain_scalar_character(c);
-        [plain_scalar_characters] = make(RegExp(`(:(:(![:\\x23])${non_space_plain_scalar_character})|(:(<=${non_space_character})\\x23)|(::(=${non_space_plain_scalar_character})))`, "u"));
+        [plain_scalar_characters] = regx(RegExp(`(:(:(![:\\x23])${non_space_plain_scalar_character})|(:(<=${non_space_character})\\x23)|(::(=${non_space_plain_scalar_character})))`, "u"));
         return plain_scalar_characters;
       }
 
@@ -1201,7 +1201,7 @@
       //   non-space-character
       block_plain_scalar_character() {
         var re;
-        [re] = make(RegExp(`(:${non_space_character})`, "u"));
+        [re] = regx(RegExp(`(:${non_space_character})`, "u"));
         return re;
       }
 
@@ -1211,7 +1211,7 @@
       //   - flow-collection-indicators
       flow_plain_scalar_character() {
         var re;
-        [re] = make(RegExp(`(:(!${flow_collection_indicator})${non_space_character})`, "u"));
+        [re] = regx(RegExp(`(:(!${flow_collection_indicator})${non_space_character})`, "u"));
         return re;
       }
 
@@ -1490,23 +1490,23 @@
     //   byte-order-mark?
     //   blanks-and-comment-line*
     [document_prefix] = init(function() {
-      return [document_prefix] = make(RegExp(`${byte_order_mark}?${blanks_and_comment_line}*`, "u"));
+      return [document_prefix] = regx(RegExp(`${byte_order_mark}?${blanks_and_comment_line}*`, "u"));
     });
 
     // [004]
     // document-start-indicator ::=
     //   "---"
     [document_start_indicator] = init(function() {
-      return [document_start_indicator] = make(RegExp(`---${ws_lookahead}`));
+      return [document_start_indicator] = regx(RegExp(`---${ws_lookahead}`));
     });
 
     // [005]
     // document-end-indicator ::=
     //   "..."                             # Not followed by non-ws char
-    [document_end_indicator] = make(/\.\.\./);
+    [document_end_indicator] = regx(/\.\.\./);
 
     [line_trail_comments] = init(function() {
-      return [line_trail_comments] = make(RegExp(`${comment_content}${line_ending}`, "u"));
+      return [line_trail_comments] = regx(RegExp(`${comment_content}${line_ending}`, "u"));
     });
 
     // [055]
@@ -1515,10 +1515,10 @@
     //   | flow-mapping(n,c)
     //   | single-quoted-scalar(n,c)
     //   | double-quoted-scalar(n,c)
-    [check_flow_json_content] = make(/(=[\[{"'])/);
+    [check_flow_json_content] = regx(/(=[\[{"'])/);
 
     [non_space_double_quoted_character] = init(function() {
-      return [non_space_double_quoted_character] = make(RegExp(`(!${blank_character})${non_break_double_quoted_character}`));
+      return [non_space_double_quoted_character] = regx(RegExp(`(!${blank_character})${non_break_double_quoted_character}`));
     });
 
     // [084]
@@ -1530,14 +1530,14 @@
     //       - '"'
     //     )
     [non_break_double_quoted_character] = init(function() {
-      return [non_break_double_quoted_character] = make(RegExp(`(:${double_quoted_scalar_escape_character}|(![\\\\"])${json_character})`));
+      return [non_break_double_quoted_character] = regx(RegExp(`(:${double_quoted_scalar_escape_character}|(![\\\\"])${json_character})`));
     });
 
     // [091]
     // single-quoted-one-line ::=
     //   non-break-single-quoted-character*
     [single_quoted_one_line] = init(function() {
-      return [single_quoted_one_line] = make(RegExp(`${non_break_single_quoted_character}*`));
+      return [single_quoted_one_line] = regx(RegExp(`${non_break_single_quoted_character}*`));
     });
 
     // [092]
@@ -1547,7 +1547,7 @@
     //     non-space-single-quoted-character
     //   )*
     [single_quoted_first_line] = init(function() {
-      return [single_quoted_first_line] = make(RegExp(`(:${blank_character}*${non_space_single_quoted_character})*`));
+      return [single_quoted_first_line] = regx(RegExp(`(:${blank_character}*${non_space_single_quoted_character})*`));
     });
 
     // [093]
@@ -1562,7 +1562,7 @@
     //     )
     //   )?
     [single_quoted_next_line] = init(function() {
-      return [single_quoted_next_line] = make(RegExp(`${non_space_single_quoted_character}${single_quoted_first_line}`));
+      return [single_quoted_next_line] = regx(RegExp(`${non_space_single_quoted_character}${single_quoted_first_line}`));
     }, -1);
 
     // [094]
@@ -1570,7 +1570,7 @@
     //     non-break-single-quoted-character
     //   - blank-character
     [non_space_single_quoted_character] = init(function() {
-      return [non_space_single_quoted_character] = make(RegExp(`(:(!${blank_character})${non_break_single_quoted_character})`));
+      return [non_space_single_quoted_character] = regx(RegExp(`(:(!${blank_character})${non_break_single_quoted_character})`));
     });
 
     // [095]
@@ -1581,13 +1581,13 @@
     //       - "'"
     //     )
     [non_break_single_quoted_character] = init(function() {
-      return [non_break_single_quoted_character] = make(RegExp(`(:${single_quoted_escaped_single_quote}|(:(!')${json_character}))`));
+      return [non_break_single_quoted_character] = regx(RegExp(`(:${single_quoted_escaped_single_quote}|(:(!')${json_character}))`));
     });
 
     // [096]
     // single-quoted-escaped-single-quote ::=
     //   "''"
-    [single_quoted_escaped_single_quote] = make(/''/);
+    [single_quoted_escaped_single_quote] = regx(/''/);
 
     // indentation-spaces(n+1) ::=
     //   space-character
@@ -1604,20 +1604,20 @@
     //   separation-blanks?
     indentation_spaces_plus_maybe_more = memoize(function(n) {
       var re;
-      [re] = make(RegExp(`${indentation_spaces_n(n)}${separation_blanks}?`));
+      [re] = regx(RegExp(`${indentation_spaces_n(n)}${separation_blanks}?`));
       return re;
     });
 
     [comment_lines] = init(function() {
-      return [comment_lines] = make(RegExp(`(:${comment_line}|${start_of_line})${blanks_and_comment_line}*`, "u"));
+      return [comment_lines] = regx(RegExp(`(:${comment_line}|${start_of_line})${blanks_and_comment_line}*`, "u"));
     });
 
     [comment_line] = init(function() {
-      return [comment_line] = make(RegExp(`(:(:${separation_blanks}${comment_content}?)?${line_ending})`, "u"));
+      return [comment_line] = regx(RegExp(`(:(:${separation_blanks}${comment_content}?)?${line_ending})`, "u"));
     });
 
     [blanks_and_comment_line] = init(function() {
-      return [blanks_and_comment_line] = make(RegExp(`(:${separation_blanks}${comment_content}?${line_ending})`, "u"));
+      return [blanks_and_comment_line] = regx(RegExp(`(:${separation_blanks}${comment_content}?${line_ending})`, "u"));
     });
 
     // [119]
@@ -1625,7 +1625,7 @@
     //   '#'
     //   non-break-character*
     [comment_content] = init(function() {
-      return [comment_content] = make(RegExp(`(:\\x23${non_break_character}*)`, "u"));
+      return [comment_content] = regx(RegExp(`(:\\x23${non_break_character}*)`, "u"));
     });
 
     // [123]
@@ -1633,21 +1633,21 @@
     //     blank-character+
     //   | <start-of-line>
     [separation_blanks] = init(function() {
-      return [separation_blanks] = make(RegExp(`(:${blank_character}+|${start_of_line})`));
+      return [separation_blanks] = regx(RegExp(`(:${blank_character}+|${start_of_line})`));
     });
 
     // [127]
     // directive-name ::=
     //   non-space-character+
     [directive_name] = init(function() {
-      return [directive_name] = make(RegExp(`${non_space_character}+`, "u"));
+      return [directive_name] = regx(RegExp(`${non_space_character}+`, "u"));
     });
 
     // [128]
     // directive-parameter ::=
     //   non-space-character+
     [directive_parameter] = init(function() {
-      return [directive_parameter] = make(RegExp(`${non_space_character}+`, "u"));
+      return [directive_parameter] = regx(RegExp(`${non_space_character}+`, "u"));
     });
 
     // [130]
@@ -1656,7 +1656,7 @@
     //   | secondary-tag-handle
     //   | primary-tag-handle
     [tag_handle] = init(function() {
-      return [tag_handle] = make(RegExp(`(:${named_tag_handle}|${secondary_tag_handle}|${primary_tag_handle})`));
+      return [tag_handle] = regx(RegExp(`(:${named_tag_handle}|${secondary_tag_handle}|${primary_tag_handle})`));
     });
 
     // [131]
@@ -1665,7 +1665,7 @@
     //   word-character+
     //   '!'
     [named_tag_handle] = init(function() {
-      return [named_tag_handle] = make(RegExp(`!${word_character}+!`));
+      return [named_tag_handle] = regx(RegExp(`!${word_character}+!`));
     });
 
     // [132]
@@ -1683,7 +1683,7 @@
     //   '!'
     //   uri-character*
     [local_tag_prefix] = init(function() {
-      return [local_tag_prefix] = make(RegExp(`!${uri_character}*`));
+      return [local_tag_prefix] = regx(RegExp(`!${uri_character}*`));
     });
 
     // [136]
@@ -1691,7 +1691,7 @@
     //   tag-character
     //   uri-character*
     [global_tag_prefix] = init(function() {
-      return [global_tag_prefix] = make(RegExp(`${tag_character}${uri_character}*`));
+      return [global_tag_prefix] = regx(RegExp(`${tag_character}${uri_character}*`));
     });
 
     // [137]
@@ -1710,13 +1710,13 @@
     //         anchor-property
     //       )?
     //     )
-    [check_node_properties] = make(/(=[!&])/);
+    [check_node_properties] = regx(/(=[!&])/);
 
     // [139]
     // anchor-name ::=
     //   anchor-character+
     [anchor_name] = init(function() {
-      return [anchor_name] = make(RegExp(`(:${anchor_character})+`, "u"));
+      return [anchor_name] = regx(RegExp(`(:${anchor_character})+`, "u"));
     }, -4);
 
     // [140]
@@ -1724,7 +1724,7 @@
     //     non-space-character
     //   - flow-collection-indicators
     [anchor_character] = init(function() {
-      return [anchor_character] = make(RegExp(`(:(!${flow_collection_indicator})${non_space_character})+`, "u"));
+      return [anchor_character] = regx(RegExp(`(:(!${flow_collection_indicator})${non_space_character})+`, "u"));
     }, -4);
 
     // [142]
@@ -1733,7 +1733,7 @@
     //   uri-character+
     //   '>'
     [verbatim_tag] = init(function() {
-      return [verbatim_tag] = make(RegExp(`!<${uri_character}+>`));
+      return [verbatim_tag] = regx(RegExp(`!<${uri_character}+>`));
     }, -4);
 
     // [143]
@@ -1741,7 +1741,7 @@
     //   tag-handle
     //   tag-character+
     [shorthand_tag] = init(function() {
-      return [shorthand_tag] = make(RegExp(`${tag_handle}${tag_character}+`));
+      return [shorthand_tag] = regx(RegExp(`${tag_handle}${tag_character}+`));
     }, -4);
 
     // [144]
@@ -1766,20 +1766,20 @@
     //   | [xA0-xD7FF]                     # Basic multilingual plane (BMP)
     //   | [xE000-xFFFD]                   # Additional unicode areas
     //   | [x010000-x10FFFF]               # 32 bit
-    [yaml_character] = make(/[\x09\x0A\x0D\x20-\x7E\x85\xA0-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/u);
+    [yaml_character] = regx(/[\x09\x0A\x0D\x20-\x7E\x85\xA0-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/u);
 
     // [147]
     // json-character ::=
     //     x09                             # Tab
     //   | [x20-x10FFFF]                   # Non-C0-control characters
-    [json_character] = make(/[\x09\x20-\u{10FFFF}]/u);
+    [json_character] = regx(/[\x09\x20-\u{10FFFF}]/u);
 
     // [148]
     // non-space-character ::=
     //     non-break-character
     //   - blank-character
     [non_space_character] = init(function() {
-      return [non_space_character] = make(RegExp(`(:(!${blank_character})${non_break_character})`, "u"));
+      return [non_space_character] = regx(RegExp(`(:(!${blank_character})${non_break_character})`, "u"));
     });
 
     // [149]
@@ -1788,15 +1788,15 @@
     //   - x0A
     //   - x0D
     //   - byte-order-mark
-    [non_break_character] = make(RegExp(`(:(![\\x0A\\x0D${byte_order_mark}])${yaml_character})`, "u"));
+    [non_break_character] = regx(RegExp(`(:(![\\x0A\\x0D${byte_order_mark}])${yaml_character})`, "u"));
 
     // [150]
     // blank-character ::=
     //     x20                             # Space
     //   | x09                             # Tab
     [blank_character, ws_lookahead] = init(function() {
-      [blank_character] = make(RegExp(`[${space_character}\\t]`));
-      return [ws_lookahead] = make(RegExp(`(=${end_of_input}|${blank_character}|${line_break})`));
+      [blank_character] = regx(RegExp(`[${space_character}\\t]`));
+      return [ws_lookahead] = regx(RegExp(`(=${end_of_input}|${blank_character}|${line_break})`));
     });
 
     // [151]
@@ -1809,7 +1809,7 @@
     //     line-break
     //   | <end-of-input>
     [line_ending] = init(function() {
-      return [line_ending] = make(RegExp(`(:${line_break}|${end_of_input})`));
+      return [line_ending] = regx(RegExp(`(:${line_break}|${end_of_input})`));
     });
 
     // [153]
@@ -1834,7 +1834,7 @@
     //     )
     //   | x0D
     //   | x0A
-    [line_break] = make(/(:(:\x0D\x0A)|\x0D|\x0A)/);
+    [line_break] = regx(/(:(:\x0D\x0A)|\x0D|\x0A)/);
 
     // XXX Rename to flow-collection-indicator
     // [156]
@@ -1847,7 +1847,7 @@
       // [156] 023
     // c-flow-indicator ::=
     //   ',' | '[' | ']' | '{' | '}'
-    [flow_collection_indicator, flow_collection_indicator_s] = make(/[,[\]{}]/);
+    [flow_collection_indicator, flow_collection_indicator_s] = regx(/[,[\]{}]/);
 
     // [157]
     // double-quoted-scalar-escape-character ::=
@@ -1860,7 +1860,7 @@
     //     | 'n'
     //     | 'v'
     //     | 'f'
-    //     | 'rgx'
+    //     | 'r'
     //     | 'e'
     //     | x20
     //     | '"'
@@ -1875,7 +1875,7 @@
     //     | ( 'U' hexadecimal-digit{8} )
     //   )
     [double_quoted_scalar_escape_character] = init(function() {
-      return [double_quoted_scalar_escape_character] = make(RegExp(`\\\\(:[0abt\\tnvfrgxe\\x20"/\\\\N_LP]|x${hexadecimal_digit}{2}|u${hexadecimal_digit}{4}|U${hexadecimal_digit}{8})`));
+      return [double_quoted_scalar_escape_character] = regx(RegExp(`\\\\(:[0abt\\tnvfre\\x20"/\\\\N_LP]|x${hexadecimal_digit}{2}|u${hexadecimal_digit}{4}|U${hexadecimal_digit}{8})`));
     });
 
     // [158]
@@ -1884,7 +1884,7 @@
     //   - '!'
     //   - flow-collection-indicators
     [tag_character] = init(function() {
-      return [tag_character] = make(RegExp(`(:(![!${flow_collection_indicator_s}])${uri_character})`));
+      return [tag_character] = regx(RegExp(`(:(![!${flow_collection_indicator_s}])${uri_character})`));
     });
 
     // [159]
@@ -1916,7 +1916,7 @@
     //   | '['
     //   | ']'
     [uri_character] = init(function() {
-      return [uri_character] = make(RegExp(`(:%${hexadecimal_digit}{2}|[${word_character_s}\\x23;/?:@&=+$,_.!~*'()[\\]])`));
+      return [uri_character] = regx(RegExp(`(:%${hexadecimal_digit}{2}|[${word_character_s}\\x23;/?:@&=+$,_.!~*'()[\\]])`));
     });
 
     // [160]
@@ -1925,7 +1925,7 @@
     //   | ascii-alpha-character
     //   | '-'
     [word_character, word_character_s] = init(function() {
-      return [word_character, word_character_s] = make(RegExp(`[${decimal_digit_s}${ascii_alpha_character_s}\\-]`));
+      return [word_character, word_character_s] = regx(RegExp(`[${decimal_digit_s}${ascii_alpha_character_s}\\-]`));
     });
 
     // [161]
@@ -1934,18 +1934,18 @@
     //   | [x41-x46]                       # A-F
     //   | [x61-x66]                       # a-f
     [hexadecimal_digit] = init(function() {
-      return [hexadecimal_digit] = make(RegExp(`[${decimal_digit_s}A-Fa-f]`));
+      return [hexadecimal_digit] = regx(RegExp(`[${decimal_digit_s}A-Fa-f]`));
     });
 
     // [162]
     // decimal-digit ::=
     //   [x30-x39]                         # 0-9
-    [decimal_digit, decimal_digit_s] = make(/[0-9]/);
+    [decimal_digit, decimal_digit_s] = regx(/[0-9]/);
 
     // [163]
     // decimal-digit-1-9 ::=
     //   [x31-x39]                         # 0-9
-    [decimal_digit_1_9] = make(/[0-9]/);
+    [decimal_digit_1_9] = regx(/[0-9]/);
 
     [
       ,
@@ -1954,7 +1954,7 @@
       //     [x41-x5A]                       # A-Z
       //   | [x61-x7A]                       # a-z
       ascii_alpha_character_s
-    ] = make(/[A-Za-z]/);
+    ] = regx(/[A-Za-z]/);
 
     ref = inits.reverse();
     for (i = 0, len = ref.length; i < len; i++) {

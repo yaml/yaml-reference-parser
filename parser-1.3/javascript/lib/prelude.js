@@ -23,7 +23,7 @@
   //------------------------------------------------------------------------------
 
   // Generate required regular expression and string variants:
-  global.make = function(rgx) {
+  global.regx = function(rgx) {
     var chars, str;
     str = String(rgx);
     // XXX Can remove when stable:
@@ -31,7 +31,7 @@
       die_(`Bad regex '${rgx}'`);
     }
     if (str.match(/\/mu?y?$/)) {
-      die_(`make(${str}) expression should not use 'm' flag`);
+      die_(`regx(${str}) expression should not use 'm' flag`);
     }
     if (str.endsWith('u')) {
       str = str.slice(0, -1);

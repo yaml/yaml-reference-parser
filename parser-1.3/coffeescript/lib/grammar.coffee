@@ -67,7 +67,7 @@ global.Grammar = class Grammar
   #   blanks-and-comment-line*
 
   [  document_prefix] = init ->
-    [document_prefix] = make ///
+    [document_prefix] = regx ///
       #{byte_order_mark}?
       #{blanks_and_comment_line}*
     ///u
@@ -95,7 +95,7 @@ global.Grammar = class Grammar
   #   "---"
 
   [  document_start_indicator] = init ->
-    [document_start_indicator] = make ///
+    [document_start_indicator] = regx ///
       ---
       #{ws_lookahead}
     ///
@@ -111,7 +111,7 @@ global.Grammar = class Grammar
   # document-end-indicator ::=
   #   "..."                             # Not followed by non-ws char
 
-  [document_end_indicator] = make ///
+  [document_end_indicator] = regx ///
     \.\.\.
   ///
 
@@ -1045,7 +1045,7 @@ global.Grammar = class Grammar
     )
 
   [  line_trail_comments] = init ->
-    [line_trail_comments] = make ///
+    [line_trail_comments] = regx ///
       #{comment_content}
       #{line_ending}
     ///u
@@ -1114,7 +1114,7 @@ global.Grammar = class Grammar
   #   | single-quoted-scalar(n,c)
   #   | double-quoted-scalar(n,c)
 
-  [check_flow_json_content] = make ///
+  [check_flow_json_content] = regx ///
     (= [ \[ { " ' ] )
   ///
 
@@ -1695,7 +1695,7 @@ global.Grammar = class Grammar
     @rgx(non_space_double_quoted_character)
 
   [  non_space_double_quoted_character] = init ->
-    [non_space_double_quoted_character] = make ///
+    [non_space_double_quoted_character] = regx ///
       (! #{blank_character})
       #{non_break_double_quoted_character}
     ///
@@ -1712,7 +1712,7 @@ global.Grammar = class Grammar
   #     )
 
   [  non_break_double_quoted_character] = init ->
-    [non_break_double_quoted_character] = make ///
+    [non_break_double_quoted_character] = regx ///
       (:
         #{double_quoted_scalar_escape_character}
       |
@@ -1830,7 +1830,7 @@ global.Grammar = class Grammar
   #   non-break-single-quoted-character*
 
   [  single_quoted_one_line] = init ->
-    [single_quoted_one_line] = make ///
+    [single_quoted_one_line] = regx ///
       #{non_break_single_quoted_character}*
     ///
 
@@ -1844,7 +1844,7 @@ global.Grammar = class Grammar
   #   )*
 
   [  single_quoted_first_line] = init ->
-    [single_quoted_first_line] = make ///
+    [single_quoted_first_line] = regx ///
       (:
         #{blank_character}*
         #{non_space_single_quoted_character}
@@ -1866,7 +1866,7 @@ global.Grammar = class Grammar
   #   )?
 
   [  single_quoted_next_line] = init ->
-    [single_quoted_next_line] = make ///
+    [single_quoted_next_line] = regx ///
       #{non_space_single_quoted_character}
       #{single_quoted_first_line}
     ///
@@ -1894,7 +1894,7 @@ global.Grammar = class Grammar
   #   - blank-character
 
   [  non_space_single_quoted_character] = init ->
-    [non_space_single_quoted_character] = make ///
+    [non_space_single_quoted_character] = regx ///
       (:
         (! #{blank_character})
         #{non_break_single_quoted_character}
@@ -1912,7 +1912,7 @@ global.Grammar = class Grammar
   #     )
 
   [  non_break_single_quoted_character] = init ->
-    [non_break_single_quoted_character] = make ///
+    [non_break_single_quoted_character] = regx ///
       (:
         #{single_quoted_escaped_single_quote}
       | (:
@@ -1928,7 +1928,7 @@ global.Grammar = class Grammar
   # single-quoted-escaped-single-quote ::=
   #   "''"
 
-  [single_quoted_escaped_single_quote] = make ///
+  [single_quoted_escaped_single_quote] = regx ///
     '
     '
   ///
@@ -2098,7 +2098,7 @@ global.Grammar = class Grammar
 
   plain_scalar_characters_re: (c)->
     non_space_plain_scalar_character = @non_space_plain_scalar_character(c)
-    [plain_scalar_characters] = make ///
+    [plain_scalar_characters] = regx ///
       (:
         (:
           (! [ : \x23 ] )
@@ -2141,7 +2141,7 @@ global.Grammar = class Grammar
   #   non-space-character
 
   block_plain_scalar_character: ->
-    [re] = make ///
+    [re] = regx ///
       (: #{non_space_character} )
     ///u
     re
@@ -2154,7 +2154,7 @@ global.Grammar = class Grammar
   #   - flow-collection-indicators
 
   flow_plain_scalar_character: ->
-    [re] = make ///
+    [re] = regx ///
       (:
         (!
           #{flow_collection_indicator}
@@ -2271,7 +2271,7 @@ global.Grammar = class Grammar
   #   separation-blanks?
 
   indentation_spaces_plus_maybe_more = memoize (n)->
-    [re] = make ///
+    [re] = regx ///
       #{indentation_spaces_n(n)}
       #{separation_blanks}?
     ///
@@ -2328,7 +2328,7 @@ global.Grammar = class Grammar
     @rgx(comment_lines)
 
   [   comment_lines] = init ->
-     [comment_lines] = make ///
+     [comment_lines] = regx ///
        (:
          #{comment_line}
        | #{start_of_line}
@@ -2350,7 +2350,7 @@ global.Grammar = class Grammar
     @rgx(comment_line)
 
   [   comment_line] = init ->
-     [comment_line] = make ///
+     [comment_line] = regx ///
        (:
          (:
            #{separation_blanks}
@@ -2372,7 +2372,7 @@ global.Grammar = class Grammar
     @rgx(blanks_and_comment_line)
 
   [  blanks_and_comment_line] = init ->
-    [blanks_and_comment_line] = make ///
+    [blanks_and_comment_line] = regx ///
       (:
         #{separation_blanks}
         #{comment_content}?
@@ -2388,7 +2388,7 @@ global.Grammar = class Grammar
   #   non-break-character*
 
   [  comment_content] = init ->
-    [comment_content] = make ///
+    [comment_content] = regx ///
       (:
         \x23
         #{non_break_character}*
@@ -2465,7 +2465,7 @@ global.Grammar = class Grammar
   #   | <start-of-line>
 
   [  separation_blanks] = init ->
-    [separation_blanks] = make ///(:
+    [separation_blanks] = regx ///(:
         #{blank_character}+
       | #{start_of_line}
     )///
@@ -2535,7 +2535,7 @@ global.Grammar = class Grammar
   #   non-space-character+
 
   [  directive_name] = init ->
-    [directive_name] = make ///
+    [directive_name] = regx ///
       #{non_space_character}+
     ///u
 
@@ -2546,7 +2546,7 @@ global.Grammar = class Grammar
   #   non-space-character+
 
   [  directive_parameter] = init ->
-    [directive_parameter] = make ///
+    [directive_parameter] = regx ///
       #{non_space_character}+
     ///u
 
@@ -2580,7 +2580,7 @@ global.Grammar = class Grammar
   #   | primary-tag-handle
 
   [  tag_handle] = init ->
-    [tag_handle] = make ///
+    [tag_handle] = regx ///
       (:
         #{named_tag_handle}
       | #{secondary_tag_handle}
@@ -2602,7 +2602,7 @@ global.Grammar = class Grammar
   #   '!'
 
   [  named_tag_handle] = init ->
-    [named_tag_handle] = make ///
+    [named_tag_handle] = regx ///
       !
       #{word_character}+
       !
@@ -2649,7 +2649,7 @@ global.Grammar = class Grammar
   #   uri-character*
 
   [  local_tag_prefix] = init ->
-    [local_tag_prefix] = make ///
+    [local_tag_prefix] = regx ///
       !
       #{uri_character}*
     ///
@@ -2662,7 +2662,7 @@ global.Grammar = class Grammar
   #   uri-character*
 
   [  global_tag_prefix] = init ->
-    [global_tag_prefix] = make ///
+    [global_tag_prefix] = regx ///
       #{tag_character}
       #{uri_character}*
     ///
@@ -2686,7 +2686,7 @@ global.Grammar = class Grammar
   #       )?
   #     )
 
-  [check_node_properties] = make ///
+  [check_node_properties] = regx ///
     (= [ ! & ] )
   ///
 
@@ -2740,7 +2740,7 @@ global.Grammar = class Grammar
   #   anchor-character+
 
   [  anchor_name] = init ->
-    [anchor_name] = make ///
+    [anchor_name] = regx ///
       (:
         #{anchor_character}
       )+
@@ -2755,7 +2755,7 @@ global.Grammar = class Grammar
   #   - flow-collection-indicators
 
   [  anchor_character] = init ->
-    [anchor_character] = make ///
+    [anchor_character] = regx ///
       (:
         (!
           #{flow_collection_indicator}
@@ -2791,7 +2791,7 @@ global.Grammar = class Grammar
   #   '>'
 
   [  verbatim_tag] = init ->
-    [verbatim_tag] = make ///
+    [verbatim_tag] = regx ///
       ! <
         #{uri_character}+
       >
@@ -2806,7 +2806,7 @@ global.Grammar = class Grammar
   #   tag-character+
 
   [  shorthand_tag] = init ->
-    [shorthand_tag] = make ///
+    [shorthand_tag] = regx ///
       #{tag_handle}
       #{tag_character}+
     ///
@@ -2843,7 +2843,7 @@ global.Grammar = class Grammar
   #   | [xE000-xFFFD]                   # Additional unicode areas
   #   | [x010000-x10FFFF]               # 32 bit
 
-  [yaml_character] = make ///
+  [yaml_character] = regx ///
     [
       \x09
       \x0A
@@ -2863,7 +2863,7 @@ global.Grammar = class Grammar
   #     x09                             # Tab
   #   | [x20-x10FFFF]                   # Non-C0-control characters
 
-  [json_character] = make ///
+  [json_character] = regx ///
     [
       \x09
       \x20-\u{10FFFF}
@@ -2878,7 +2878,7 @@ global.Grammar = class Grammar
   #   - blank-character
 
   [  non_space_character] = init ->
-    [non_space_character] = make ///
+    [non_space_character] = regx ///
       (:
         (!
           #{blank_character}
@@ -2896,7 +2896,7 @@ global.Grammar = class Grammar
   #   - x0D
   #   - byte-order-mark
 
-  [non_break_character] = make ///
+  [non_break_character] = regx ///
     (:
       (!
         [
@@ -2917,14 +2917,14 @@ global.Grammar = class Grammar
   #   | x09                             # Tab
 
   [  blank_character, ws_lookahead] = init ->
-    [blank_character] = make ///
+    [blank_character] = regx ///
       [
         #{space_character}
         \t
       ]
     ///
 
-    [ws_lookahead] = make ///
+    [ws_lookahead] = regx ///
       (=
         #{end_of_input}
       | #{blank_character}
@@ -2951,7 +2951,7 @@ global.Grammar = class Grammar
   #   | <end-of-input>
 
   [  line_ending] = init ->
-    [line_ending] = make ///
+    [line_ending] = regx ///
       (:
         #{line_break}
       | #{end_of_input}
@@ -2987,7 +2987,7 @@ global.Grammar = class Grammar
   #   | x0D
   #   | x0A
 
-  [line_break] = make ///
+  [line_break] = regx ///
     (:
       (:
         \x0D
@@ -3012,7 +3012,7 @@ global.Grammar = class Grammar
   # c-flow-indicator ::=
   #   ',' | '[' | ']' | '{' | '}'
 
-  [flow_collection_indicator, flow_collection_indicator_s] = make ///
+  [flow_collection_indicator, flow_collection_indicator_s] = regx ///
     [
       ,
       [
@@ -3035,7 +3035,7 @@ global.Grammar = class Grammar
   #     | 'n'
   #     | 'v'
   #     | 'f'
-  #     | 'rgx'
+  #     | 'r'
   #     | 'e'
   #     | x20
   #     | '"'
@@ -3051,7 +3051,7 @@ global.Grammar = class Grammar
   #   )
 
   [  double_quoted_scalar_escape_character] = init ->
-    [double_quoted_scalar_escape_character] = make ///
+    [double_quoted_scalar_escape_character] = regx ///
       \\
       (:
         [
@@ -3063,7 +3063,7 @@ global.Grammar = class Grammar
           n
           v
           f
-          rgx
+          r
           e
           \x20
           "
@@ -3089,7 +3089,7 @@ global.Grammar = class Grammar
   #   - flow-collection-indicators
 
   [  tag_character] = init ->
-    [tag_character] = make ///
+    [tag_character] = regx ///
       (:
         (!
           [
@@ -3133,7 +3133,7 @@ global.Grammar = class Grammar
   #   | ']'
 
   [  uri_character] = init ->
-    [uri_character] = make ///
+    [uri_character] = regx ///
       (:
         % #{hexadecimal_digit}{2}
       | [
@@ -3172,7 +3172,7 @@ global.Grammar = class Grammar
   #   | '-'
 
   [  word_character, word_character_s] = init ->
-    [word_character, word_character_s] = make ///
+    [word_character, word_character_s] = regx ///
       [
         #{decimal_digit_s}
         #{ascii_alpha_character_s}
@@ -3189,7 +3189,7 @@ global.Grammar = class Grammar
   #   | [x61-x66]                       # a-f
 
   [  hexadecimal_digit] = init ->
-    [hexadecimal_digit] = make ///
+    [hexadecimal_digit] = regx ///
       [
         #{decimal_digit_s}
         A - F
@@ -3203,7 +3203,7 @@ global.Grammar = class Grammar
   # decimal-digit ::=
   #   [x30-x39]                         # 0-9
 
-  [decimal_digit, decimal_digit_s] = make ///
+  [decimal_digit, decimal_digit_s] = regx ///
     [
       0 - 9
     ]
@@ -3215,7 +3215,7 @@ global.Grammar = class Grammar
   # decimal-digit-1-9 ::=
   #   [x31-x39]                         # 0-9
 
-  [decimal_digit_1_9] = make ///
+  [decimal_digit_1_9] = regx ///
     [
       0 - 9
     ]
@@ -3228,7 +3228,7 @@ global.Grammar = class Grammar
   #     [x41-x5A]                       # A-Z
   #   | [x61-x7A]                       # a-z
 
-  [, ascii_alpha_character_s] = make ///
+  [, ascii_alpha_character_s] = regx ///
     [
       A - Z
       a - z

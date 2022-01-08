@@ -17,14 +17,14 @@ global.memoize = require('moize').maxSize(50)
 #------------------------------------------------------------------------------
 
 # Generate required regular expression and string variants:
-global.make = (rgx)->
+global.regx = (rgx)->
   str = String(rgx)
 
   # XXX Can remove when stable:
   if str.match(/>>\d+<</)
     die_ "Bad regex '#{rgx}'"
   if str.match(/\/mu?y?$/)
-    die_ "make(#{str}) expression should not use 'm' flag"
+    die_ "regx(#{str}) expression should not use 'm' flag"
 
   str = str[0..-2] if str.endsWith('u')
   str = String(str)[1..-2]
