@@ -47,10 +47,6 @@ global.Grammar = class Grammar
               @rep('*', @document_prefix)
               @rep('?', @any_document)
             )
-            @rgx(///(:
-                #{byte_order_mark}
-              | #{comment_line}
-            )///u, 'BOM or comment line')
             @start_indicator_and_document
           )
         )

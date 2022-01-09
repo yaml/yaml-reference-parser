@@ -596,8 +596,9 @@ sub auto_detect {
     $m = $m - $n - 1;
   }
   # XXX change 'die' to 'error' for reporting parse errors
+  $n += $m;
   die "Spaces found after indent in auto-detect (5LLU)"
-    if $m > 0 and $pre =~ /^.{$m}\ /m;
+    if $m > 0 and $pre =~ /^.{$n}\ /m;
   return($m == 0 ? 1 : $m);
 }
 name 'auto_detect', \&auto_detect;

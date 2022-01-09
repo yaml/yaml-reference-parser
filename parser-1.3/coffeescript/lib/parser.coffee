@@ -478,7 +478,7 @@ global.Parser = class Parser extends Grammar
         m++
       m = m - n - 1
     die "Spaces found after indent in auto-detect (5LLU)" \
-      if m > 0 && pre.match ///^.{#{m}}\ ///m
+      if m > 0 && pre.match ///^.{#{m + n}}\ ///m
     return if m == 0 then 1 else m
 
 #------------------------------------------------------------------------------

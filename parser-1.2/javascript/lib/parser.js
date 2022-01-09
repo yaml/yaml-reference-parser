@@ -610,7 +610,7 @@
         }
         m = m - n - 1;
       }
-      if (m > 0 && pre.match(RegExp(`^.{${m}} `, "m"))) {
+      if (m > 0 && pre.match(RegExp(`^.{${m + n}} `, "m"))) {
         die("Spaces found after indent in auto-detect (5LLU)");
       }
       if (m === 0) {

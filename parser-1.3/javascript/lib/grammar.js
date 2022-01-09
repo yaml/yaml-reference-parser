@@ -33,7 +33,7 @@
       //     | start-indicator-and-document
       //   )*
       yaml_stream() {
-        return this.got(this.all(this.rep('*', this.document_prefix), this.rep('?', this.any_document), this.rep('*', this.any(this.all(this.rep('+', this.document_suffix), this.rep('*', this.document_prefix), this.rep('?', this.any_document)), this.rgx(RegExp(`(:${byte_order_mark}|${comment_line})`, "u"), 'BOM or comment line'), this.start_indicator_and_document))), {
+        return this.got(this.all(this.rep('*', this.document_prefix), this.rep('?', this.any_document), this.rep('*', this.any(this.all(this.rep('+', this.document_suffix), this.rep('*', this.document_prefix), this.rep('?', this.any_document)), this.start_indicator_and_document))), {
           try_: true,
           got_: true
         });
