@@ -37,10 +37,19 @@ global.TestReceiver = class TestReceiver extends Receiver
         style = style_map[e.style]
         value = e.value
           .replace(/\\/g, '\\\\')
+          .replace(/\x00/g, '\\0')
+          .replace(/\x07/g, '\\a')
           .replace(/\x08/g, '\\b')
-          .replace(/\t/g, '\\t')
-          .replace(/\n/g, '\\n')
-          .replace(/\r/g, '\\r')
+          .replace(/\x09/g, '\\t')
+          .replace(/\x0a/g, '\\n')
+          .replace(/\x0b/g, '\\v')
+          .replace(/\x0c/g, '\\f')
+          .replace(/\x0d/g, '\\r')
+          .replace(/\x1b/g, '\\e')
+          .replace(/\u{85}/g, '\\N')
+          .replace(/\u{a0}/g, '\\_')
+          .replace(/\u{2028}/g, '\\L')
+          .replace(/\u{2029}/g, '\\P')
         event.push "#{style}#{value}"
       event.join(' ') + "\n"
     list.join ''

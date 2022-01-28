@@ -57,7 +57,7 @@
         }
         if (e.value != null) {
           style = style_map[e.style];
-          value = e.value.replace(/\\/g, '\\\\').replace(/\x08/g, '\\b').replace(/\t/g, '\\t').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+          value = e.value.replace(/\\/g, '\\\\').replace(/\x00/g, '\\0').replace(/\x07/g, '\\a').replace(/\x08/g, '\\b').replace(/\x09/g, '\\t').replace(/\x0a/g, '\\n').replace(/\x0b/g, '\\v').replace(/\x0c/g, '\\f').replace(/\x0d/g, '\\r').replace(/\x1b/g, '\\e').replace(/\u0085/g, '\\N').replace(/\u00a0/g, '\\_').replace(/\u2028/g, '\\L').replace(/\u2029/g, '\\P');
           event.push(`${style}${value}`);
         }
         return event.join(' ') + "\n";

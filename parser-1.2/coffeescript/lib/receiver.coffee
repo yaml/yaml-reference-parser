@@ -178,27 +178,64 @@ global.Receiver = class Receiver
       .replace(/''/g, "'")
     @add scalar_event 'single', text
 
-  got__c_double_quoted: (o)->
-    text = o.text[1...-1]
-      .replace(/((?:\\\ |\\\t)*)(?:[\ \t]*\r?\n[\ \t]*)/gm, "$1\n")
-      .replace(/\\\n[\ \t]*/g, '')
-      .replace(/(\n)(\n*)/g, (m...)-> if m[2].length then m[2] else ' ')
-      .replace(/\\(["\/])/g, "$1")
-      .replace(/\\ /g, ' ')
-      .replace(/\\b/g, "\b")
-      .replace(/\\\t/g, "\t")
-      .replace(/\\t/g, "\t")
-      .replace(/\\n/g, "\n")
-      .replace(/\\r/g, "\r")
-      .replace /\\x([0-9a-fA-F]{2})/g, (m...)->
-        String.fromCharCode(parseInt(m[1], 16))
-      .replace /\\u([0-9a-fA-F]{4})/g, (m...)->
-        String.fromCharCode(parseInt(m[1], 16))
-      .replace /\\U([0-9a-fA-F]{8})/g, (m...)->
-        String.fromCharCode(parseInt(m[1], 16))
-      .replace(/\\\\/g, '\\')
+  unescapes =
+    '\\\\': '\\'
+    '\r\n': '\n'
+    '\\ ': ' '
+    '\\"': '"'
+    '\\/': '/'
+    '\\_': '\u{a0}'
+    '\\0': '\x00'
+    '\\a': '\x07'
+    '\\b': '\x08'
+    '\\e': '\x1b'
+    '\\f': '\x0c'
+    '\\n': '\x0a'
+    '\\r': '\x0d'
+    '\\t': '\x09'
+    '\\\t': '\x09'
+    '\\v': '\x0b'
+    '\\L': '\u{2028}'
+    '\\N': '\u{85}'
+    '\\P': '\u{2029}'
 
-    @add scalar_event 'double', text
+  end1 = String(/// (?: \\ \r?\n[\ \t]* ) ///)[1..-2]
+  end2 = String(/// (?: [\ \t]*\r?\n[\ \t]* ) ///)[1..-2]
+  hex  = '[0-9a-fA-F]'
+  hex2 = String(/// (?: \\x ( #{hex}{2} ) ) ///)[1..-2]
+  hex4 = String(/// (?: \\u ( #{hex}{4} ) ) ///)[1..-2]
+  hex8 = String(/// (?: \\U ( #{hex}{8} ) ) ///)[1..-2]
+
+  got__c_double_quoted: (o)->
+    @add scalar_event('double', o.text[1...-1]
+      .replace ///
+        (?:
+          \r\n
+        | #{end1}
+        | #{end2}+
+        | #{hex2}
+        | #{hex4}
+        | #{hex8}
+        | \\[\\\ "/_0abefnrt\tvLNP]
+        )
+      ///g, (m)->
+        if n = m.match ///^ #{hex2} $///
+          return String.fromCharCode(parseInt(n[1], 16))
+        if n = m.match ///^ #{hex4} $///
+          return String.fromCharCode(parseInt(n[1], 16))
+        if n = m.match ///^ #{hex8} $///
+          return String.fromCharCode(parseInt(n[1], 16))
+        if m.match ///^ #{end1} $///
+          return ''
+        if m.match ///^ #{end2}+ $///
+          u = m
+            .replace(/// #{end2} ///, '')
+            .replace(/// #{end2} ///g, '\n')
+          return u || ' '
+        if u = unescapes[m]
+          return u
+        XXX m
+    )
 
   got__l_empty: ->
     @add cache('') if @in_scalar
