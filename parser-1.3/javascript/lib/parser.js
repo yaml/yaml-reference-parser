@@ -157,7 +157,7 @@
           }
         });
         value = func.apply(this, args);
-        while (typeof value === 'function' || value instanceof Array) {
+        while (value instanceof Object) {
           value = this.call(value);
         }
         this.state_pop();
@@ -204,7 +204,7 @@
           debug_rule(func.name, ...args);
         }
         value = func.apply(this, args);
-        while (typeof value === 'function' || value instanceof Array) {
+        while (value instanceof Object) {
           value = this.call(value);
         }
         if (TRACE) {

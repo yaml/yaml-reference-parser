@@ -120,7 +120,7 @@ global.Parser = class Parser extends Grammar
         a
 
     value = func.apply(@, args)
-    while typeof(value) == 'function' or value instanceof Array
+    while value instanceof Object
       value = @call value
 
     @state_pop()
@@ -162,7 +162,7 @@ global.Parser = class Parser extends Grammar
       debug_rule func.name, args...
 
     value = func.apply(@, args)
-    while typeof(value) == 'function' or value instanceof Array
+    while value instanceof Object
       value = @call value
 
     if TRACE
