@@ -1,9 +1,19 @@
 (ns yaml-parser.receiver
   (:require [clojure.string :as str]
-            [yaml-parser.prelude :refer :all]))
+            [yaml-parser.prelude :refer :all]
+            [yaml-parser.parser :as parser]))
 
 ;; Forward declarations
 (declare push-event check-document-start check-document-end)
+
+;; Helper: convert hex string to Unicode character string (handles all codepoints)
+(defn hex->char [hex-val]
+  #?(:clj (let [cp (Integer/parseInt hex-val 16)]
+            (if (> cp 65535)
+              (String. (Character/toChars cp))
+              (str (char cp))))
+     :glj (let [[n _] (strconv.ParseInt hex-val 16 32)]
+            (str (go/rune n)))))
 
 ;; Event constructors
 (defn stream-start-event []
@@ -13,17 +23,18 @@
   {:event "stream_end"})
 
 (defn document-start-event
-  ([] (document-start-event false))
-  ([explicit]
-   {:event "document_start"
-    :explicit explicit
-    :version nil}))
+  ([] (document-start-event false nil))
+  ([explicit] (document-start-event explicit nil))
+  ([explicit version]
+   (cond-> {:event "document_start"}
+     explicit (assoc :explicit explicit)
+     version (assoc :version version))))
 
 (defn document-end-event
   ([] (document-end-event false))
   ([explicit]
-   {:event "document_end"
-    :explicit explicit}))
+   (cond-> {:event "document_end"}
+     explicit (assoc :explicit explicit))))
 
 (defn mapping-start-event
   ([] (mapping-start-event false))
@@ -44,9 +55,9 @@
   {:event "sequence_end"})
 
 (defn scalar-event [style value]
-  {:event "scalar"
-   :style style
-   :value value})
+  (cond-> {:event "scalar"
+           :value value}
+    (not= style "plain") (assoc :style style)))
 
 (defn alias-event [name]
   {:event "alias"
@@ -189,15 +200,15 @@
                        ;; hex escapes
                        (re-matches (re-pattern (str "\\\\x(" hex "{2})")) match)
                        (let [[_ hex-val] (re-matches (re-pattern (str "\\\\x(" hex "{2})")) match)]
-                         (str (char (Integer/parseInt hex-val 16))))
+                         (hex->char hex-val))
 
                        (re-matches (re-pattern (str "\\\\u(" hex "{4})")) match)
                        (let [[_ hex-val] (re-matches (re-pattern (str "\\\\u(" hex "{4})")) match)]
-                         (str (char (Integer/parseInt hex-val 16))))
+                         (hex->char hex-val))
 
                        (re-matches (re-pattern (str "\\\\U(" hex "{8})")) match)
                        (let [[_ hex-val] (re-matches (re-pattern (str "\\\\U(" hex "{8})")) match)]
-                         (String. (Character/toChars (Integer/parseInt hex-val 16))))
+                         (hex->char hex-val))
 
                        ;; line continuation
                        (re-matches #"(?:\\ ?\r?\n[ \t]*)" match)
@@ -438,10 +449,8 @@
                    lines)
            lines (map #(str (:text %) "\n") lines)
            text (apply str lines)
-           ;; :parser is stored directly (not as atom) in the receiver passed to callbacks
-           parser (:parser receiver)
-           state-curr @(requiring-resolve 'yaml-parser.parser/state-curr)
-           t (:t (state-curr parser))
+           p (:parser receiver)
+           t (:t (parser/state-curr p))
            text (cond
                   (= t "clip") (str/replace text #"\n+$" "\n")
                   (= t "strip") (str/replace text #"\n+$" "")
@@ -484,15 +493,20 @@
      (reset! (:in-scalar receiver) false)
      (let [lines (map :text (cache-drop receiver))
            text (str/join "\n" lines)
-           text (-> text
-                    (str/replace #"(?m)^(\S.*)\n(?=\S)" "$1 ")
-                    (str/replace #"(?m)^(\S.*)\n(\n+)" "$1$2")
-                    (str/replace #"(?m)^([ \t]+\S.*)\n(\n+)(?=\S)" "$1$2"))
+           text #?(:clj (-> text
+                            ;; Use re-pattern strings (not literals) to avoid RE2
+                            ;; compile errors when Gloat reads this file
+                            (str/replace (re-pattern "(?m)^(\\S.*)\\n(?=\\S)") "$1 ")
+                            (str/replace (re-pattern "(?m)^(\\S.*)\\n(?=\\n+)") "$1")
+                            (str/replace (re-pattern "(?m)^([ \\t]+\\S.*)\\n(?=\\n+\\S)") "$1"))
+                   :glj (-> text
+                            ;; RE2 lacks lookaheads; capture and reinsert next char
+                            (str/replace #"(?m)^(\S.*)\n(\S)" "$1 $2")
+                            (str/replace #"(?m)^(\S.*)\n(\n+)" "$1$2")
+                            (str/replace #"(?m)^([ \t]+\S.*)\n(\n+)(\S)" "$1$2$3")))
            text (str text "\n")
-           ;; :parser is stored directly (not as atom) in the receiver passed to callbacks
-           parser (:parser receiver)
-           state-curr @(requiring-resolve 'yaml-parser.parser/state-curr)
-           t (:t (state-curr parser))
+           p (:parser receiver)
+           t (:t (parser/state-curr p))
            text (cond
                   (= t "clip") (let [t (str/replace text #"\n+$" "\n")]
                                  (if (= t "\n") "" t))
@@ -556,7 +570,7 @@
            ;; URL-decode percent escapes
            resolved-tag (str/replace resolved-tag #"%([0-9a-fA-F]{2})"
                                      (fn [[_ hex]]
-                                       (str (char (Integer/parseInt hex 16)))))]
+                                       (hex->char hex)))]
        (reset! (:tag receiver) resolved-tag)))
 
    ;; Alias node

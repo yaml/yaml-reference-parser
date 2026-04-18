@@ -6,7 +6,9 @@
 (declare auto-detect auto-detect-indent trace-start trace-flush)
 
 ;; TRACE flag from environment
-(def TRACE (Boolean/parseBoolean (or (env "TRACE") "false")))
+(def TRACE
+  #?(:clj (Boolean/parseBoolean (or (env "TRACE") "false"))
+     :glj (= (os.Getenv "TRACE") "true")))
 
 ;; Default state when stack is empty
 (def default-state
@@ -135,7 +137,8 @@
          (when-not (fn? func)
            (FAIL (str "Bad call type '" (typeof* func) "' for '" func "'")))
 
-         (let [trace (or (:trace (meta func))
+         (let [trace (or (func-name func)
+                         (:trace (meta func))
                          (str func))]
            (state-push parser trace)
 
@@ -143,7 +146,7 @@
            ;; TODO: trace '?' trace args when TRACE
 
            ;; Set doc flag for l_bare_document
-           (when (= (:name (meta func)) "l_bare_document")
+           (when (= (or (func-name func) (:name (meta func))) "l_bare_document")
              (swap! (:state parser)
                     (fn [s]
                       (let [curr (peek s)]
@@ -159,8 +162,12 @@
                  pos @(:pos parser)
                  _ (receive parser func :try pos)
 
-                 ;; Call the function
-                 value (loop [v (apply func parser args)]
+                 ;; Call the function — bypass clojure.core/apply
+                 ;; when args is empty (common case) to avoid
+                 ;; lang.Apply []any allocation and reflection.
+                 value (loop [v (if (empty? args)
+                                  (func parser)
+                                  (apply func parser args))]
                          (if (or (fn? v) (vector? v))
                            (recur (call parser v))
                            v))]
@@ -202,55 +209,65 @@
   (or (end-of-stream* parser)
       (and (:doc (state-curr parser))
            (start-of-line* parser)
+           ;; RE2 doesn't support lookaheads; check manually
            (let [remaining (subs @(:input parser) @(:pos parser))]
-             (re-find #"^(?:---|\.\.\.)(?=\s|$)" remaining)))))
+             #?(:clj (re-find (re-pattern "^(?:---|\\.\\.\\.)((?=\\s)|$)") remaining)
+                :glj (let [prefix (re-find #"^(?:---|\.\.\.)" remaining)]
+                       (when prefix
+                         (let [after (subs remaining (count prefix))]
+                           (or (empty? after)
+                               (re-find #"^\s" after))))))))))
 
 ;; Grammar-callable versions (return functions)
 (defn start-of-line [parser]
-  (with-meta
+  (name* "start_of_line"
     (fn [p] (start-of-line* p))
-    {:trace "start_of_line"}))
+    "start_of_line"))
 
 (defn end-of-stream [parser]
-  (with-meta
+  (name* "end_of_stream"
     (fn [p] (end-of-stream* p))
-    {:trace "end_of_stream"}))
+    "end_of_stream"))
 
 (defn empty-rule [parser]
-  (with-meta
+  (name* "empty"
     (fn [p] true)
-    {:trace "empty"}))
+    "empty"))
 
 ;; Character matching primitives
 (defn chr [parser char]
-  (with-meta
-    (fn chr-fn [p]
-      (when-not (the-end p)
-        (when (= (nth @(:input p) @(:pos p)) (first char))
-          (swap! (:pos p) inc)
-          true)))
-    {:trace (str "chr(" (stringify char) ")")}))
+  (let [trace (str "chr(" (stringify char) ")")]
+    (name* trace
+      (fn chr-fn [p]
+        (when-not (the-end p)
+          (when (= (nth @(:input p) @(:pos p)) (first char))
+            (swap! (:pos p) inc)
+            true)))
+      trace)))
 
 (defn rng [parser low high]
-  (with-meta
-    (fn rng-fn [p]
-      (when-not (the-end p)
-        (let [input @(:input p)
-              pos @(:pos p)
-              remaining (subs input pos)
-              pattern (re-pattern (str "^[" low "-" high "]"))]
-          (when (re-find pattern remaining)
-            ;; Handle surrogate pairs
-            (let [cp (.codePointAt remaining 0)]
-              (when (> cp 65535)
-                (swap! (:pos p) inc)))
-            (swap! (:pos p) inc)
-            true))))
-    {:trace (str "rng(" (stringify low) "," (stringify high) ")")}))
+  (let [trace (str "rng(" (stringify low) "," (stringify high) ")")]
+    (name* trace
+      (fn rng-fn [p]
+        (when-not (the-end p)
+          (let [input @(:input p)
+                pos @(:pos p)
+                remaining (subs input pos)
+                pattern (re-pattern (str "^[" low "-" high "]"))]
+            (when (re-find pattern remaining)
+              ;; Advance by 1, plus 1 more for codepoints above U+FFFF
+              #?(:clj (when (> (.codePointAt ^String remaining 0) 65535)
+                        (swap! (:pos p) inc))
+                 :glj (let [[r _] (unicode:utf8.DecodeRuneInString remaining)]
+                        (when (> (int r) 65535)
+                          (swap! (:pos p) inc))))
+              (swap! (:pos p) inc)
+              true))))
+      trace)))
 
 ;; Combinators
 (defn all [parser & funcs]
-  (with-meta
+  (name* "all"
     (fn all-fn [p]
       (let [pos @(:pos p)]
         (loop [fs funcs]
@@ -264,10 +281,10 @@
                   (reset! (:pos p) pos)
                   false)
                 (recur (rest fs))))))))
-    {:trace "all"}))
+    "all"))
 
 (defn any [parser & funcs]
-  (with-meta
+  (name* "any"
     (fn any-fn [p]
       (loop [fs funcs]
         (if (empty? fs)
@@ -275,75 +292,77 @@
           (if (call p (first fs))
             true
             (recur (rest fs))))))
-    {:trace "any"}))
+    "any"))
 
 (defn may [parser func]
-  (with-meta
+  (name* "may"
     (fn may-fn [p]
       (call p func)
       true)
-    {:trace "may"}))
+    "may"))
 
 (defn rep [parser min max func]
-  (with-meta
-    (fn rep-fn [p]
-      (if (and max (< max 0))
-        false
-        (let [pos-start @(:pos p)]
-          (loop [count 0
-                 pos @(:pos p)]
-            (if (and max (>= count max))
-              (if (and (>= count min) (or (nil? max) (<= count max)))
-                true
-                (do
-                  (reset! (:pos p) pos-start)
-                  false))
-              (if-not (call p func)
+  (let [trace (str "rep(" min "," max ")")]
+    (name* trace
+      (fn rep-fn [p]
+        (if (and max (< max 0))
+          false
+          (let [pos-start @(:pos p)]
+            (loop [count 0
+                   pos @(:pos p)]
+              (if (and max (>= count max))
                 (if (and (>= count min) (or (nil? max) (<= count max)))
                   true
                   (do
                     (reset! (:pos p) pos-start)
                     false))
-                (if (= @(:pos p) pos)
+                (if-not (call p func)
                   (if (and (>= count min) (or (nil? max) (<= count max)))
                     true
                     (do
                       (reset! (:pos p) pos-start)
                       false))
-                  (recur (inc count) @(:pos p)))))))))
-    {:trace (str "rep(" min "," max ")")}))
+                  (if (= @(:pos p) pos)
+                    (if (and (>= count min) (or (nil? max) (<= count max)))
+                      true
+                      (do
+                        (reset! (:pos p) pos-start)
+                        false))
+                    (recur (inc count) @(:pos p)))))))))
+      trace)))
 
 (defn rep2 [parser min max func]
-  (with-meta
-    (fn rep2-fn [p]
-      (if (and max (< max 0))
-        false
-        (let [pos-start @(:pos p)]
-          (loop [count 0
-                 pos @(:pos p)]
-            (if (and max (>= count max))
-              (if (and (>= count min) (or (nil? max) (<= count max)))
-                true
-                (do
-                  (reset! (:pos p) pos-start)
-                  false))
-              (if-not (call p func)
+  (let [trace (str "rep2(" min "," max ")")]
+    (name* trace
+      (fn rep2-fn [p]
+        (if (and max (< max 0))
+          false
+          (let [pos-start @(:pos p)]
+            (loop [count 0
+                   pos @(:pos p)]
+              (if (and max (>= count max))
                 (if (and (>= count min) (or (nil? max) (<= count max)))
                   true
                   (do
                     (reset! (:pos p) pos-start)
                     false))
-                (if (= @(:pos p) pos)
+                (if-not (call p func)
                   (if (and (>= count min) (or (nil? max) (<= count max)))
                     true
                     (do
                       (reset! (:pos p) pos-start)
                       false))
-                  (recur (inc count) @(:pos p)))))))))
-    {:trace (str "rep2(" min "," max ")")}))
+                  (if (= @(:pos p) pos)
+                    (if (and (>= count min) (or (nil? max) (<= count max)))
+                      true
+                      (do
+                        (reset! (:pos p) pos-start)
+                        false))
+                    (recur (inc count) @(:pos p)))))))))
+      trace)))
 
 (defn but [parser & funcs]
-  (with-meta
+  (name* "but"
     (fn but-fn [p]
       (when-not (the-end p)
         (let [pos1 @(:pos p)]
@@ -360,29 +379,31 @@
                       (reset! (:pos p) pos1)
                       false)
                     (recur (rest fs))))))))))
-    {:trace "but"}))
+    "but"))
 
 (defn chk [parser type expr]
-  (with-meta
-    (fn chk-fn [p]
-      (let [pos @(:pos p)]
-        (when (= type "<=")
-          (swap! (:pos p) dec))
-        (let [ok (call p expr)]
-          (reset! (:pos p) pos)
-          (if (= type "!")
-            (not ok)
-            ok))))
-    {:trace (str "chk(" type "," (stringify expr) ")")}))
+  (let [trace (str "chk(" type "," (stringify expr) ")")]
+    (name* trace
+      (fn chk-fn [p]
+        (let [pos @(:pos p)]
+          (when (= type "<=")
+            (swap! (:pos p) dec))
+          (let [ok (call p expr)]
+            (reset! (:pos p) pos)
+            (if (= type "!")
+              (not ok)
+              ok))))
+      trace)))
 
 (defn case* [parser var map]
-  (with-meta
-    (fn case-fn [p]
-      (let [rule (get map var)]
-        (when-not rule
-          (FAIL (str "Can't find '" var "' in:") map))
-        (call p rule)))
-    {:trace (str "case(" var "," (stringify map) ")")}))
+  (let [trace (str "case(" var "," (stringify map) ")")]
+    (name* trace
+      (fn case-fn [p]
+        (let [rule (get map var)]
+          (when-not rule
+            (FAIL (str "Can't find '" var "' in:") map))
+          (call p rule)))
+      trace)))
 
 (defn flip [parser var map]
   (let [value (get map var)]
@@ -393,65 +414,69 @@
       (call parser value "number"))))
 
 (defn set* [parser var expr]
-  (with-meta
-    (fn set-fn [p]
-      (let [value (call p expr "any")]
-        (if (= value -1)
-          false
-          (let [value (if (= value "auto-detect")
-                        (auto-detect p)
-                        value)]
-            ;; Update state-prev
-            (swap! (:state p)
-                   (fn [s]
-                     (if (< (count s) 2)
-                       s
-                       (let [state-prev (nth s (- (count s) 2))]
-                         (assoc s (- (count s) 2)
-                                (assoc state-prev (keyword var) value))))))
-            ;; Propagate to parent scopes
-            (let [state @(:state p)
-                  size (count state)]
-              (when (not= (:name (nth state (- size 2))) "all")
-                (loop [i 3]
-                  (when (< i size)
-                    (let [idx (- size i 1)
-                          st (nth state idx)]
-                      (swap! (:state p)
-                             (fn [s]
-                               (assoc s idx (assoc st (keyword var) value))))
-                      (when-not (= (:name st) "s_l_block_scalar")
-                        (recur (inc i))))))))
-            true))))
-    {:trace (str "set('" var "'," (stringify expr) ")")}))
+  (let [trace (str "set('" var "'," (stringify expr) ")")]
+    (name* trace
+      (fn set-fn [p]
+        (let [value (call p expr "any")]
+          (if (= value -1)
+            false
+            (let [value (if (= value "auto-detect")
+                          (auto-detect p)
+                          value)]
+              ;; Update state-prev
+              (swap! (:state p)
+                     (fn [s]
+                       (if (< (count s) 2)
+                         s
+                         (let [state-prev (nth s (- (count s) 2))]
+                           (assoc s (- (count s) 2)
+                                  (assoc state-prev (keyword var) value))))))
+              ;; Propagate to parent scopes
+              (let [state @(:state p)
+                    size (count state)]
+                (when (not= (:name (nth state (- size 2))) "all")
+                  (loop [i 3]
+                    (when (< i size)
+                      (let [idx (- size i 1)
+                            st (nth state idx)]
+                        (swap! (:state p)
+                               (fn [s]
+                                 (assoc s idx (assoc st (keyword var) value))))
+                        (when-not (= (:name st) "s_l_block_scalar")
+                          (recur (inc i))))))))
+              true))))
+      trace)))
 
 (defn max* [parser max-val]
-  (with-meta
-    (fn max-fn [p] true)
-    {:trace (str "max(" max-val ")")}))
+  (let [trace (str "max(" max-val ")")]
+    (name* trace
+      (fn max-fn [p] true)
+      trace)))
 
 (defn exclude [parser rule]
-  (with-meta
+  (name* "exclude"
     (fn exclude-fn [p] true)
-    {:trace "exclude"}))
+    "exclude"))
 
 (defn add [parser x y]
-  (with-meta
-    (fn add-fn [p]
-      (let [y-val (if (fn? y) (call p y "number") y)]
-        (when-not (number? y-val)
-          (FAIL (str "y is '" (stringify y-val) "', not number in 'add'")))
-        (+ x y-val)))
-    {:trace (str "add(" x "," (stringify y) ")")}))
+  (let [trace (str "add(" x "," (stringify y) ")")]
+    (name* trace
+      (fn add-fn [p]
+        (let [y-val (if (fn? y) (call p y "number") y)]
+          (when-not (number? y-val)
+            (FAIL (str "y is '" (stringify y-val) "', not number in 'add'")))
+          (+ x y-val)))
+      trace)))
 
 (defn sub [parser x y]
-  (with-meta
-    (fn sub-fn [p]
-      (- x y))
-    {:trace (str "sub(" x "," y ")")}))
+  (let [trace (str "sub(" x "," y ")")]
+    (name* trace
+      (fn sub-fn [p]
+        (- x y))
+      trace)))
 
 (defn match [parser]
-  (with-meta
+  (name* "match"
     (fn match-fn [p]
       (let [state @(:state p)]
         (loop [i (dec (count state))]
@@ -467,24 +492,24 @@
                 (when (= i 1)
                   (FAIL "Can't find match"))
                 (recur (dec i))))))))
-    {:trace "match"}))
+    "match"))
 
 (defn len [parser str-val]
-  (with-meta
+  (name* "len"
     (fn len-fn [p]
       (let [s (if (string? str-val) str-val (call p str-val "string"))]
         (count s)))
-    {:trace "len"}))
+    "len"))
 
 (defn ord [parser str-val]
-  (with-meta
+  (name* "ord"
     (fn ord-fn [p]
       (let [s (if (string? str-val) str-val (call p str-val "string"))]
         (- (int (first s)) 48)))
-    {:trace "ord"}))
+    "ord"))
 
 (defn if* [parser test do-if-true]
-  (with-meta
+  (name* "if"
     (fn if-fn [p]
       (let [test-val (if (instance? Boolean test) test (call p test "boolean"))]
         (if test-val
@@ -492,35 +517,37 @@
             (call p do-if-true)
             true)
           false)))
-    {:trace "if"}))
+    "if"))
 
 (defn lt [parser x y]
-  (with-meta
-    (fn lt-fn [p]
-      (let [x-val (if (number? x) x (call p x "number"))
-            y-val (if (number? y) y (call p y "number"))]
-        (< x-val y-val)))
-    {:trace (str "lt(" (stringify x) "," (stringify y) ")")}))
+  (let [trace (str "lt(" (stringify x) "," (stringify y) ")")]
+    (name* trace
+      (fn lt-fn [p]
+        (let [x-val (if (number? x) x (call p x "number"))
+              y-val (if (number? y) y (call p y "number"))]
+          (< x-val y-val)))
+      trace)))
 
 (defn le [parser x y]
-  (with-meta
-    (fn le-fn [p]
-      (let [x-val (if (number? x) x (call p x "number"))
-            y-val (if (number? y) y (call p y "number"))]
-        (<= x-val y-val)))
-    {:trace (str "le(" (stringify x) "," (stringify y) ")")}))
+  (let [trace (str "le(" (stringify x) "," (stringify y) ")")]
+    (name* trace
+      (fn le-fn [p]
+        (let [x-val (if (number? x) x (call p x "number"))
+              y-val (if (number? y) y (call p y "number"))]
+          (<= x-val y-val)))
+      trace)))
 
 (defn m [parser]
-  (with-meta
+  (name* "m"
     (fn m-fn [p]
       (:m (state-curr p)))
-    {:trace "m"}))
+    "m"))
 
 (defn t [parser]
-  (with-meta
+  (name* "t"
     (fn t-fn [p]
       (:t (state-curr p)))
-    {:trace "t"}))
+    "t"))
 
 ;; Auto-detect indent
 (defn auto-detect-indent [parser n]
@@ -583,7 +610,7 @@
           (when (< @(:pos parser) @(:end parser))
             (throw (ex-info "Parser finished before end of input" {})))
           true)
-        (catch Exception e
+        (catch #?(:clj Exception :glj go/any) e
           (trace-flush parser)
           (throw e))))))
 

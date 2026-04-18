@@ -73,8 +73,8 @@
 (defn gen-hex-code [hex]
   (let [code-point (Long/parseLong hex 16)]
     (if (> code-point 0xFFFF)
-      ;; For code points above 0xFFFF, use String constructor from code points
-      (str "(String. (int-array [0x" hex "]) 0 1)")
+      ;; For code points above 0xFFFF, use cross-platform helper
+      (str "(from-code-point 0x" hex ")")
       ;; For 4-digit or less, use \uXXXX escape
       (let [padded (if (< (count hex) 4)
                      (str (apply str (repeat (- 4 (count hex)) "0")) hex)
@@ -383,7 +383,7 @@
                     (indent (gen rule)))]
     (str comment
          "(def " rule-name-str "\n"
-         "  (with-meta\n"
+         "  (name* \"" rule-name-str "\"\n"
          "    (fn " rule-name-str "-fn " rule-args setm "\n"
          "      (debug-rule \"" rule-name-str "\"" debug-args ")\n"
          "  " rule-body  ;; extra indent for the body inside fn
@@ -391,22 +391,23 @@
            (str/includes? setm "if-let") ")\n      false)"  ;; close do, add else false, close if-let
            (str/includes? setm "let [m") ")")               ;; close let
          ")\n"
-         "    {:trace \"" rule-name-str "\" :name \"" rule-name-str "\"}))\n\n")))
+         "    nil))\n\n")))
 
-(defn gen-grammar-head [top]
+(defn gen-grammar-head [top ns-prefix]
   (let [name (rule-name top)]
     (str ";; This grammar was generated from https://yaml.org/spec/1.2/spec.html\n\n"
-         "(ns yaml-parser.grammar\n"
-         "  (:require [yaml-parser.parser :as p]\n"
-         "            [yaml-parser.prelude :refer [debug-rule]]))\n\n"
+         "(ns " ns-prefix ".grammar\n"
+         "  (:refer-clojure :exclude [empty])\n"
+         "  (:require [" ns-prefix ".parser :as p]\n"
+         "            [" ns-prefix ".prelude :refer [debug-rule name* from-code-point]]))\n\n"
          "(declare " name ")\n\n"
          ";; TOP returns the top-level grammar rule as a vector for call to process\n"
          "(def TOP\n"
-         "  (with-meta\n"
+         "  (name* \"TOP\"\n"
          "    (fn TOP-fn [parser]\n"
          "      ;; Return the top rule as a value that call can process\n"
          "      [" name "])\n"
-         "    {:trace \"TOP\" :name \"TOP\"}))\n\n"
+         "    nil))\n\n"
          ";; Helper function for auto-detect\n"
          "(defn auto_detect [parser n]\n"
          "  (p/auto-detect parser n))\n\n"
@@ -415,14 +416,14 @@
          "(defn empty [parser]\n"
          "  (p/empty-rule parser))\n\n")))
 
-(defn gen-grammar [spec-text top]
+(defn gen-grammar [spec-text top ns-prefix]
   (let [spec (yaml/parse-string spec-text)
         comments (get-comments spec-text)
         nums (build-nums spec)
         rule-names (->> (keys spec)
                         (filter #(not (str/starts-with? (name %) ":")))
                         (map name))]
-    (str (gen-grammar-head top)
+    (str (gen-grammar-head top ns-prefix)
          ;; Forward declarations for all rules
          "(declare\n"
          (str/join "\n" (map #(str "  " (rule-name %)) rule-names))
@@ -432,14 +433,16 @@
 
 (defn -main [& args]
   (let [opts (cli/parse-opts args {:spec {:from {:alias :f :desc "Input YAML spec file"}
-                                          :rule {:alias :r :desc "Top rule name" :default "l-yaml-stream"}}})
+                                          :rule {:alias :r :desc "Top rule name" :default "l-yaml-stream"}
+                                          :namespace {:alias :n :desc "Namespace prefix" :default "yaml-parser"}}})
         from (:from opts)
-        rule (:rule opts)]
+        rule (:rule opts)
+        ns-prefix (:namespace opts)]
     (when-not from
-      (println "Usage: generate-yaml-grammar --from <spec.yaml> [--rule <top-rule>]")
+      (println "Usage: generate-yaml-grammar --from <spec.yaml> [--rule <top-rule>] [--namespace <prefix>]")
       (System/exit 1))
     (let [spec-text (slurp from)
-          grammar (gen-grammar spec-text rule)]
+          grammar (gen-grammar spec-text rule ns-prefix)]
       (println grammar))))
 
 (when (= *file* (System/getProperty "babashka.file"))
