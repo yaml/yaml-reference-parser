@@ -1,7 +1,7 @@
-(ns yaml-parser.receiver
+(ns yamlstar.parser.receiver
   (:require [clojure.string :as str]
-            [yaml-parser.prelude :refer :all]
-            [yaml-parser.parser :as parser]))
+            [yamlstar.parser.prelude :refer :all]
+            [yamlstar.parser.parser :as parser]))
 
 ;; Forward declarations
 (declare push-event check-document-start check-document-end)
@@ -68,25 +68,25 @@
 
 ;; Receiver state
 (defn make-receiver []
-  {:events (atom [])
-   :cache (atom [])
-   :anchor (atom nil)
-   :tag (atom nil)
-   :tag-map (atom {})
-   :tag-handle (atom nil)
-   :document-start (atom nil)
-   :document-end (atom nil)
-   :parser (atom nil)
-   :in-scalar (atom false)
-   :first (atom "")
-   :callback (atom nil)
+  {:events (volatile! [])
+   :cache (volatile! [])
+   :anchor (volatile! nil)
+   :tag (volatile! nil)
+   :tag-map (volatile! {})
+   :tag-handle (volatile! nil)
+   :document-start (volatile! nil)
+   :document-end (volatile! nil)
+   :parser (volatile! nil)
+   :in-scalar (volatile! false)
+   :first (volatile! "")
+   :callback (volatile! nil)
    :callbacks {}})
 
 ;; Core receiver operations
 (defn send-event [receiver event]
   (if-let [cb @(:callback receiver)]
     (cb event)
-    (swap! (:events receiver) conj event)))
+    (vswap! (:events receiver) conj event)))
 
 (defn add-event [receiver event]
   (let [event (if (:event event)
@@ -95,14 +95,14 @@
                   @(:tag receiver) (assoc :tag @(:tag receiver)))
                 event)]
     (when (:event event)
-      (reset! (:anchor receiver) nil)
-      (reset! (:tag receiver) nil))
+      (vreset! (:anchor receiver) nil)
+      (vreset! (:tag receiver) nil))
     (push-event receiver event)
     event))
 
 (defn push-event [receiver event]
   (if (seq @(:cache receiver))
-    (swap! (:cache receiver)
+    (vswap! (:cache receiver)
            (fn [c]
              (let [last-cache (peek c)]
                (conj (pop c) (conj last-cache event)))))
@@ -115,7 +115,7 @@
 (defn cache-up
   ([receiver] (cache-up receiver nil))
   ([receiver event]
-   (swap! (:cache receiver) conj [])
+   (vswap! (:cache receiver) conj [])
    (when event
      (add-event receiver event))))
 
@@ -125,7 +125,7 @@
    (let [events (peek @(:cache receiver))]
      (when-not events
        (FAIL "cache_down"))
-     (swap! (:cache receiver) pop)
+     (vswap! (:cache receiver) pop)
      (doseq [e events]
        (push-event receiver e))
      (when event
@@ -135,7 +135,7 @@
   (let [events (peek @(:cache receiver))]
     (when-not events
       (FAIL "cache_drop"))
-    (swap! (:cache receiver) pop)
+    (vswap! (:cache receiver) pop)
     events))
 
 (defn cache-get [receiver type]
@@ -148,15 +148,15 @@
 (defn check-document-start [receiver]
   (when-let [doc-start @(:document-start receiver)]
     (send-event receiver doc-start)
-    (reset! (:document-start receiver) nil)
-    (reset! (:document-end receiver) (document-end-event))))
+    (vreset! (:document-start receiver) nil)
+    (vreset! (:document-end receiver) (document-end-event))))
 
 (defn check-document-end [receiver]
   (when-let [doc-end @(:document-end receiver)]
     (send-event receiver doc-end)
-    (reset! (:document-end receiver) nil)
-    (reset! (:tag-map receiver) {})
-    (reset! (:document-start receiver) (document-start-event))))
+    (vreset! (:document-end receiver) nil)
+    (vreset! (:tag-map receiver) {})
+    (vreset! (:document-start receiver) (document-start-event))))
 
 ;; Unescape maps for double-quoted strings
 (def unescapes
@@ -234,9 +234,9 @@
    "try__l_yaml_stream"
    (fn [receiver o]
      (add-event receiver (stream-start-event))
-     (reset! (:tag-map receiver) {})
-     (reset! (:document-start receiver) (document-start-event))
-     (reset! (:document-end receiver) nil))
+     (vreset! (:tag-map receiver) {})
+     (vreset! (:document-start receiver) (document-start-event))
+     (vreset! (:document-end receiver) nil))
 
    "got__l_yaml_stream"
    (fn [receiver o]
@@ -248,27 +248,27 @@
    (fn [receiver o]
      (when (:version @(:document-start receiver))
        (die "Multiple %YAML directives not allowed"))
-     (swap! (:document-start receiver) assoc :version (:text o)))
+     (vswap! (:document-start receiver) assoc :version (:text o)))
 
    ;; Tag handling
    "got__c_tag_handle"
    (fn [receiver o]
-     (reset! (:tag-handle receiver) (:text o)))
+     (vreset! (:tag-handle receiver) (:text o)))
 
    "got__ns_tag_prefix"
    (fn [receiver o]
-     (swap! (:tag-map receiver) assoc @(:tag-handle receiver) (:text o)))
+     (vswap! (:tag-map receiver) assoc @(:tag-handle receiver) (:text o)))
 
    ;; Document markers
    "got__c_directives_end"
    (fn [receiver o]
      (check-document-end receiver)
-     (swap! (:document-start receiver) assoc :explicit true))
+     (vswap! (:document-start receiver) assoc :explicit true))
 
    "got__c_document_end"
    (fn [receiver o]
      (when @(:document-end receiver)
-       (swap! (:document-end receiver) assoc :explicit true))
+       (vswap! (:document-end receiver) assoc :explicit true))
      (check-document-end receiver))
 
    ;; Flow mapping
@@ -315,8 +315,8 @@
    (fn [receiver o]
      (let [events (cache-drop receiver)
            event (first events)]
-       (reset! (:anchor receiver) (:anchor event))
-       (reset! (:tag receiver) (:tag event))))
+       (vreset! (:anchor receiver) (:anchor event))
+       (vreset! (:tag receiver) (:tag event))))
 
    ;; Compact mapping
    "try__ns_l_compact_mapping"
@@ -437,12 +437,12 @@
 
    "try__c_l_literal"
    (fn [receiver o]
-     (reset! (:in-scalar receiver) true)
+     (vreset! (:in-scalar receiver) true)
      (cache-up receiver))
 
    "got__c_l_literal"
    (fn [receiver o]
-     (reset! (:in-scalar receiver) false)
+     (vreset! (:in-scalar receiver) false)
      (let [lines (cache-drop receiver)
            lines (if (and (seq lines) (= "" (:text (last lines))))
                    (butlast lines)
@@ -460,19 +460,19 @@
 
    "not__c_l_literal"
    (fn [receiver o]
-     (reset! (:in-scalar receiver) false)
+     (vreset! (:in-scalar receiver) false)
      (cache-drop receiver))
 
    ;; Folded block scalar
    "got__ns_char"
    (fn [receiver o]
      (when @(:in-scalar receiver)
-       (reset! (:first receiver) (:text o))))
+       (vreset! (:first receiver) (:text o))))
 
    "got__s_white"
    (fn [receiver o]
      (when @(:in-scalar receiver)
-       (reset! (:first receiver) (:text o))))
+       (vreset! (:first receiver) (:text o))))
 
    "got__s_nb_folded_text__all__rep"
    (fn [receiver o]
@@ -484,13 +484,13 @@
 
    "try__c_l_folded"
    (fn [receiver o]
-     (reset! (:in-scalar receiver) true)
-     (reset! (:first receiver) "")
+     (vreset! (:in-scalar receiver) true)
+     (vreset! (:first receiver) "")
      (cache-up receiver))
 
    "got__c_l_folded"
    (fn [receiver o]
-     (reset! (:in-scalar receiver) false)
+     (vreset! (:in-scalar receiver) false)
      (let [lines (map :text (cache-drop receiver))
            text (str/join "\n" lines)
            text #?(:clj (-> text
@@ -516,7 +516,7 @@
 
    "not__c_l_folded"
    (fn [receiver o]
-     (reset! (:in-scalar receiver) false)
+     (vreset! (:in-scalar receiver) false)
      (cache-drop receiver))
 
    ;; Empty scalar
@@ -527,13 +527,13 @@
    ;; Block collection properties cleanup
    "not__s_l_block_collection__all__rep__all__any__all"
    (fn [receiver o]
-     (reset! (:tag receiver) nil)
-     (reset! (:anchor receiver) nil))
+     (vreset! (:tag receiver) nil)
+     (vreset! (:anchor receiver) nil))
 
    ;; Anchor property
    "got__c_ns_anchor_property"
    (fn [receiver o]
-     (reset! (:anchor receiver) (subs (:text o) 1)))
+     (vreset! (:anchor receiver) (subs (:text o) 1)))
 
    ;; Tag property
    "got__c_ns_tag_property"
@@ -571,7 +571,7 @@
            resolved-tag (str/replace resolved-tag #"%([0-9a-fA-F]{2})"
                                      (fn [[_ hex]]
                                        (hex->char hex)))]
-       (reset! (:tag receiver) resolved-tag)))
+       (vreset! (:tag receiver) resolved-tag)))
 
    ;; Alias node
    "got__c_ns_alias_node"

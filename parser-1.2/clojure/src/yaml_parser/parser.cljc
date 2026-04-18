@@ -1,6 +1,6 @@
-(ns yaml-parser.parser
+(ns yamlstar.parser.parser
   (:require [clojure.string :as str]
-            [yaml-parser.prelude :refer :all]))
+            [yamlstar.parser.prelude :refer :all]))
 
 ;; Forward declarations
 (declare auto-detect auto-detect-indent trace-start trace-flush)
@@ -20,20 +20,20 @@
    :m nil
    :t nil})
 
-;; Parser state - uses atoms for mutable state
+;; Parser state - uses volatiles for mutable state
 (defn make-parser [receiver]
-  (let [parser {:receiver (atom receiver)
-                :input (atom "")
-                :pos (atom 0)
-                :end (atom 0)
-                :state (atom [])
-                :trace-num (atom 0)
-                :trace-line (atom 0)
-                :trace-on (atom true)
-                :trace-off (atom 0)
-                :trace-info (atom ["" "" "" 0])}]
+  (let [parser {:receiver (volatile! receiver)
+                :input (volatile! "")
+                :pos (volatile! 0)
+                :end (volatile! 0)
+                :state (volatile! [])
+                :trace-num (volatile! 0)
+                :trace-line (volatile! 0)
+                :trace-on (volatile! true)
+                :trace-off (volatile! 0)
+                :trace-info (volatile! ["" "" "" 0])}]
     ;; Link parser to receiver (stores parser directly in the receiver copy, not as atom)
-    (swap! (:receiver parser) assoc :parser parser)
+    (vswap! (:receiver parser) assoc :parser parser)
     parser))
 
 ;; State management
@@ -50,7 +50,7 @@
 
 (defn state-push [parser name]
   (let [curr (state-curr parser)]
-    (swap! (:state parser) conj
+    (vswap! (:state parser) conj
            {:name name
             :doc (:doc curr)
             :lvl (inc (:lvl curr))
@@ -61,10 +61,10 @@
 
 (defn state-pop [parser]
   (let [child (peek @(:state parser))]
-    (swap! (:state parser) pop)
+    (vswap! (:state parser) pop)
     (let [curr-state @(:state parser)]
       (when (seq curr-state)
-        (swap! (:state parser)
+        (vswap! (:state parser)
                (fn [s]
                  (let [curr (peek s)]
                    (conj (pop s)
@@ -75,19 +75,19 @@
 ;; Receiver callback routing
 (defn make-receivers [parser]
   (let [state @(:state parser)
-        names (atom [])
-        i (atom (count state))]
+        names (volatile! [])
+        i (volatile! (count state))]
     (while (and (> @i 0)
                 (let [n (:name (nth state (dec @i)))]
                   (not (str/includes? (str n) "_"))))
-      (swap! i dec)
+      (vswap! i dec)
       (let [n (:name (nth state @i))]
         (let [n (if-let [[_ c] (re-matches #"chr\((.)\)" (str n))]
                   (str "x" (hex-char c))
                   (str/replace (str n) #"\(.*" ""))]
-          (swap! names #(cons n %)))))
+          (vswap! names #(cons n %)))))
     ;; Decrement i to get actual index (i was count, need count-1)
-    (swap! i dec)
+    (vswap! i dec)
     (if (or (neg? @i) (empty? state))
       {:try nil :got nil :not nil}
       (let [n (:name (nth state @i))
@@ -97,28 +97,45 @@
          :got (get-in receiver [:callbacks (str "got__" name)])
          :not (get-in receiver [:callbacks (str "not__" name)])}))))
 
+;; Set of anchor rule names that have receiver callbacks.
+;; Used for early-exit in receive to avoid expensive make-receivers
+;; for the ~85% of calls where no callback will match.
+(def ^:private callback-rules
+  #{"l_yaml_stream" "ns_yaml_version" "c_tag_handle" "ns_tag_prefix"
+    "c_directives_end" "c_document_end" "c_flow_mapping" "c_flow_sequence"
+    "l_block_mapping" "l_block_sequence" "ns_l_compact_mapping"
+    "ns_l_compact_sequence" "ns_flow_pair" "ns_l_block_map_implicit_entry"
+    "c_l_block_map_explicit_entry" "c_ns_flow_map_empty_key_entry"
+    "ns_plain" "c_single_quoted" "c_double_quoted" "l_empty"
+    "l_nb_literal_text" "c_l_literal" "ns_char" "s_white"
+    "s_nb_folded_text" "s_nb_spaced_text" "c_l_folded" "e_scalar"
+    "s_l_block_collection" "c_ns_anchor_property" "c_ns_tag_property"
+    "c_ns_alias_node"})
+
 (defn receive [parser func type pos]
-  (let [receivers (make-receivers parser)
-        receiver-fn (get receivers type)]
-    (when (env "DEBUG_RECEIVE")
-      (let [state @(:state parser)
-            name (when (seq state) (:name (peek state)))]
-        (println "receive:" type name "=>" (if receiver-fn "FOUND" "nil"))))
-    (when (and (env "DEBUG_MATCH") receiver-fn)
-      (let [state @(:state parser)
-            name (when (seq state) (:name (peek state)))]
-        (println "MATCHED:" type name)))
-    (when receiver-fn
-      (let [curr-pos @(:pos parser)
-            input @(:input parser)
-            ;; Handle case where pos > curr-pos (like JS slice does)
-            text (if (<= pos curr-pos)
-                   (subs input pos curr-pos)
-                   "")]
-        (receiver-fn @(:receiver parser)
-                     {:text text
-                      :state (state-curr parser)
-                      :start pos})))))
+  ;; Early exit: find the anchor rule name (first name with _)
+  ;; and check if it has any callbacks.
+  (let [state @(:state parser)]
+    (when (seq state)
+      (let [anchor-name (loop [i (dec (count state))]
+                          (when (>= i 0)
+                            (let [n (:name (nth state i))]
+                              (if (and n (str/includes? (str n) "_"))
+                                (str n)
+                                (recur (dec i))))))]
+        (when (and anchor-name (callback-rules anchor-name))
+          (let [receivers (make-receivers parser)
+                receiver-fn (get receivers type)]
+            (when receiver-fn
+              (let [curr-pos @(:pos parser)
+                    input @(:input parser)
+                    text (if (<= pos curr-pos)
+                           (subs input pos curr-pos)
+                           "")]
+                (receiver-fn @(:receiver parser)
+                             {:text text
+                              :state (state-curr parser)
+                              :start pos})))))))))
 
 ;; Forward declarations for grammar functions
 (declare call)
@@ -142,30 +159,29 @@
                          (str func))]
            (state-push parser trace)
 
-           (swap! (:trace-num parser) inc)
-           ;; TODO: trace '?' trace args when TRACE
-
            ;; Set doc flag for l_bare_document
-           (when (= (or (func-name func) (:name (meta func))) "l_bare_document")
-             (swap! (:state parser)
+           (when (= trace "l_bare_document")
+             (vswap! (:state parser)
                     (fn [s]
                       (let [curr (peek s)]
                         (conj (pop s) (assoc curr :doc true))))))
 
-           ;; Evaluate arguments
-           (let [args (mapv (fn [a]
-                              (cond
-                                (vector? a) (call parser a "any")
-                                (fn? a) (call parser a "any")
-                                :else a))
-                            args)
+           ;; Evaluate arguments (skip mapv when no args)
+           (let [args (if (nil? args)
+                        nil
+                        (mapv (fn [a]
+                                (cond
+                                  (vector? a) (call parser a "any")
+                                  (fn? a) (call parser a "any")
+                                  :else a))
+                              args))
                  pos @(:pos parser)
                  _ (receive parser func :try pos)
 
                  ;; Call the function — bypass clojure.core/apply
                  ;; when args is empty (common case) to avoid
                  ;; lang.Apply []any allocation and reflection.
-                 value (loop [v (if (empty? args)
+                 value (loop [v (if (nil? args)
                                   (func parser)
                                   (apply func parser args))]
                          (if (or (fn? v) (vector? v))
@@ -178,22 +194,15 @@
                         (not (and (= type "boolean") (nil? value))))
                (FAIL (str "Calling '" trace "' returned '" (typeof* value) "' instead of '" type "'")))
 
-             (swap! (:trace-num parser) inc)
-
              ;; Handle result
              (if (not= type "boolean")
-               nil ;; TODO: trace '>' value when TRACE
+               nil
                (if value
-                 (do
-                   ;; TODO: trace '+' trace when TRACE
-                   (receive parser func :got pos))
-                 (do
-                   ;; TODO: trace 'x' trace when TRACE
-                   (receive parser func :not pos))))
+                 (receive parser func :got pos)
+                 (receive parser func :not pos)))
 
              (state-pop parser)
              value)))))))
-
 ;; Special functions - internal versions
 (defn start-of-line* [parser]
   (let [pos @(:pos parser)
@@ -236,32 +245,30 @@
 
 ;; Character matching primitives
 (defn chr [parser char]
-  (let [trace (str "chr(" (stringify char) ")")]
+  (let [trace (str "chr(" (stringify char) ")")
+        c (first char)]
     (name* trace
       (fn chr-fn [p]
         (when-not (the-end p)
-          (when (= (nth @(:input p) @(:pos p)) (first char))
-            (swap! (:pos p) inc)
+          (when (= (nth @(:input p) @(:pos p)) c)
+            (vswap! (:pos p) inc)
             true)))
       trace)))
 
 (defn rng [parser low high]
-  (let [trace (str "rng(" (stringify low) "," (stringify high) ")")]
+  (let [trace (str "rng(" (stringify low) "," (stringify high) ")")
+        lo (int (first low))
+        hi (int (first high))]
     (name* trace
       (fn rng-fn [p]
         (when-not (the-end p)
-          (let [input @(:input p)
-                pos @(:pos p)
-                remaining (subs input pos)
-                pattern (re-pattern (str "^[" low "-" high "]"))]
-            (when (re-find pattern remaining)
+          (let [ch (nth @(:input p) @(:pos p))
+                cp (int ch)]
+            (when (and (>= cp lo) (<= cp hi))
               ;; Advance by 1, plus 1 more for codepoints above U+FFFF
-              #?(:clj (when (> (.codePointAt ^String remaining 0) 65535)
-                        (swap! (:pos p) inc))
-                 :glj (let [[r _] (unicode:utf8.DecodeRuneInString remaining)]
-                        (when (> (int r) 65535)
-                          (swap! (:pos p) inc))))
-              (swap! (:pos p) inc)
+              (when (> cp 65535)
+                (vswap! (:pos p) inc))
+              (vswap! (:pos p) inc)
               true))))
       trace)))
 
@@ -278,7 +285,7 @@
                 (FAIL "*** Missing function in all group:" funcs))
               (if-not (call p f)
                 (do
-                  (reset! (:pos p) pos)
+                  (vreset! (:pos p) pos)
                   false)
                 (recur (rest fs))))))))
     "all"))
@@ -314,19 +321,19 @@
                 (if (and (>= count min) (or (nil? max) (<= count max)))
                   true
                   (do
-                    (reset! (:pos p) pos-start)
+                    (vreset! (:pos p) pos-start)
                     false))
                 (if-not (call p func)
                   (if (and (>= count min) (or (nil? max) (<= count max)))
                     true
                     (do
-                      (reset! (:pos p) pos-start)
+                      (vreset! (:pos p) pos-start)
                       false))
                   (if (= @(:pos p) pos)
                     (if (and (>= count min) (or (nil? max) (<= count max)))
                       true
                       (do
-                        (reset! (:pos p) pos-start)
+                        (vreset! (:pos p) pos-start)
                         false))
                     (recur (inc count) @(:pos p)))))))))
       trace)))
@@ -344,19 +351,19 @@
                 (if (and (>= count min) (or (nil? max) (<= count max)))
                   true
                   (do
-                    (reset! (:pos p) pos-start)
+                    (vreset! (:pos p) pos-start)
                     false))
                 (if-not (call p func)
                   (if (and (>= count min) (or (nil? max) (<= count max)))
                     true
                     (do
-                      (reset! (:pos p) pos-start)
+                      (vreset! (:pos p) pos-start)
                       false))
                   (if (= @(:pos p) pos)
                     (if (and (>= count min) (or (nil? max) (<= count max)))
                       true
                       (do
-                        (reset! (:pos p) pos-start)
+                        (vreset! (:pos p) pos-start)
                         false))
                     (recur (inc count) @(:pos p)))))))))
       trace)))
@@ -368,15 +375,15 @@
         (let [pos1 @(:pos p)]
           (when (call p (first funcs))
             (let [pos2 @(:pos p)]
-              (reset! (:pos p) pos1)
+              (vreset! (:pos p) pos1)
               (loop [fs (rest funcs)]
                 (if (empty? fs)
                   (do
-                    (reset! (:pos p) pos2)
+                    (vreset! (:pos p) pos2)
                     true)
                   (if (call p (first fs))
                     (do
-                      (reset! (:pos p) pos1)
+                      (vreset! (:pos p) pos1)
                       false)
                     (recur (rest fs))))))))))
     "but"))
@@ -387,9 +394,9 @@
       (fn chk-fn [p]
         (let [pos @(:pos p)]
           (when (= type "<=")
-            (swap! (:pos p) dec))
+            (vswap! (:pos p) dec))
           (let [ok (call p expr)]
-            (reset! (:pos p) pos)
+            (vreset! (:pos p) pos)
             (if (= type "!")
               (not ok)
               ok))))
@@ -424,7 +431,7 @@
                           (auto-detect p)
                           value)]
               ;; Update state-prev
-              (swap! (:state p)
+              (vswap! (:state p)
                      (fn [s]
                        (if (< (count s) 2)
                          s
@@ -439,7 +446,7 @@
                     (when (< i size)
                       (let [idx (- size i 1)
                             st (nth state idx)]
-                        (swap! (:state p)
+                        (vswap! (:state p)
                                (fn [s]
                                  (assoc s idx (assoc st (keyword var) value))))
                         (when-not (= (:name st) "s_l_block_scalar")
@@ -593,15 +600,15 @@
   (let [input (if (or (empty? input) (str/ends-with? input "\n"))
                 input
                 (str input "\n"))]
-    (reset! (:input parser) input)
-    (reset! (:end parser) (count input))
-    (reset! (:pos parser) 0)
-    (reset! (:state parser) [])
+    (vreset! (:input parser) input)
+    (vreset! (:end parser) (count input))
+    (vreset! (:pos parser) 0)
+    (vreset! (:state parser) [])
 
     (when TRACE
-      (reset! (:trace-on parser) (not (trace-start parser))))
+      (vreset! (:trace-on parser) (not (trace-start parser))))
 
-    (let [grammar @(requiring-resolve 'yaml-parser.grammar/TOP)]
+    (let [grammar @(requiring-resolve 'yamlstar.parser.grammar/TOP)]
       (try
         (let [ok (call parser grammar)]
           (trace-flush parser)

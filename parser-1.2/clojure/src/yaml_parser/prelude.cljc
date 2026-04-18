@@ -1,4 +1,4 @@
-(ns yaml-parser.prelude
+(ns yamlstar.parser.prelude
   (:require [clojure.string :as str]))
 
 ;; Environment access - returns nil (falsy) when not set
