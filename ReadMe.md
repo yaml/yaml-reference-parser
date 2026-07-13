@@ -33,11 +33,11 @@ module in every programming language.
 
 At the moment we have YAML 1.2 reference parsers in these languages:
   * [CoffeeScript](
-    https://github.com/yaml/yaml-grammar/tree/master/parser/coffeescript/lib/grammar.coffee)
+    https://github.com/yaml/yaml-reference-parser/blob/main/parser-1.2/coffeescript/lib/grammar.coffee)
   * [JavaScript](
-    https://github.com/yaml/yaml-grammar/tree/master/parser/javascript/lib/grammar.js)
+    https://github.com/yaml/yaml-reference-parser/blob/main/parser-1.2/javascript/lib/grammar.js)
   * [Perl](
-    https://github.com/yaml/yaml-grammar/tree/master/parser/perl/lib/Grammar.pm)
+    https://github.com/yaml/yaml-reference-parser/blob/main/parser-1.2/perl/lib/Grammar.pm)
 
 The parsers pass 100% of the [YAML Test Suite](
 https://github.com/yaml/yaml-test-suite/)!
